@@ -1,17 +1,17 @@
 {
   "name": "Muthubalan Personal App",
-  "short_name": "Tobi💥",
+  "short_name": "Tobi",
   "start_url": "/Tobi/",
   "display": "standalone",
   "background_color": "#04060d",
   "theme_color": "#04060d",
   "orientation": "portrait",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/2936/2936886.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+"icons": [
+  {
+    "src": "https://files.softicons.com/download/culture-icons/sharingan-icons-1.5-by-harenome-razanajato/png/512x512/kakashi.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "any maskable"
+  }
+]
 }
