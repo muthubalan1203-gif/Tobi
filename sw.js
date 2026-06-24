@@ -1,4 +1,4 @@
-const CACHE_NAME = 'muthubalan-pwa-v2';
+const CACHE_NAME = 'muthubalan-pwa-v3';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
