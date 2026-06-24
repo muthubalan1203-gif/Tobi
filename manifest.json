@@ -1,0 +1,17 @@
+{
+  "name": "Muthubalan Personal App",
+  "short_name": "Muthubalan App",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#04060d",
+  "theme_color": "#04060d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2936/2936886.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
