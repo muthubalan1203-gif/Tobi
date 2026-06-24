@@ -104,6 +104,10 @@ header p { margin:4px 0 0 0; font-size:0.8rem; color:var(--text-secondary); text
 body.theme-stark .toast-notification-hub { border-color: var(--neon-cyan); }
 body.theme-arc .toast-notification-hub { border-color: var(--neon-purple); background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(6,182,212,0.2)); }
 body.theme-vibranium .toast-notification-hub { border-color: var(--neon-gold); background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(239,68,68,0.2)); }
+body.theme-sharingan .toast-notification-hub { 
+  border-color: var(--neon-red); 
+  background: linear-gradient(135deg, rgba(255,0,0,0.2), rgba(255,68,68,0.2)); 
+}
 .bottom-console-bar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; height:85px; background:rgba(10,14,28,0.82); backdrop-filter:blur(25px); border-top:1px solid var(--glass-border); display:flex; align-items:center; justify-content:space-between; padding:0 22px; z-index:4000; }
 .console-gear-btn { background:none; border:none; color:var(--text-secondary); font-size:1.35rem; cursor:pointer; padding:8px; }
 .universal-modal { display:none; position:fixed; top:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; height:100%; background:rgba(0,0,0,0.82); z-index:6000; padding:24px; justify-content:center; align-items:center; backdrop-filter:blur(6px); }
@@ -322,7 +326,16 @@ body.theme-vibranium .toast-notification-hub { border-color: var(--neon-gold); b
 .theme-stark { --neon-cyan: #06b6d4; --neon-gold: #f59e0b; --neon-red: #ef4444; --neon-green: #10b981; --neon-purple: #a855f7; --neon-indigo: #6366f1; }
 .theme-arc { --neon-cyan: #60a5fa; --neon-gold: #fbbf24; --neon-red: #f87171; --neon-green: #34d399; --neon-purple: #a78bfa; --neon-indigo: #818cf8; --bg-ultra: #02040a; --surface-ultra: #080c18; }
 .theme-vibranium { --neon-cyan: #c084fc; --neon-gold: #fbbf24; --neon-red: #fb7185; --neon-green: #a3e635; --neon-purple: #e879f9; --neon-indigo: #c084fc; --bg-ultra: #0a0612; --surface-ultra: #120a1c; }
-
+.theme-sharingan { 
+  --neon-cyan: #ff3333; 
+  --neon-gold: #ff6600; 
+  --neon-red: #ff0000; 
+  --neon-green: #ff4444; 
+  --neon-purple: #cc0000; 
+  --neon-indigo: #ff2222; 
+  --bg-ultra: #0a0000; 
+  --surface-ultra: #120000; 
+}
 /* 3D Holographic Cards */
 .app-card, .savings-card, .ceo-dashboard, .dash-box {
   transform-style: preserve-3d; perspective: 1000px;
@@ -466,6 +479,7 @@ body.theme-vibranium .toast-notification-hub { border-color: var(--neon-gold); b
 @keyframes pulseRingAnim { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.1); opacity: 0; } }
 
 </style>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <base target="_blank">
     <link rel="manifest" href="manifest.json">
@@ -500,6 +514,7 @@ body.theme-vibranium .toast-notification-hub { border-color: var(--neon-gold); b
   <button class="theme-toggle-btn" onclick="setTheme('stark')" title="Stark Mode">STARK</button>
   <button class="theme-toggle-btn" onclick="setTheme('arc')" title="Arc Reactor" style="color:var(--neon-cyan);">ARC</button>
   <button class="theme-toggle-btn" onclick="setTheme('vibranium')" title="Vibranium" style="color:var(--neon-purple);">VIB</button>
+  <button class="theme-toggle-btn" onclick="setTheme('sharingan')" title="Sharingan" style="color:#ff0000;">SHR</button>
 </div>
 
 <!-- HUD Digital Clock (fixed top left, subtle) -->
@@ -2727,9 +2742,10 @@ function drawNeural() {
     if (!isAppVisible) return; // திரை மறைவாக இருந்தால் அனிமேஷனை நிறுத்து
 
     nCtx.clearRect(0, 0, neuralCanvas.width, neuralCanvas.height);
-    const isArc = document.body.classList.contains('theme-arc');
-    const isVib = document.body.classList.contains('theme-vibranium');
-    let nodeColor = isArc ? 'rgba(96,165,250,' : (isVib ? 'rgba(192,132,252,' : 'rgba(6,182,212,');
+let isArc = document.body.classList.contains('theme-arc');
+let isVib = document.body.classList.contains('theme-vibranium');
+let isSharingan = document.body.classList.contains('theme-sharingan');
+let nodeColor = isSharingan ? 'rgba(255,0,0,' : (isArc ? 'rgba(96,165,250,' : (isVib ? 'rgba(192,132,252,' : 'rgba(6,182,212,'));
 
     for(let i=0; i<neuralNodes.length; i++) {
         let n = neuralNodes[i];
