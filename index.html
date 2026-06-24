@@ -12,6 +12,28 @@
 <link rel="icon" type="image/png" href="https://files.softicons.com/download/culture-icons/sharingan-icons-1.5-by-harenome-razanajato/png/512x512/kakashi.png">
 <link rel="apple-touch-icon" href="https://files.softicons.com/download/culture-icons/sharingan-icons-1.5-by-harenome-razanajato/png/512x512/kakashi.png">
 <style>
+/* ===== GYM PAGE BACKGROUND IMAGE ===== */
+#page-gym {
+  position: relative;
+}
+
+#page-gym::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRug-k3P77zHQCRPryVmGFPrV1SaoK_3le-u0PZuokJcaLFEnxhRaL5bc7J&s=10');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.08;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+#page-gym > * {
+  position: relative;
+  z-index: 1;
+}
 :root {
   --bg-ultra:#04060d; --surface-ultra:#0a0e1c; --glass-border:rgba(255,255,255,0.05);
   --text-primary:#f8fafc; --text-secondary:#94a3b8;
