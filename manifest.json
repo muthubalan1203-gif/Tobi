@@ -1,7 +1,7 @@
 {
   "name": "Muthubalan Personal App",
   "short_name": "Muthubalan App",
-  "start_url": "/",
+  "start_url": "/Tobi/",
   "display": "standalone",
   "background_color": "#04060d",
   "theme_color": "#04060d",
