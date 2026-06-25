@@ -2106,17 +2106,122 @@ function downloadYearlyArchive() { triggerDeviceHapticPulse(); const { jsPDF } =
 
 function triggerNightlyStrictReview() { 
     let appToday = getAppToday(); 
+    let todayDateStr = appToday.toDateString();
+    let todayName = daysOfWeek[appToday.getDay()];
+    
+    // 9 PM mela oru thadava thaan varum nu lock pannidum
+    localStorage.setItem('night_review_done_' + todayDateStr, 'true');
+    
     openModalWithHistory('aiEngineModal'); 
-    document.getElementById('aiHeaderTitle').innerText = "TOBI NIGHTLY REVIEW"; 
-    document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-cyan); color:black;" onclick="generateTomorrowProtocol()">நாளைக்கான Protocol-ஐ காட்டு</button>`; 
-function setTomorrowPlan() { let appToday = getAppToday(); let plan = prompt("TOBI: நாளைக்கு முக்கியமாக என்ன செய்ய வேண்டும்?"); if(plan) { localStorage.setItem('tomorrow_plan', plan); localStorage.setItem('night_review_done_' + appToday.toDateString(), 'true'); showTomorrowPlan(); closeModalAction('aiEngineModal'); displayPremiumToastNotification("Plan Saved!", "📅"); } }
+    document.getElementById('aiHeaderTitle').innerText = "📊 TOBI NIGHTLY REVIEW & WHATSAPP"; 
+    
+    // ===== FOOD DETAILS =====
+    let todayMeals = mealLogs.filter(m => m.date === todayDateStr);
+    let foodList = todayMeals.length > 0 
+        ? todayMeals.map((m, i) => `${i+1}. ${m.foodText} (P:${m.p}g C:${m.c}g Cal:${m.cal})`).join('\n')
+        : "• Inniku meals log pannala";
+    
+    // ===== EXPENSE DETAILS =====
+    let todayExpenses = expenses.filter(e => new Date(e.date).toDateString() === todayDateStr);
+    let expenseList = "";
+    let totalExp = 0;
+    if (todayExpenses.length > 0) {
+        expenseList = todayExpenses.map((e, i) => `${i+1}. ${e.desc} - ₹${e.amount} (${e.category})`).join('\n');
+        totalExp = todayExpenses.reduce((s, e) => s + e.amount, 0);
+    } else {
+        expenseList = "• Inniku selavu log pannala";
+    }
+    
+    // ===== GYM STATUS =====
+    let gymStatus = localStorage.getItem(`gym_done_${todayDateStr}`);
+    const workoutMap = {
+        'Monday': 'Chest & Triceps 💥',
+        'Tuesday': 'Back & Biceps 🦍',
+        'Wednesday': 'Shoulders & Abs 🎯',
+        'Thursday': 'Chest & Biceps ⚡',
+        'Friday': 'Back & Triceps 🔥',
+        'Saturday': 'Heavy Legs 🦵',
+        'Sunday': 'Rest Day 🧘‍♂️'
+    };
+    let gymLine = "";
+    if (gymStatus === 'true') {
+        gymLine = `✅ YES - ${workoutMap[todayName] || todayName}`;
+    } else if (gymStatus === 'false') {
+        gymLine = '❌ NO - Gym Skip pannuta';
+    } else {
+        gymLine = '⏳ Innum Gym attendance mark pannala';
+    }
+    
+    // ===== TASKS & GYM CHECKBOXES =====
+    const checkBoxes = document.querySelectorAll('#dayCard input[type="checkbox"]'); 
+    let totalTasks = checkBoxes.length, completedTasks = 0, missedTasks = []; 
+    checkBoxes.forEach(cb => { 
+        if(cb.checked) completedTasks++; 
+        else missedTasks.push(cb.nextElementSibling.innerText.replace(/<[^>]*>?/gm, '').trim()); 
+    });
+    
+    const activeCard = document.querySelector('.visible-workout'); 
+    let gymCompleted = 0, gymTotal = 0; 
+    if(activeCard) { 
+        const gymCbs = activeCard.querySelectorAll('input[type="checkbox"]'); 
+        gymTotal = gymCbs.length; 
+        gymCbs.forEach(cb => { if(cb.checked) gymCompleted++; }); 
+    }
+    
+    let waterLiters = (currentWater / 1000).toFixed(1);
+    let p = currentLoggedProtein;
+    
+    // Build Report
+    let aiReport = `📡 TOBI NIGHT SCAN - ${todayDateStr}\n=========================================\n\n`;
+    aiReport += `🍽️ FOOD:\n${foodList}\n\n`;
+    aiReport += `💰 EXPENSES (Total: ₹${totalExp}):\n${expenseList}\n\n`;
+    aiReport += `🏋️‍♂️ GYM: ${gymLine}\n`;
+    if(gymTotal > 0) aiReport += `   Exercises Done: ${gymCompleted} / ${gymTotal}\n\n`;
+    else aiReport += `\n`;
+    aiReport += `📊 SUMMARY:\n- தண்ணீர்: ${waterLiters}L / 4L\n- டாஸ்க்குகள்: ${completedTasks} / ${totalTasks}\n- Protein: ${p}g / ${targetP}g\n\n`;
+    
+    if(missedTasks.length > 0 || waterLiters < 4 || (gymTotal > 0 && gymCompleted < gymTotal) || p < targetP) { 
+        aiReport += "⚠️ STRICT REVIEW: முத்துபாலன், இன்று சில விஷயங்களை கோட்டை விட்டுள்ளீர்கள்!\n"; 
+        if(waterLiters < 4) aiReport += `❌ தண்ணீர் இன்னும் ${(4 - waterLiters).toFixed(1)}L பாக்கி.\n`; 
+        if(missedTasks.length > 0) aiReport += `❌ முடிக்காத டாஸ்க்: ${missedTasks[0]}\n`; 
+        if(gymTotal > 0 && gymCompleted < gymTotal) aiReport += `❌ ஜிம்மில் ${gymTotal - gymCompleted} பயிற்சிகளை செய்யவில்லை.\n`; 
+        if(p < targetP) aiReport += `❌ Protein ${targetP > 0 ? targetP - p : 0}g குறைகிறது.\n`; 
+    } else { 
+        aiReport += "✅ PERFECT DAY: அருமை முத்துபாலன்! 100% கச்சிதம்!\n"; 
+    }
+    
+    // Store for WhatsApp
+    window.lastNightlyReport = aiReport;
+    
+    playAiTyping(aiReport, document.getElementById('aiTypingText')); 
+    
+    // WhatsApp + Tomorrow Protocol buttons
+    document.getElementById('aiActionButtons').innerHTML = `
+        <button class="ai-btn-close" style="background:var(--neon-green); color:black;" onclick="shareNightlyReportToWhatsApp()">📲 Share to WhatsApp</button>
+        <button class="ai-btn-close" style="background:var(--neon-cyan); color:black;" onclick="generateTomorrowProtocol()">நாளைக்கான Protocol-ஐ காட்டு</button>
+    `; 
+}
+
+function setTomorrowPlan() { 
+    let appToday = getAppToday(); 
+    let plan = prompt("TOBI: நாளைக்கு முக்கியமாக என்ன செய்ய வேண்டும்?"); 
+    if(plan) { 
+        localStorage.setItem('tomorrow_plan', plan); 
+        localStorage.setItem('night_review_done_' + appToday.toDateString(), 'true'); 
+        showTomorrowPlan(); 
+        closeModalAction('aiEngineModal'); 
+        displayPremiumToastNotification("Plan Saved!", "📅"); 
+    } 
+}
+
 function shareNightlyReportToWhatsApp() {
     let report = window.lastNightlyReport || "Muthubalan Daily Report";
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(report)}`;
     window.open(whatsappUrl, '_blank');
     displayPremiumToastNotification("WhatsApp Report Sent!", "📲");
 }
-function generateTomorrowProtocol() {
+
+function generateTomorrowProtocol() { 
     let appToday = getAppToday();
     let tomorrow = new Date(appToday);
     tomorrow.setDate(tomorrow.getDate() + 1); // நாளைய தேதியை எடுக்க
