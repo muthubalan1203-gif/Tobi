@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ta">
 <head>
+<meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -15,15 +16,14 @@
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'activated') {
-              window.location.reload();
-            }
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+    window.location.reload();
+}
           });
         });
       });
   }
 </script>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>முத்துபாலன் Personal App v4.0 — AI-Powered Command Center</title>
 <meta name="mobile-web-app-capable" content="yes">
@@ -2843,7 +2843,7 @@ Analyze like a professional coach. Be honest but motivating.`;
         let bMatch = aiResponse.match(/BUDGET_RISK_PCT:\s*([0-9.]+)/);
         let oMatch = aiResponse.match(/OVERTRAINING_RISK_PCT:\s*([0-9.]+)/);
         let mMatch = aiResponse.match(/MUSCLE_GROWTH_PCT:\s*([0-9.]+)/);
-        let insightMatch = aiResponse.match(/TAMIL_INSIGHT:\s*(.+?)(?:\n|$)/);
+        let insightMatch = aiResponse.match(/TAMIL_INSIGHT:\s*([\s\S]+?)(?:\n\n|$)/);
 
         // Extract values (fallback to local math if AI returns garbage)
         let wVal = wMatch ? parseFloat(wMatch[1]) : (currentWt + ((currentWt-62)/daysSinceStart)*30);
@@ -3515,7 +3515,7 @@ setInterval(updateHudClock, 1000); updateHudClock();
 
 // 6. Theme Engine
 function setTheme(themeName) {
-  document.body.classList.remove('theme-stark','theme-arc','theme-vibranium');
+  document.body.classList.remove('theme-stark','theme-arc','theme-vibranium','theme-sharingan');
   document.body.classList.add('theme-' + themeName);
   localStorage.setItem('premium_theme', themeName);
   displayPremiumToastNotification('Theme: ' + themeName.toUpperCase() + ' ACTIVATED', '🎨');
@@ -3611,8 +3611,8 @@ switchPage = function(pageId) {
 
 // Override completeCurrentDay to trigger achievement check
 const originalCompleteDay = completeCurrentDay;
-completeCurrentDay = function() {
-  originalCompleteDay();
+completeCurrentDay = async function() {
+  await originalCompleteDay();
   setTimeout(checkAchievements, 1000);
 };
 
