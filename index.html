@@ -656,7 +656,7 @@ body.theme-sharingan .toast-notification-hub {
 <li class="task-item"><span style="padding-left:5px;">🔸 <b>ஈரப்பதம்:</b> முகத்தை கழுவிய பின் ஆலோவேரா ஜெல் தடவவும்.</span></li>
 <li class="task-item"><span style="padding-left:5px;">🔸 <b>தாடி:</b> வேர்களுக்கு சீரம்/ஜெல் மசாஜ் செய்யவும்.</span></li>
 <li class="task-item"><span style="padding-left:5px;">🔸 <b>முடி:</b> தேங்காய் எண்ணெய் அல்லது சீரம் தடவவும்.</span></li>
-<li class="task-item"><span style="padding-left:5px;">🔸 <b>சைனஸ்:</b> தொந்தரவு வராமல் இருக்க தேவைப்பட்டால் ஆவி பிடிக்கவும்.</span></li>
+<li class="task-item"><span style="padding-left:5px;">🔸 <b>மூக்கடைப்பு:</b> தொந்தரவு வராமல் இருக்க தேவைப்பட்டால் ஆவி பிடிக்கவும்.</span></li>
 </ul>
 </div>
 </div> <!-- ✅ இந்த இரண்டு DIV-கள் தான் Glowup பேஜை மூடி மற்ற Tabs-ஐ வேலை செய்ய வைக்கும்! -->
@@ -1217,7 +1217,7 @@ const dietScheduleMacros = [
 const dailyNaturalProtocols = {
     0: { title: "🧖 முகப் பராமரிப்பு + 💊 உடல்நலம்", items: [
         {id:'nat_sun_1', text:'🌿 கற்றாழை + குங்குமப்பூ + வெள்ளரிக்காய் முகப் பேக் (30 நிமிடம்)'},{id:'nat_sun_2', text:'🥛 வெறும் பாலில் பஞ்சு துடைத்தல் (Cleansing)'},
-        {id:'nat_sun_3', text:'🍃 சைனஸ்-க்கு: மஞ்சள் பால் + உப்பு நீர்'},{id:'nat_sun_4', text:'💊 வயிற்றுப்புண்-க்கு: இளநீர் + வாழைப்பழம்'}]},
+        {id:'nat_sun_3', text:'🍃 மூக்கடைப்பு-க்கு: மஞ்சள் பால் + உப்பு நீர்'},{id:'nat_sun_4', text:'💊 வயிறு-க்கு: இளநீர் + வாழைப்பழம்'}]},
     1: { title: "🧴 முகப் பராமரிப்பு + 🧔 தாடி", items: [
         {id:'nat_mon_1', text:'🌾 கடலை மாவு + பச்சைப் பயறு மாவு Cleansing'},{id:'nat_mon_2', text:'🌿 கற்றாழை ஜெல் (20 நிமிடம்)'},
         {id:'nat_mon_3', text:'🌹 ரோஸ் வாட்டர் Toner'},{id:'nat_mon_4', text:'🧔 தாடிக்கு: ஆலிவ் எண்ணெய் + தேன் + வெங்காயம் ஜூஸ் (20 நிமிடம்)'}]},
@@ -1229,10 +1229,10 @@ const dailyNaturalProtocols = {
         {id:'nat_wed_3', text:'🌿 ஆலோ + நீம் இலை (Dandruff Pack)'},{id:'nat_wed_4', text:'🍚 அரிசி மாவு + தேன் + எலுமிச்சை Face Scrub'}]},
     4: { title: "🧔 தாடி Softening + 💊 Ulcer Care", items: [
         {id:'nat_thu_1', text:'🥣 தயிர் + மஞ்சள் (தாடி Softener 15 நிமிடம்)'},{id:'nat_thu_2', text:'🥚 முட்டை வெள்ளை + ஆலிவ் எண்ணெய் (தாடி)'},
-        {id:'nat_thu_3', text:'💊 வயிற்றுப்புண்-க்கு: குளிர்ந்த பால் + கற்றாழை ஜூஸ்'},{id:'nat_thu_4', text:'🍌 வாழைப்பழம் (காலை + இரவு)'}]},
+        {id:'nat_thu_3', text:'💊 வயிறு-க்கு: குளிர்ந்த பால் + கற்றாழை ஜூஸ்'},{id:'nat_thu_4', text:'🍌 வாழைப்பழம் (காலை + இரவு)'}]},
     5: { title: "✨ Face Glow Pack + 🤧 Sinus Care", items: [
         {id:'nat_fri_1', text:'🟡 மஞ்சள் + தயிர் + தேன் (Brightening Pack 20 நிமிடம்)'},{id:'nat_fri_2', text:'🥒 வெள்ளரிக்காய் + எலுமிச்சை (Cooling Pack)'},
-        {id:'nat_fri_3', text:'🤧 சைனஸ்-க்கு: நீராவி (துளசி/வேப்பிலை)'},{id:'nat_fri_4', text:'🫚 இஞ்சி + தேன் (காலை + இரவு)'}]},
+        {id:'nat_fri_3', text:'🤧 மூக்கடைப்பு-க்கு: நீராவி (துளசி/வேப்பிலை)'},{id:'nat_fri_4', text:'🫚 இஞ்சி + தேன் (காலை + இரவு)'}]},
     6: { title: "🌿 Deep Hair Conditioning + 🧔 Beard Growth", items: [
         {id:'nat_sat_1', text:'🥣 தயிர் + முட்டை + தேன் (Deep Conditioning 30 நிமிடம்)'},{id:'nat_sat_2', text:'🧅 வெங்காயம் ஜூஸ் + தேங்காய் எண்ணெய் (முடி)'},
         {id:'nat_sat_3', text:'🧔 வெந்தயம் + பாதாம் எண்ணெய் (தாடி Overnight)'},{id:'nat_sat_4', text:'🌺 செம்பருத்தி + ஆலிவ் எண்ணெய் (முடி)'}]}
