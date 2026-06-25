@@ -1,6 +1,28 @@
 <!DOCTYPE html>
 <html lang="ta">
 <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/Tobi/sw.js')
+      .then(reg => {
+        console.log('SW registered');
+        // Auto check update every 30 seconds
+        setInterval(() => reg.update(), 30000);
+        // If new SW found, auto reload
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'activated') {
+              window.location.reload();
+            }
+          });
+        });
+      });
+  }
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>முத்துபாலன் Personal App v4.0 — AI-Powered Command Center</title>
@@ -3634,34 +3656,8 @@ window.addEventListener('resize', () => { resizeNeural(); resizeConfetti(); });
 
 checkGymAttendanceStatus();
 
-// Register Service Worker for PWA — inline blob method (no external sw.js needed)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    const swCode = `
-      const CACHE_NAME = 'muthu-app-v1';
-      self.addEventListener('install', event => { self.skipWaiting(); });
-      self.addEventListener('activate', event => {
-        event.waitUntil(
-          caches.keys().then(keys =>
-            Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-          )
-        );
-        self.clients.claim();
-      });
-      self.addEventListener('fetch', event => {
-        event.respondWith(
-          caches.match(event.request).then(resp => resp || fetch(event.request).catch(() => resp))
-        );
-      });
-    `;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl)
-      .then(reg => console.log('SW registered OK'))
-      .catch(err => console.log('SW skipped (normal in some browsers)'));
-  });
-}
 
 </script>
+
 </body>
 </html>
