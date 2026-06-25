@@ -577,7 +577,13 @@ body.theme-sharingan .toast-notification-hub {
 <div class="predict-row"><div><div class="predict-label">BUDGET RISK (THIS WEEK)</div><div class="predict-bar"><div id="predictBudgetBar" class="predict-bar-fill" style="width:0%"></div></div></div><div class="predict-val" id="predictBudgetVal">--</div></div>
 <div class="predict-row"><div><div class="predict-label">OVERTRAINING RISK</div><div class="predict-bar"><div id="predictOvertrainBar" class="predict-bar-fill" style="width:0%"></div></div></div><div class="predict-val" id="predictOvertrainVal">--</div></div>
 <div class="predict-row"><div><div class="predict-label">MUSCLE GROWTH RATE</div><div class="predict-bar"><div id="predictMuscleBar" class="predict-bar-fill" style="width:0%"></div></div></div><div class="predict-val" id="predictMuscleVal">--</div></div>
-<button class="tts-btn" onclick="speakTamil('முத்துபாலன், இன்றைய ப்ரெடிக்டிவ் அனாலிசிஸ் ரெடி')">🔊 Listen in Tamil</button>
+<!-- 👇 AI Insight Box — Gemini-இங்க தான் Tamil Analysis காட்டும் -->
+<div id="predictAiInsight" style="margin-top:12px; padding:10px; background:rgba(168,85,247,0.08); border:1px solid rgba(168,85,247,0.2); border-radius:12px; font-size:0.8rem; color:var(--neon-purple); font-weight:700; line-height:1.5; display:none;">
+    <!-- TOBI-இன் Tamil Insight இங்கே வரும் -->
+</div>
+
+<!-- 👇 இது அப்படியே இருக்கும், ஆனா speakTamil-ல் Text-ஐ Dynamic-ஆ மாற்றுறோம் -->
+<button class="tts-btn" onclick="speakTamil(document.getElementById('predictAiInsight').innerText || 'முத்துபாலன், இன்றைய ப்ரெடிக்டிவ் அனாலிசிஸ் ரெடி')">🔊 Listen in Tamil</button>
 </div>
 
 <div class="app-card" style="border-top:5px solid var(--neon-orange); margin-bottom:16px;">
@@ -1279,8 +1285,50 @@ function switchPage(pageId) {
     const selectedPage = document.getElementById(`page-${pageId}`);
     if(selectedPage) { selectedPage.style.display='block'; setTimeout(() => { selectedPage.style.opacity='1'; selectedPage.style.transform='scale(1)'; }, 25); }
     document.getElementById(`tab-${pageId}`).classList.add('active');
-    if(pageId === 'glowup') { renderCurrentDay(); loadBioStates(); renderWakeupLogs(); updateProgressBars(); renderTodayNaturalCare(); updateCEODashboard(); updatePredictiveAnalytics(); renderCardioLogs();  }
-    if(pageId === 'calendar') { renderMonthlyCalendar(); }
+   if(pageId === 'glowup') { 
+    renderCurrentDay(); 
+    loadBioStates(); 
+    renderWakeupLogs(); 
+    updateProgressBars(); 
+    renderTodayNaturalCare(); 
+    updateCEODashboard(); 
+    
+    // 👇👇👇 PUDHUSA SERKKAPADUTHU ITHU 👇👇👇
+    // Offline-ல் இருந்தாலோ, Gemini Load ஆகும் வரைக்கும் கடைசி Result-ஐ காட்டும்
+    let cachedPred = localStorage.getItem('tobi_ai_predictions');
+    if(cachedPred) {
+        let p = JSON.parse(cachedPred);
+        // இன்றைய Date-க்கு Match ஆகுதான்னு பார்க்கிறோம்
+        if(p.date === getAppToday().toDateString()) {
+            // Weight Forecast
+            document.getElementById('predictWeightVal').innerText = p.weight.toFixed(1) + ' kg';
+            document.getElementById('predictWeightBar').style.width = Math.min(100, ((p.weight - 62) / 8) * 100) + '%';
+            
+            // Budget Risk
+            document.getElementById('predictBudgetVal').innerText = p.budget > 100 ? 'OVER ⚠️' : Math.round(p.budget) + '%';
+            document.getElementById('predictBudgetBar').style.width = Math.min(100, p.budget) + '%';
+            
+            // Overtraining Risk
+            document.getElementById('predictOvertrainVal').innerText = Math.round(p.overtrain) + '%';
+            document.getElementById('predictOvertrainBar').style.width = Math.min(100, p.overtrain) + '%';
+            
+            // Muscle Growth
+            document.getElementById('predictMuscleVal').innerText = Math.round(p.muscle) + '%';
+            document.getElementById('predictMuscleBar').style.width = Math.min(100, p.muscle) + '%';
+            
+            // Tamil Insight Box-ல் காட்டுவது
+            if(p.insight && document.getElementById('predictAiInsight')) {
+                document.getElementById('predictAiInsight').innerText = p.insight;
+                document.getElementById('predictAiInsight').style.display = 'block';
+            }
+        }
+    }
+    // 👆👆👆 MUDINJATHU 👆👆👆
+    
+    // இப்போ Fresh-ஆ Gemini-இடம் புது Analysis கேட்கும் (Async)
+    updatePredictiveAnalytics(); 
+    renderCardioLogs();  
+}
     if(pageId === 'gym') { initGymDay(); updateCalorieTargets(); renderWeightsCircleAndLists(); generateAdaptiveWorkout(); }
     if(pageId === 'diet') { renderMealLogsAndMacros(); renderWater(); updateCalorieTargets(); loadDietCheckboxes(); generateSmartGrocery(); }
     if(pageId === 'expense') { renderExpenses(); renderSavings(); }
@@ -2698,10 +2746,119 @@ function speakTamil(text) {
     } else { displayPremiumToastNotification("TTS not supported in this browser", "❌"); }
 }
 
-// 2. AI Predictive Analytics
-function updatePredictiveAnalytics() {
+// ========== GEMINI-POWERED PREDICTIVE AI v2.0 ==========
+
+async function updatePredictiveAnalytics() {
     let appToday = getAppToday();
-    // Weight forecast
+    let currentWt = weights.length > 0 ? weights[0].val : 62.0;
+    let daysSinceStart = Math.max(1, Math.floor((appToday - startDate) / (1000*60*60*24)));
+    
+    // Collect recent data for AI context
+    let weekAgo = new Date(appToday); weekAgo.setDate(weekAgo.getDate()-7);
+    let recentMoods = JSON.parse(localStorage.getItem('gym_moods') || '{}');
+    let moodEntries = Object.entries(recentMoods).slice(0, 7);
+    let tiredCount = moodEntries.filter(([d,m]) => m.includes('Tired') || m.includes('Sore')).length;
+    
+    let recentSleep = sleepLogs.slice(0, 3);
+    let sleepAvg = recentSleep.length > 0 ? recentSleep.reduce((s,l)=>s+l.score,0)/recentSleep.length : 70;
+    
+    let now = new Date(appToday);
+    let dayOfWeek = now.getDay() || 7;
+    let weekStart = new Date(now); weekStart.setDate(now.getDate()-dayOfWeek+1);
+    let weekSum = expenses.reduce((sum,e)=>{let d=new Date(e.date); return d>=weekStart?sum+e.amount:sum},0);
+    
+    // Show "Analyzing..." state
+    document.getElementById('predictWeightVal').innerText = '🧠...';
+    document.getElementById('predictBudgetVal').innerText = '🧠...';
+    document.getElementById('predictOvertrainVal').innerText = '🧠...';
+    document.getElementById('predictMuscleVal').innerText = '🧠...';
+
+    // Build AI Prompt
+    let prompt = `You are TOBI, Muthubalan's elite fitness & life AI coach. Analyze his biometric and financial data deeply. Provide 4 predictions and a brief Tamil insight.
+
+**STRICT FORMAT — Return exactly like this:**
+
+WEIGHT_FORECAST_30D: [projected weight in kg — be realistic, use trend analysis]
+BUDGET_RISK_PCT: [0-100 — percentage of weekly budget already consumed/at risk]
+OVERTRAINING_RISK_PCT: [0-100 — based on sleep quality, mood fatigue, gym streak]
+MUSCLE_GROWTH_PCT: [0-100 — anabolic potential based on protein, hydration, sleep]
+
+TAMIL_INSIGHT: [2-3 sentences in Tamil motivating him or warning him]
+
+**Muthubalan's Live Data:**
+• Starting Weight: 62.0 kg
+• Current Weight: ${currentWt} kg (Day ${daysSinceStart})
+• Weight Trend: ${(currentWt - 62.0).toFixed(1)} kg gained so far
+• Daily Protein: ${currentLoggedProtein}g / Target: ${targetP}g
+• Water Intake: ${(currentWater/1000).toFixed(1)}L / 4L Goal
+• Sleep Score (3-day avg): ${sleepAvg.toFixed(0)}%
+• Tired/Sore Mood Days (last 7): ${tiredCount} days
+• Weekly Expenses: ₹${weekSum} / Budget: ₹${weeklyBudgetTarget}
+• Gym Streak: ${localStorage.getItem('gym_streak')||0} days
+• Missed Gym (last 7 days): ${getMissedGymDays(7)} days
+
+Analyze like a professional coach. Be honest but motivating.`;
+
+    try {
+        // 🔥 Call Gemini API
+        let aiResponse = await askGemini(prompt);
+        
+        // Parse structured data using Regex
+        let wMatch = aiResponse.match(/WEIGHT_FORECAST_30D:\s*([0-9.]+)/);
+        let bMatch = aiResponse.match(/BUDGET_RISK_PCT:\s*([0-9.]+)/);
+        let oMatch = aiResponse.match(/OVERTRAINING_RISK_PCT:\s*([0-9.]+)/);
+        let mMatch = aiResponse.match(/MUSCLE_GROWTH_PCT:\s*([0-9.]+)/);
+        let insightMatch = aiResponse.match(/TAMIL_INSIGHT:\s*(.+?)(?:\n|$)/);
+
+        // Extract values (fallback to local math if AI returns garbage)
+        let wVal = wMatch ? parseFloat(wMatch[1]) : (currentWt + ((currentWt-62)/daysSinceStart)*30);
+        let bVal = bMatch ? parseFloat(bMatch[1]) : (weeklyBudgetTarget>0?(weekSum/weeklyBudgetTarget)*100:0);
+        let oVal = oMatch ? parseFloat(oMatch[1]) : Math.round(((tiredCount/7)*50)+((100-sleepAvg)/100)*50);
+        let mVal = mMatch ? parseFloat(mMatch[1]) : Math.round((currentLoggedProtein/Math.max(1,targetP))*40+(currentWater/4000)*30+(sleepAvg/100)*30);
+        
+        let tamilInsight = insightMatch ? insightMatch[1].trim() : '';
+
+        // ========== UPDATE UI ==========
+        
+        // 1. Weight Forecast
+        let weightPct = Math.min(100, Math.max(0, ((wVal - 62) / 8) * 100));
+        document.getElementById('predictWeightVal').innerText = wVal.toFixed(1) + ' kg';
+        document.getElementById('predictWeightBar').style.width = weightPct + '%';
+        
+        // 2. Budget Risk
+        document.getElementById('predictBudgetVal').innerText = bVal > 100 ? 'OVER ⚠️' : Math.round(bVal) + '%';
+        document.getElementById('predictBudgetBar').style.width = Math.min(100, bVal) + '%';
+        
+        // 3. Overtraining Risk
+        document.getElementById('predictOvertrainVal').innerText = Math.round(oVal) + '%';
+        document.getElementById('predictOvertrainBar').style.width = Math.min(100, oVal) + '%';
+        
+        // 4. Muscle Growth
+        document.getElementById('predictMuscleVal').innerText = Math.round(mVal) + '%';
+        document.getElementById('predictMuscleBar').style.width = Math.min(100, mVal) + '%';
+
+        // 5. Optional: Show AI Tamil Insight below predictions
+        if(tamilInsight && document.getElementById('predictAiInsight')) {
+            document.getElementById('predictAiInsight').innerText = tamilInsight;
+        }
+
+        // Save to localStorage for offline viewing
+        localStorage.setItem('tobi_ai_predictions', JSON.stringify({
+            date: appToday.toDateString(),
+            weight: wVal, budget: bVal, overtrain: oVal, muscle: mVal,
+            insight: tamilInsight
+        }));
+
+    } catch(err) {
+        console.error("Gemini Predictive AI Failed:", err);
+        displayPremiumToastNotification("AI Offline — Using Local Math", "⚠️");
+        runLocalPredictiveAnalytics(); // Fallback
+    }
+}
+
+// ========== OLD LOCAL MATH (Renamed as Fallback) ==========
+function runLocalPredictiveAnalytics() {
+    let appToday = getAppToday();
     let currentWt = weights.length > 0 ? weights[0].val : 62.0;
     let daysSinceStart = Math.max(1, Math.floor((appToday - startDate) / (1000*60*60*24)));
     let weightDelta = currentWt - 62.0;
@@ -2710,13 +2867,13 @@ function updatePredictiveAnalytics() {
     let weightPct = Math.min(100, Math.max(0, ((projected30 - 62) / 8) * 100));
     document.getElementById('predictWeightVal').innerText = projected30.toFixed(1) + 'kg';
     document.getElementById('predictWeightBar').style.width = weightPct + '%';
-    // Budget risk
-    let now = new Date(appToday); let dayOfWeek = now.getDay() || 7; let weekStart = new Date(now); weekStart.setDate(now.getDate() - dayOfWeek + 1); weekStart.setHours(0,0,0,0);
+
+    let now = new Date(appToday); let dayOfWeek = now.getDay() || 7; let weekStart = new Date(now); weekStart.setDate(now.getDate()-dayOfWeek+1); weekStart.setHours(0,0,0,0);
     let weekSum = expenses.reduce((sum, e) => { let d = new Date(e.date); return (d >= weekStart) ? sum + e.amount : sum; }, 0);
     let budgetRisk = weeklyBudgetTarget > 0 ? (weekSum / weeklyBudgetTarget) * 100 : 0;
     document.getElementById('predictBudgetVal').innerText = budgetRisk > 100 ? 'OVER ⚠️' : Math.round(budgetRisk) + '% Used';
     document.getElementById('predictBudgetBar').style.width = Math.min(100, budgetRisk) + '%';
-    // Overtraining risk
+
     let moodData = JSON.parse(localStorage.getItem('gym_moods')) || {};
     let tiredCount = 0, totalMoodDays = 0;
     for(let i=0;i<7;i++) { let d = new Date(appToday); d.setDate(d.getDate()-i); let m = moodData[d.toDateString()]; if(m) { totalMoodDays++; if(m.includes('Tired') || m.includes('Sore')) tiredCount++; } }
@@ -2724,12 +2881,11 @@ function updatePredictiveAnalytics() {
     let overtrainRisk = Math.round(((tiredCount / Math.max(1,totalMoodDays)) * 50) + ((100 - sleepAvg) / 100) * 50);
     document.getElementById('predictOvertrainVal').innerText = overtrainRisk + '%';
     document.getElementById('predictOvertrainBar').style.width = overtrainRisk + '%';
-    // Muscle growth rate
+
     let muscleGrowth = Math.round((currentLoggedProtein / Math.max(1,targetP)) * 40 + (currentWater/4000)*30 + (sleepAvg/100)*30);
     document.getElementById('predictMuscleVal').innerText = muscleGrowth + '%';
     document.getElementById('predictMuscleBar').style.width = Math.min(100, muscleGrowth) + '%';
 }
-
 // 3. UV / Sun Exposure Tracker
 function startSunExposure() {
     if(sunExposureTimer) clearInterval(sunExposureTimer);
