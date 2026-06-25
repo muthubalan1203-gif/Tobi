@@ -5,13 +5,13 @@
   "display": "standalone",
   "background_color": "#04060d",
   "theme_color": "#04060d",
-  "orientation": "portrait",
-"icons": [
-  {
-    "src": "https://files.softicons.com/download/culture-icons/sharingan-icons-1.5-by-harenome-razanajato/png/512x512/kakashi.png",
-    "sizes": "512x512",
-    "type": "image/png",
-    "purpose": "any maskable"
-  }
-]
+  "version": "5.0",
+  "icons": [
+    {
+      "src": "https://files.softicons.com/download/culture-icons/sharingan-icons-1.5-by-harenome-razanajato/png/512x512/kakashi.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
