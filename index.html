@@ -2437,8 +2437,66 @@ function checkNightlyPlanningTimer() {
 function showTomorrowPlan() { let plan = localStorage.getItem('tomorrow_plan'); let display = document.getElementById('tomorrow-task-display'); let card = document.getElementById('tomorrow-planner-card'); if(plan && display && card) { display.innerText = plan; card.style.display = 'block'; } }
 function applyDisciplinePenalty() { let appToday = getAppToday(); let todayDateKey = getIsoDateStr(appToday); if(localStorage.getItem('penalty_applied_' + todayDateKey)) return; let streak = parseInt(localStorage.getItem('gym_streak') || 0); if(streak < 2 && savings.length > 0) { savings.unshift({ id: Date.now(), amount: -100, date: appToday.toDateString(), note: 'Penalty' }); localStorage.setItem('person_savings', JSON.stringify(savings)); renderSavings(); localStorage.setItem('penalty_applied_' + todayDateKey, 'true'); displayPremiumToastNotification("Penalty Applied: ₹100 deducted.", "⚠️"); } }
 
-function renderCurrentDay() { let appToday = getAppToday(); let todayDateKey = getIsoDateStr(appToday); const dayName = daysOfWeek[appToday.getDay()]; let tagText = 'தினசரி வழக்கம்', specialTasks = ''; if(['Monday','Wednesday','Friday'].includes(dayName)) { specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-oil" onchange="handleTaskChange('${todayDateKey}', 't-oil')"><span><b>வாய் சுத்தம்:</b> Oil Pulling (நல்லெண்ணெய்/தேங்காய் எண்ணெய்).</span></label></li>`; } if(dayName === 'Wednesday' || dayName === 'Sunday') { tagText = 'முடி பராமரிப்பு'; specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-h1" onchange="handleTaskChange('${todayDateKey}', 't-h1')"><span><b>முடி வேர்களின் தூய்மைக்கு:</b> எலுமிச்சை + தயிர் மாஸ்க்.</span></label></li><li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-h2" onchange="handleTaskChange('${todayDateKey}', 't-h2')"><span><b>வறண்ட முடிக்கு:</b> தேங்காய் எண்ணெய்/சீரம்.</span></label></li>`; } if(dayName === 'Monday' || dayName === 'Friday') { tagText = 'முகப் பராமரிப்பு'; specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-f1" onchange="handleTaskChange('${todayDateKey}', 't-f1')"><span><b>எண்ணெய் சருமத்திற்கு:</b> முல்தானி மெட்டி மாஸ்க்.</span></label></li>`; } if(dayName === 'Sunday') { tagText = 'WEEKEND MAINTENANCE'; specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-scrub" onchange="handleTaskChange('${todayDateKey}', 't-scrub')"><span><b>சருமப் பராமரிப்பு:</b> Face Scrub (வாரம் ஒருமுறை).</span></label></li><li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-nail" onchange="handleTaskChange('${todayDateKey}', 't-nail')"><span><b>சுத்தம்:</b> Nail Grooming (நகங்களை வெட்டுதல்).</span></label></li><li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-cheat" onchange="handleTaskChange('${todayDateKey}', 't-cheat')"><span><b>டயட் பிரேக்:</b> Weekly Cheat Meal (1 Time Only).</span></label></li>`; } let waterTaskHTML = ""; if(dayName === 'Monday' || dayName === 'Tuesday') { waterTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>செரிமானத்திற்கு:</b> காலை வெறும் வயிற்றில் சீரகத் தண்ணீர்.</span></label></li>`; } else if(dayName === 'Wednesday' || dayName === 'Thursday') { waterTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>குளிர்ச்சிக்கு:</b> காலை வெறும் வயிற்றில் சியா விதை தண்ணீர்.</span></label></li>`; } else { waterTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>டீடாக்ஸ்:</b> காலை வெறும் வயிற்றில் சாதாரண சுடுநீர்.</span></label></li>`; } let faceWashTaskHTML = ""; if(dayName === 'Monday' || dayName === 'Wednesday' || dayName === 'Friday') { faceWashTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-w" onchange="handleTaskChange('${todayDateKey}', 't-w')"><span><b>சருமப் பாதுகாப்பு:</b> கடலை மாவு + கஸ்தூரி மஞ்சள்.</span></label></li>`; } else { faceWashTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-w" onchange="handleTaskChange('${todayDateKey}', 't-w')"><span><b>சருமப் பாதுகாப்பு:</b> மைல்டான ஃபேஸ் வாஷ் மட்டும்.</span></label></li>`; } const card = document.getElementById('dayCard'); if(!card) return; card.innerHTML = `<div class="day-header"><div><div class="day-number">Today's Protocol</div><div class="day-date">${appToday.getDate()} ${monthNames[appToday.getMonth()]} (${dayName})</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;"><span class="day-tag" style="background:var(--neon-gold); color:#000;">${tagText}</span><span id="glowupPctBadge" class="day-pct-badge">Progress: 0%</span></div></div><ul class="task-list" style="margin-top:12px;">${waterTaskHTML}${faceWashTaskHTML}${specialTasks}<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-g" onchange="handleTaskChange('${todayDateKey}', 't-g')"><span><b>உடல் எடை அதிகரிக்க:</b> 2 வாழைப்பழம் அல்லது மில்க்‌ஷேக்.</span></label></li></ul>`; const savedStates = getSavedCheckboxStates(todayDateKey); for(const tid in savedStates) { const cb = document.getElementById(tid); if(cb) cb.checked = savedStates[tid]; } calculateGlowupCardPercentage(); }
-
+function renderCurrentDay() { 
+    let appToday = getAppToday(); 
+    let todayDateKey = getIsoDateStr(appToday); 
+    const dayName = daysOfWeek[appToday.getDay()]; 
+    let tagText = 'தினசரி வழக்கம்', specialTasks = ''; 
+    
+    if(['Monday','Wednesday','Friday'].includes(dayName)) { 
+        specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-oil" onchange="handleTaskChange('${todayDateKey}', 't-oil')"><span><b>வாய் சுத்தம்:</b> Oil Pulling (நல்லெண்ணெய்/தேங்காய் எண்ணெய்).</span></label></li>`; 
+    } 
+    
+    if(dayName === 'Wednesday' || dayName === 'Sunday') { 
+        tagText = 'முடி பராமரிப்பு'; 
+        specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-h1" onchange="handleTaskChange('${todayDateKey}', 't-h1')"><span><b>முடி வேர்களின் தூய்மைக்கு:</b> எலுமிச்சை + தயிர் மாஸ்க்.</span></label></li><li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-h2" onchange="handleTaskChange('${todayDateKey}', 't-h2')"><span><b>வறண்ட முடிக்கு:</b> தேங்காய் எண்ணெய்/சீரம்.</span></label></li>`; 
+    } 
+    
+    if(dayName === 'Monday' || dayName === 'Friday') { 
+        tagText = 'முகப் பராமரிப்பு'; 
+        specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-f1" onchange="handleTaskChange('${todayDateKey}', 't-f1')"><span><b>எண்ணெய் சருமத்திற்கு:</b> முல்தானி மெட்டி மாஸ்க்.</span></label></li>`; 
+    } 
+    
+    if(dayName === 'Sunday') { 
+        tagText = 'WEEKEND MAINTENANCE'; 
+        specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-scrub" onchange="handleTaskChange('${todayDateKey}', 't-scrub')"><span><b>சருமப் பராமரிப்பு:</b> Face Scrub (வாரம் ஒருமுறை).</span></label></li><li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-nail" onchange="handleTaskChange('${todayDateKey}', 't-nail')"><span><b>சுத்தம்:</b> Nail Grooming (நகங்களை வெட்டுதல்).</span></label></li><li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-cheat" onchange="handleTaskChange('${todayDateKey}', 't-cheat')"><span><b>டயட் பிரேக்:</b> Weekly Cheat Meal (1 Time Only).</span></label></li>`; 
+    } 
+    
+    // ===== PUDHUSA ADD PANNUNGA ITHA =====
+    if(dayName === 'Saturday') { 
+        specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-dresswash" onchange="handleTaskChange('${todayDateKey}', 't-dresswash')"><span><b>🧺 Saturday Special:</b> Dress Wash (Laundry complete pannu)</span></label></li>`; 
+    } 
+    if(dayName === 'Sunday') { 
+        specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-dressiron" onchange="handleTaskChange('${todayDateKey}', 't-dressiron')"><span><b>👔 Sunday Special:</b> Dress Ironing (All clothes press pannu)</span></label></li>`; 
+    } 
+    // ===== IDHUVARAIKUM =====
+    
+    let waterTaskHTML = ""; 
+    if(dayName === 'Monday' || dayName === 'Tuesday') { 
+        waterTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>செரிமானத்திற்கு:</b> காலை வெறும் வயிற்றில் சீரகத் தண்ணீர்.</span></label></li>`; 
+    } else if(dayName === 'Wednesday' || dayName === 'Thursday') { 
+        waterTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>குளிர்ச்சிக்கு:</b> காலை வெறும் வயிற்றில் சியா விதை தண்ணீர்.</span></label></li>`; 
+    } else { 
+        waterTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>டீடாக்ஸ்:</b> காலை வெறும் வயிற்றில் சாதாரண சுடுநீர்.</span></label></li>`; 
+    } 
+    
+    let faceWashTaskHTML = ""; 
+    if(dayName === 'Monday' || dayName === 'Wednesday' || dayName === 'Friday') { 
+        faceWashTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-w" onchange="handleTaskChange('${todayDateKey}', 't-w')"><span><b>சருமப் பாதுகாப்பு:</b> கடலை மாவு + கஸ்தூரி மஞ்சள்.</span></label></li>`; 
+    } else { 
+        faceWashTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-w" onchange="handleTaskChange('${todayDateKey}', 't-w')"><span><b>சருமப் பாதுகாப்பு:</b> மைல்டான ஃபேஸ் வாஷ் மட்டும்.</span></label></li>`; 
+    } 
+    
+    const card = document.getElementById('dayCard'); 
+    if(!card) return; 
+    card.innerHTML = `<div class="day-header"><div><div class="day-number">Today's Protocol</div><div class="day-date">${appToday.getDate()} ${monthNames[appToday.getMonth()]} (${dayName})</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;"><span class="day-tag" style="background:var(--neon-gold); color:#000;">${tagText}</span><span id="glowupPctBadge" class="day-pct-badge">Progress: 0%</span></div></div><ul class="task-list" style="margin-top:12px;">${waterTaskHTML}${faceWashTaskHTML}${specialTasks}<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-g" onchange="handleTaskChange('${todayDateKey}', 't-g')"><span><b>உடல் எடை அதிகரிக்க:</b> 2 வாழைப்பழம் அல்லது மில்க்‌ஷேக்.</span></label></li></ul>`; 
+    const savedStates = getSavedCheckboxStates(todayDateKey); 
+    for(const tid in savedStates) { 
+        const cb = document.getElementById(tid); 
+        if(cb) cb.checked = savedStates[tid]; 
+    } 
+    calculateGlowupCardPercentage(); 
+}
 async function completeCurrentDay() {
     let appToday = getAppToday();
     let todayDateKey = getIsoDateStr(appToday);
