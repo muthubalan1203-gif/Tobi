@@ -2215,10 +2215,83 @@ function setTomorrowPlan() {
 }
 
 function shareNightlyReportToWhatsApp() {
-    let report = window.lastNightlyReport || "Muthubalan Daily Report";
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(report)}`;
+    let appToday = getAppToday();
+    let dateStr = appToday.toDateString();
+    let todayName = daysOfWeek[appToday.getDay()];
+    
+    // ===== FOOD LOGS (Simple - No Macros) =====
+    let todayMeals = mealLogs.filter(m => m.date === dateStr);
+    let foodList = "";
+    if (todayMeals.length > 0) {
+        foodList = todayMeals.map((m, i) => `${i+1}. ${m.foodText}`).join('\n');
+    } else {
+        foodList = "• Inniku meals log pannala";
+    }
+    
+    // ===== EXPENSES (Simple - No Category Tags) =====
+    let todayExpenses = expenses.filter(e => new Date(e.date).toDateString() === dateStr);
+    let expenseList = "";
+    let totalExp = 0;
+    if (todayExpenses.length > 0) {
+        expenseList = todayExpenses.map((e, i) => `${i+1}. ${e.desc} - ₹${e.amount}`).join('\n');
+        totalExp = todayExpenses.reduce((s, e) => s + e.amount, 0);
+    } else {
+        expenseList = "• Inniku selavu log pannala";
+    }
+    
+    // ===== GYM STATUS =====
+    let gymStatus = localStorage.getItem(`gym_done_${dateStr}`);
+    const workoutMap = {
+        'Monday': 'Chest & Triceps 💥',
+        'Tuesday': 'Back & Biceps 🦍',
+        'Wednesday': 'Shoulders & Abs 🎯',
+        'Thursday': 'Chest & Biceps ⚡',
+        'Friday': 'Back & Triceps 🔥',
+        'Saturday': 'Heavy Legs 🦵',
+        'Sunday': 'Rest Day 🧘‍♂️'
+    };
+    let gymLine = "";
+    if (gymStatus === 'true') {
+        gymLine = `✅ YES - ${workoutMap[todayName] || todayName}`;
+    } else if (gymStatus === 'false') {
+        gymLine = '❌ NO - Gym Skip pannuta';
+    } else {
+        gymLine = '⏳ Innum Gym attendance mark pannala';
+    }
+    
+    // ===== SLEEP & OVERALL =====
+    let sleepText = '--';
+    if(sleepLogs.length > 0 && sleepLogs[0].date === dateStr) sleepText = sleepLogs[0].score + '%';
+    
+    let overallText = '0%';
+    let overallEl = document.getElementById('ceoOverallText');
+    if(overallEl) overallText = overallEl.innerText;
+
+    // ===== CLEAN SIMPLE WHATSAPP FORMAT =====
+    let reportText = `🌟 *MUTHUBALAN DAILY REPORT* 🌟
+📅 *Date:* ${dateStr} (${todayName})
+
+──────────────────
+🍽️ *INNIKU SAAPTA FOOD:*
+${foodList}
+
+💰 *INNIKU SELAVU (Total: ₹${totalExp}):*
+${expenseList}
+
+🏋️‍♂️ *GYM STATUS:* ${gymLine}
+
+💧 *Water:* ${(currentWater / 1000).toFixed(1)}L / 4L
+🍗 *Protein:* ${currentLoggedProtein}g / ${targetP}g
+⚡ *Calories:* ${currentLoggedCal} / ${dailyTargetCals} Kcal
+😴 *Sleep:* ${sleepText}
+🔥 *Overall:* ${overallText}
+
+──────────────────
+🤖 _MUTHUBALAN Personal App_`;
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(reportText)}`;
     window.open(whatsappUrl, '_blank');
-    displayPremiumToastNotification("WhatsApp Report Sent!", "📲");
+    displayPremiumToastNotification("WhatsApp Report Sent! 📲", "✅");
 }
 
 function generateTomorrowProtocol() { 
