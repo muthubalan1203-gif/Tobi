@@ -559,7 +559,18 @@ body.theme-sharingan .toast-notification-hub {
 <div style="margin-top:12px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px; border:1px solid var(--glass-border);">
 <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-secondary); font-weight:700;"><span>💰 Budget Left</span><span id="ceoBudget">₹0</span></div>
 </div></div>
+</div></div>  <!-- 👈 CEO Dashboard ends here -->
 
+<!-- 👇👇👇 ITHU MUNNAADI PASTE PANNUNGA 👇👇👇 -->
+
+<div class="app-card" style="border-top:4px solid var(--neon-indigo);">
+<h3 class="card-title" style="color:var(--neon-indigo);">🚶 Daily Steps & Cardio Engine</h3>
+... (full HTML code) ...
+</div>
+
+<!-- 👆👆👆 IDHUVARAIKUM PASTE PANNUNGA 👆👆👆 -->
+
+<div class="app-card ai-predict-card" style="margin-bottom:16px;">  <!-- 👈 TOBI Predictive AI -->
 <div class="app-card ai-predict-card" style="margin-bottom:16px;">
 <h3 class="card-title" style="color:var(--neon-purple);">🔮 TOBI Predictive AI</h3>
 <div class="predict-row"><div><div class="predict-label">WEIGHT FORECAST (30 DAYS)</div><div class="predict-bar"><div id="predictWeightBar" class="predict-bar-fill" style="width:0%"></div></div></div><div class="predict-val" id="predictWeightVal">--</div></div>
@@ -850,6 +861,16 @@ body.theme-sharingan .toast-notification-hub {
 <div class="cat-spend-row"><div class="cat-spend-header"><span>📦 Others</span><span id="catSpentLabel-Others">₹0</span></div><div class="cat-spend-bar-bg"><div id="catSpentBar-Others" class="cat-spend-bar-fill" style="background:var(--text-secondary); width:0%;"></div></div></div></div>
 
 <div class="savings-card">
+<div class="app-card" style="border-top:4px solid var(--neon-red); background:rgba(239,68,68,0.05);">
+<h3 class="card-title" style="color:var(--neon-red);">🔮 TOBI Expense Predictor</h3>
+<div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">Weekly budget-a eppo mudiyum nu predict pannrom:</div>
+<div style="background:rgba(0,0,0,0.2); border-radius:12px; padding:12px; border:1px solid var(--glass-border);">
+<div style="font-size:0.75rem; color:var(--text-secondary); font-weight:700;">SPENDING VELOCITY</div>
+<div style="font-size:1.2rem; font-weight:900; color:var(--neon-cyan); margin:4px 0;" id="expenseVelocity">₹0 / day</div>
+<div style="font-size:0.75rem; color:var(--text-secondary); font-weight:700; margin-top:8px;">BUDGET LIFETIME</div>
+<div style="font-size:1.1rem; font-weight:800; color:var(--neon-gold); margin:4px 0;" id="budgetLifetime">Set budget first</div>
+<div style="font-size:0.8rem; color:var(--neon-red); font-weight:700; margin-top:8px;" id="expensePredictionMsg"></div>
+</div></div>
 <h3 class="card-title" style="color:var(--neon-green); position:relative; z-index:2;">Savings Vault</h3>
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; position:relative; z-index:2;"><div><span style="font-size:0.75rem; color:var(--text-secondary);">Total Saved</span><br><b style="font-size:1.5rem; color:var(--neon-green);" id="totalSavingsDisplay">₹0</b></div><button class="btn-universal" style="width:auto; padding:8px 15px; font-size:0.8rem; background:var(--neon-green); color:black;" onclick="addSavings()">+ Add Money</button></div>
 <ul class="list-container" id="savingsListContainer" style="max-height:150px; position:relative; z-index:2; border:none;"></ul></div></div>
@@ -1258,7 +1279,7 @@ function switchPage(pageId) {
     const selectedPage = document.getElementById(`page-${pageId}`);
     if(selectedPage) { selectedPage.style.display='block'; setTimeout(() => { selectedPage.style.opacity='1'; selectedPage.style.transform='scale(1)'; }, 25); }
     document.getElementById(`tab-${pageId}`).classList.add('active');
-    if(pageId === 'glowup') { renderCurrentDay(); loadBioStates(); renderWakeupLogs(); updateProgressBars(); renderTodayNaturalCare(); updateCEODashboard(); updatePredictiveAnalytics();  }
+    if(pageId === 'glowup') { renderCurrentDay(); loadBioStates(); renderWakeupLogs(); updateProgressBars(); renderTodayNaturalCare(); updateCEODashboard(); updatePredictiveAnalytics(); renderCardioLogs();  }
     if(pageId === 'calendar') { renderMonthlyCalendar(); }
     if(pageId === 'gym') { initGymDay(); updateCalorieTargets(); renderWeightsCircleAndLists(); generateAdaptiveWorkout(); }
     if(pageId === 'diet') { renderMealLogsAndMacros(); renderWater(); updateCalorieTargets(); loadDietCheckboxes(); generateSmartGrocery(); }
@@ -1527,7 +1548,61 @@ function renderExpenses() {
             document.getElementById(`catSpentBar-${categoryKey}`).style.width = `${percentageBarFill}%`;
         }
     }
-
+function updateExpensePrediction() {
+    let appToday = getAppToday();
+    let dayOfWeek = appToday.getDay() || 7;
+    let weekStart = new Date(appToday);
+    weekStart.setDate(appToday.getDate() - dayOfWeek + 1);
+    weekStart.setHours(0,0,0,0);
+    
+    let daysPassed = appToday.getDay() === 0 ? 7 : appToday.getDay();
+    let weekSpent = expenses.reduce((sum, e) => {
+        let d = new Date(e.date);
+        return (d >= weekStart) ? sum + e.amount : sum;
+    }, 0);
+    
+    let remaining = weeklyBudgetTarget - weekSpent;
+    let dailyRate = daysPassed > 0 ? weekSpent / daysPassed : 0;
+    
+    let velEl = document.getElementById('expenseVelocity');
+    let lifeEl = document.getElementById('budgetLifetime');
+    let msgEl = document.getElementById('expensePredictionMsg');
+    if(!velEl || !lifeEl) return;
+    
+    if(weeklyBudgetTarget <= 0) {
+        velEl.innerText = "Set budget first!";
+        lifeEl.innerText = "--";
+        msgEl.innerText = "";
+        return;
+    }
+    
+    velEl.innerText = `₹${dailyRate.toFixed(0)} / day`;
+    
+    if(remaining <= 0) {
+        lifeEl.innerText = "BUDGET OVER!";
+        lifeEl.style.color = "var(--neon-red)";
+        msgEl.innerText = "⚠️ Muthubalan! Budget already crossed. Control spending!";
+    } else if(dailyRate <= 0) {
+        lifeEl.innerText = "Full Week Safe";
+        lifeEl.style.color = "var(--neon-green)";
+        msgEl.innerText = "✅ Innum selavu pannala. Nalla control!";
+    } else {
+        let daysLeft = Math.floor(remaining / dailyRate);
+        if(daysLeft <= 0) {
+            lifeEl.innerText = "TODAY!";
+            lifeEl.style.color = "var(--neon-red)";
+            msgEl.innerText = "🔥 Budget innum hours-la mudiyum!";
+        } else if(daysLeft >= (7 - daysPassed + 1)) {
+            lifeEl.innerText = `${daysLeft} days (Safe)`;
+            lifeEl.style.color = "var(--neon-green)";
+            msgEl.innerText = "✅ Budget safe. Next week-kum extend aagum.";
+        } else {
+            lifeEl.innerText = `${daysLeft} days`;
+            lifeEl.style.color = "var(--neon-gold)";
+            msgEl.innerText = `⚠️ Friday-kulla budget mudiyum! Slow down!`;
+        }
+    }
+}
     // --- Weekly Budget அப்டேட் செய்வதற்கான புதிய Code ---
     let actualWeeklySum = expenses.reduce((sum, e) => {
         let d = new Date(e.date);
@@ -1556,6 +1631,7 @@ function renderExpenses() {
             remainingText.style.color = "var(--neon-red)";
         }
     }
+    updateExpensePrediction();
 }
 function addSavings() { let appToday = getAppToday(); const val = prompt("Enter Savings Amount (₹):"); if(val !== null) { const amt = parseFloat(val); if(amt && amt > 0) { savings.unshift({ id: Date.now(), amount: amt, date: appToday.toDateString(), note: '' }); localStorage.setItem('person_savings', JSON.stringify(savings)); renderSavings(); displayPremiumToastNotification("Savings Added!", "🏦"); } } }
 function deleteSavings(id) { triggerDeviceHapticPulse(); savings = savings.filter(s => s.id !== id); localStorage.setItem('person_savings', JSON.stringify(savings)); renderSavings(); updateCEODashboard(); }
@@ -2392,12 +2468,80 @@ async function completeCurrentDay() {
 }
 function renderTodayNaturalCare() {
     let appToday = getAppToday(); const day = appToday.getDay(); const protocol = dailyNaturalProtocols[day]; const container = document.getElementById('todayNaturalCareContainer'); if(!container || !protocol) return; 
+    let todayStr = appToday.toDateString();
     let html = `<div style="margin-bottom:10px; font-weight:800; color:var(--neon-gold); font-size:0.95rem;">${protocol.title}</div><ul class="task-list">`; 
     protocol.items.forEach(item => { 
-        html += `<li class="task-item" style="border-bottom:1px solid rgba(255,255,255,0.03); padding-left:5px;">🔸 <span>${item.text}</span></li>`; 
+        let isChecked = localStorage.getItem(`${item.id}_${todayStr}`) === 'true';
+        html += `<li class="task-item" style="border-bottom:1px solid rgba(255,255,255,0.03); padding-left:5px;">
+            <label class="task-checkbox-side" style="cursor:pointer;">
+                <input type="checkbox" id="${item.id}" ${isChecked ? 'checked' : ''} onchange="toggleNaturalTask('${item.id}')">
+                <span>${item.text}</span>
+            </label>
+        </li>`; 
     }); 
     html += `</ul>`; 
     container.innerHTML = html;
+}
+
+function toggleNaturalTask(taskId) {
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
+    let cb = document.getElementById(taskId);
+    if(cb && cb.checked) {
+        localStorage.setItem(`${taskId}_${todayStr}`, 'true');
+    } else {
+        localStorage.removeItem(`${taskId}_${todayStr}`);
+    }
+    displayPremiumToastNotification("Protocol updated!", "✅");
+}
+
+function logStepsCardio() {
+    let steps = parseInt(document.getElementById('stepsInput').value) || 0;
+    let walk = parseInt(document.getElementById('walkMin').value) || 0;
+    let run = parseInt(document.getElementById('runMin').value) || 0;
+    let cycle = parseInt(document.getElementById('cycleMin').value) || 0;
+    
+    let burn = (walk * 4) + (run * 10) + (cycle * 8) + (steps * 0.04);
+    let burnRounded = Math.round(burn);
+    
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
+    
+    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    cardioLogs = cardioLogs.filter(c => c.date !== todayStr);
+    cardioLogs.unshift({ id: Date.now(), date: todayStr, steps, walk, run, cycle, burn: burnRounded });
+    localStorage.setItem('cardio_logs', JSON.stringify(cardioLogs));
+    
+    document.getElementById('cardioBurnDisplay').innerText = `${burnRounded} Kcal 🔥`;
+    renderCardioLogs();
+    displayPremiumToastNotification(`Burned ${burnRounded} Kcal! Great work!`, "🔥");
+    updateCEODashboard();
+}
+
+function renderCardioLogs() {
+    let container = document.getElementById('cardioLogList');
+    if(!container) return;
+    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
+    
+    let todayLog = cardioLogs.find(c => c.date === todayStr);
+    if(todayLog) {
+        document.getElementById('stepsInput').value = todayLog.steps || '';
+        document.getElementById('walkMin').value = todayLog.walk || '';
+        document.getElementById('runMin').value = todayLog.run || '';
+        document.getElementById('cycleMin').value = todayLog.cycle || '';
+        document.getElementById('cardioBurnDisplay').innerText = `${todayLog.burn} Kcal 🔥`;
+    }
+    
+    container.innerHTML = '';
+    cardioLogs.slice(0, 5).forEach(c => {
+        let li = document.createElement('li');
+        li.className = 'list-item';
+        li.style.borderLeftColor = 'var(--neon-indigo)';
+        li.innerHTML = `<div style="font-size:0.8rem;"><b>${c.date}</b><br>🚶 ${c.steps} steps | 🏃 ${c.run}m | 🚴 ${c.cycle}m</div><div style="color:var(--neon-orange); font-weight:900; font-size:0.9rem;">-${c.burn} 🔥</div>`;
+        container.appendChild(li);
+    });
 }
 function toggleNaturalTaskMain(taskId) { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const key = todayStr + '_' + taskId; const cb = document.getElementById(taskId); if(cb && cb.checked) { naturalTasks[key] = true; } else { delete naturalTasks[key]; } localStorage.setItem('person_natural_tasks', JSON.stringify(naturalTasks)); renderTodayNaturalCare(); updateCEODashboard(); }
 
