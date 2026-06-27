@@ -7,12 +7,12 @@
 <meta http-equiv="Expires" content="0">
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/Tobi/sw.js')
+    // SW path — தானாக detect பண்ணி register பண்ணும்
+    const swPath = location.pathname.includes('/Tobi/') ? '/Tobi/sw.js' : '/sw.js';
+    navigator.serviceWorker.register(swPath)
       .then(reg => {
-        console.log('SW registered');
-        // Auto check update every 30 seconds
+        console.log('SW registered:', swPath);
         setInterval(() => reg.update(), 30000);
-        // If new SW found, auto reload
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           newWorker.addEventListener('statechange', () => {
@@ -21,11 +21,12 @@
 }
           });
         });
-      });
+      })
+      .catch(err => console.log('SW not available (offline mode ok):', err.message));
   }
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>முத்துபாலன் Personal App v4.0 — AI-Powered Command Center</title>
+<title>முத்துபாலன் Personal App v5.0 — AI-Powered Command Center</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -240,7 +241,7 @@ body.theme-sharingan .toast-notification-hub {
 .diet-text { flex:1; }
 .diet-macro-tag { font-size:0.65rem; color:var(--text-secondary); display:block; margin-top:2px; }
 
-/* ========== NEW v4.0 AI FEATURE STYLES ========== */
+/* ========== NEW v5.0 AI FEATURE STYLES ========== */
 .TOBI-chat-fab { position:fixed; bottom:100px; right:15px; width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, var(--neon-cyan), var(--neon-indigo)); border:2px solid rgba(255,255,255,0.1); color:white; font-size:1.6rem; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:5000; box-shadow:0 0 20px rgba(6,182,212,0.4); transition:all 0.3s; }
 .TOBI-chat-fab:active { transform:scale(0.9); }
 .TOBI-chat-fab .TOBI-badge { position:absolute; top:-2px; right:-2px; width:18px; height:18px; background:var(--neon-red); border-radius:50%; font-size:0.6rem; display:flex; align-items:center; justify-content:center; font-weight:900; }
@@ -534,26 +535,23 @@ body.theme-sharingan .toast-notification-hub {
   <div class="achievement-desc" id="achDesc">Description here</div>
 </div>
 
-<!-- Theme Engine Toggle (fixed top right) -->
-<div style="position:fixed; top:12px; right:12px; z-index:5000; display:flex; gap:6px;">
-  <button class="theme-toggle-btn" onclick="setTheme('stark')" title="Stark Mode">STARK</button>
-  <button class="theme-toggle-btn" onclick="setTheme('arc')" title="Arc Reactor" style="color:var(--neon-cyan);">ARC</button>
-  <button class="theme-toggle-btn" onclick="setTheme('vibranium')" title="Vibranium" style="color:var(--neon-purple);">VIB</button>
-  <button class="theme-toggle-btn" onclick="setTheme('sharingan')" title="Sharingan" style="color:#ff0000;">SHR</button>
-</div>
-
-<!-- HUD Digital Clock (fixed top left, subtle) -->
-<div style="position:fixed; top:12px; left:12px; z-index:5000; font-family:var(--font-hud); font-size:0.65rem; color:var(--neon-cyan); letter-spacing:2px; opacity:0.7;">
-  <span class="hud-status-dot"></span><span id="hudClock">00:00:00</span>
+<!-- Theme Engine — Compact Pill (header-ல் embed ஆகும்) -->
+<div id="themePickerPanel" style="display:none; position:fixed; top:56px; right:12px; z-index:5001; background:rgba(10,14,28,0.95); border:1px solid var(--glass-border); border-radius:14px; padding:8px 10px; gap:6px; display:none; flex-direction:column; backdrop-filter:blur(20px); box-shadow:0 8px 30px rgba(0,0,0,0.6);">
+  <button onclick="setTheme('stark'); closeThemePicker()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:#e2e8f0; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">⚪ STARK</button>
+  <button onclick="setTheme('arc'); closeThemePicker()" style="background:rgba(6,182,212,0.08); border:1px solid rgba(6,182,212,0.25); border-radius:8px; color:var(--neon-cyan); font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🔵 ARC</button>
+  <button onclick="setTheme('vibranium'); closeThemePicker()" style="background:rgba(168,85,247,0.08); border:1px solid rgba(168,85,247,0.25); border-radius:8px; color:#c084fc; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🟣 VIBRANIUM</button>
+  <button onclick="setTheme('sharingan'); closeThemePicker()" style="background:rgba(255,0,0,0.08); border:1px solid rgba(255,0,0,0.25); border-radius:8px; color:#ff4444; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🔴 SHARINGAN</button>
 </div>
 
 <div id="pwaInstallBanner" class="pwa-install-banner"><span>📲 Install Muthubalan Personal App to Home Screen</span><button onclick="installPWA()">Install</button></div>
 <div id="premiumAppToast" class="toast-notification-hub"><span style="font-size:1.5rem;" id="toastIconElement">🔥</span><span id="toastMessageText">Notification System Activated.</span></div>
 <div class="app-container">
-<header><div><h1>🌟 Muthubalan Personal App</h1><p>Lifelong Personal Assistant OS v4.0 AI</p></div>
+<header><div><h1>🌟 Muthubalan Personal App</h1><p>Lifelong Personal Assistant OS v5.0 AI</p></div>
+<div style="display:flex; align-items:center; gap:8px;">
+<button onclick="toggleThemePicker()" id="themeToggleHeaderBtn" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:6px 11px; color:var(--neon-cyan); font-size:0.65rem; font-weight:800; cursor:pointer; letter-spacing:0.5px; backdrop-filter:blur(10px); transition:all 0.2s; white-space:nowrap;">🎨 Theme</button>
 <div id="ambientAudioBtn" class="ambient-audio-widget" onclick="toggleAmbientSynthBeats()">
 <div class="audio-wave-dot" style="animation-delay:0.1s"></div><div class="audio-wave-dot" style="animation-delay:0.3s"></div><div class="audio-wave-dot" style="animation-delay:0.2s"></div>
-<span id="audioTrackLabel">Workout Beats</span></div></header>
+<span id="audioTrackLabel">Beats</span></div></div></header>
 <div class="nav-tabs">
 <button id="tab-glowup" class="tab-btn active" onclick="switchPage('glowup')">✨ Glow Up</button>
 <button id="tab-gym" class="tab-btn" onclick="switchPage('gym')">💪 Gym Plan</button>
@@ -3229,7 +3227,7 @@ async function getGeminiInsights(reportType, data) {
     return await askGemini(prompt);
 }
 
-// ========== NEW v4.0 AI & FEATURE FUNCTIONS ==========
+// ========== NEW v5.0 AI & FEATURE FUNCTIONS ==========
 
 // 1. Tamil TTS Voice Coach
 function speakTamil(text) {
@@ -3494,35 +3492,12 @@ function stopWimHof() {
     document.getElementById('breathRoundDisplay').innerText = 'Breath: 0 / 15'; 
 }
 
-// 6. AI Photo Scanner (Meal)
-function handleMealPhotoScan(input) {
-    if(input.files && input.files[0]) {
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('mealPhotoPreview').src = e.target.result;
-            document.getElementById('mealPhotoPreview').style.display = 'block';
-            document.getElementById('scannerAnalyzing').style.display = 'block';
-            // Simulate AI analysis
-            setTimeout(() => {
-                document.getElementById('scannerAnalyzing').style.display = 'none';
-                let detected = ["Rice", "Chicken Curry", "Vegetables"]; // Mock detection
-                let p = 25, c = 55, cal = 450; // Mock values
-                photoScanData = { p: p, c: c, f: 8, cal: cal, foodText: detected.join(', ') };
-                document.getElementById('photoScanDetected').innerText = detected.join(' + ');
-                document.getElementById('photoScanP').innerText = p;
-                document.getElementById('photoScanC').innerText = c;
-                document.getElementById('photoScanCal').innerText = cal;
-                document.getElementById('photoScanResult').style.display = 'block';
-                displayPremiumToastNotification("AI Scan Complete! Confirm to log.", "📸");
-            }, 2500);
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
+// 6. AI Photo Scanner (Meal) — Real AI scan only (mock removed)
 function confirmPhotoScan() {
+    // Real AI scan (handleMealPhotoScanWithAI) auto-logs — இந்த பட்டன் fallback மட்டும்
     if(photoScanData) {
         let actualNow = new Date();
-        let data = { id: Date.now(), date: getAppToday().toDateString(), time: actualNow.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), foodText: "[AI] " + photoScanData.foodText, p: photoScanData.p, c: photoScanData.c, f: photoScanData.f, cal: photoScanData.cal };
+        let data = { id: Date.now(), date: getAppToday().toDateString(), time: actualNow.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), foodText: "[AI Photo] " + photoScanData.foodText, p: photoScanData.p, c: photoScanData.c, f: photoScanData.f, cal: photoScanData.cal };
         mealLogs.unshift(data); localStorage.setItem('person_meal_logs', JSON.stringify(mealLogs));
         renderMealLogsAndMacros(); updateCEODashboard();
         document.getElementById('photoScanResult').style.display = 'none';
@@ -3530,6 +3505,9 @@ function confirmPhotoScan() {
         document.getElementById('mealPhotoInput').value = '';
         photoScanData = null;
         displayPremiumToastNotification("AI Meal Logged!", "✅");
+        playSuccessSound();
+    } else {
+        displayPremiumToastNotification("Photo scan பண்ணி மீண்டும் try பண்ணுங்க!", "⚠️");
     }
 }
 
@@ -3966,16 +3944,25 @@ function checkAchievements() {
   if(totalSav >= 1000) unlockAchievement('savings_1000');
 }
 
-// 5. HUD Digital Clock
-function updateHudClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  const s = String(now.getSeconds()).padStart(2,'0');
-  const el = document.getElementById('hudClock');
-  if(el) el.innerText = `${h}:${m}:${s}`;
+// 5. Theme Picker Toggle
+function toggleThemePicker() {
+  const panel = document.getElementById('themePickerPanel');
+  if(!panel) return;
+  const isOpen = panel.style.display === 'flex';
+  panel.style.display = isOpen ? 'none' : 'flex';
 }
-setInterval(updateHudClock, 1000); updateHudClock();
+function closeThemePicker() {
+  const panel = document.getElementById('themePickerPanel');
+  if(panel) panel.style.display = 'none';
+}
+// Outside tap-ல் close பண்ண
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('themePickerPanel');
+  const btn = document.getElementById('themeToggleHeaderBtn');
+  if(panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.style.display = 'none';
+  }
+});
 
 // 6. Theme Engine
 function setTheme(themeName) {
