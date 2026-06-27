@@ -1246,7 +1246,7 @@ async function askGemini(prompt, imageBase64 = null, imageMimeType = 'image/jpeg
     }
 
     // Vision API தேவைப்பட்டால் gemini-1.5-flash உபயோகி (image support உண்டு)
-    const model = imageBase64 ? 'gemini-3.1-pro' : 'gemini-3.5-flash' : 'gemini-3.1-flash-lite';
+    const model = imageBase64 ? 'gemini-3.5-flash' : 'gemini-3.1-flash-lite';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
     // parts array build பண்றோம் — image இருந்தா முதல்ல image, பிறகு text
