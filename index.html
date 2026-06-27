@@ -1013,6 +1013,50 @@ body.theme-sharingan .toast-notification-hub {
 <button class="TOBI-chat-fab" id="TOBIChatFab" onclick="toggleChatPanel()">🤖<div class="TOBI-badge" id="TOBIChatBadge" style="display:none;">1</div></button>
 </div>
 <script>
+function checkDailyWisdom() {
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
+    
+    // இன்று ஏற்கனவே தத்துவத்தை காட்டிவிட்டோமா என்று பார்க்க
+    if (!localStorage.getItem('daily_wisdom_shown_' + todayStr)) {
+        const gitaQuotes = [
+            "உன்னை உருவாக்குவதும் நீயே, உன்னை அழிப்பதும் நீயே. சோர்வு உடலுக்கு மட்டுமே! 🔥",
+            "பலனை எதிர்பார்க்காமல் கடமையைச் செய். இன்றைய வலி, நாளை உனக்கு மிகப்பெரிய வலிமை. 💪",
+            "எது நடந்ததோ அது நன்றாகவே நடந்தது. தளர்ந்து விடாதே! 🌿",
+            "மனதை வென்றவனுக்கு உலகமே அடிமை. நீயும் இன்று உன் சோர்வை வெல்! 🧘‍♂️",
+            "கஷ்டங்கள் வரும்போது எதிர்கொண்டு நில். நீ ஒரு வீரன், இன்று போராடு! ⚡",
+            "உடலின் சோர்வு தற்காலிகமானது, உன் இலக்கின் பெருமை நிரந்தரமானது. 🎯",
+            "எல்லாமே உன் எண்ணங்களைப் பொறுத்தது. உன்னால் முடியும்! 🦚",
+            "வெற்றி என்பது வீழ்ந்து விடாமல் இருப்பதல்ல, விழுந்த போதெல்லாம் மீண்டும் எழுவது. 🏆",
+            "தன்னம்பிக்கை உடையவன் எதையும் சாதிக்கலாம். இன்று உன் ஜிம் செஷனை முடித்துவிட்டு வா! 🧗",
+            "ஒவ்வொரு சொட்டு வியர்வையும் உன் வெற்றிக்கான படிக்கட்டு. 💧",
+            "உன் இலக்கு உன்னைத் தூங்க விடாமல் செய்தால், அதுவே சிறந்த வெற்றி. 💤",
+            "உழைப்பவன் ஒருபோதும் தோற்பதில்லை. உழைப்பைப் போல சிறந்த நண்பன் யாருமில்லை. ⚒️",
+            "தடைகள் வரும்போது திரும்பிப் பார்க்காதே, இலக்கை மட்டும் பார். 🚀",
+            "சிங்கம் ஓய்வு எடுப்பது தோற்பதற்காக அல்ல, மீண்டும் பாய்வதற்காக! 🦁",
+            "வலி உன்னை மாற்றும். சோர்வு உன்னை வளர்க்கும். 🔱",
+            "நேற்று செய்த தவறை இன்று திருத்திக்கொள். அதுவே வளர்ச்சி. 📈",
+            "உன்னால் முடியாதது என்று எதுவும் இல்லை. முயற்சி செய்! 🌟",
+            "கடமை தவறாதவனுக்குக் காலம் தானாகவே கைகூடும். ⏳",
+            "உன் திறமை உனக்குத் தெரியும், அதை உலகுக்கு நிரூபிக்கும் நேரம் இது. ⚔️",
+            "பெரிய வெற்றிகளுக்குப் பின்னால் பெரிய தியாகங்கள் இருக்கின்றன. பொறுமையுடன் தொடரு! ✨"
+        ];
+        
+        let randomQuote = gitaQuotes[Math.floor(Math.random() * gitaQuotes.length)];
+        
+        // ஆப் திறந்த 5 விநாடிகள் கழித்து தானாக வரும்
+        setTimeout(() => {
+            triggerDeviceHapticPulse();
+            openModalWithHistory('aiEngineModal');
+            document.getElementById('aiHeaderTitle').innerText = "🌞 TOBI-யின் தினசரி ஊக்கம்";
+            document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-gold); color:black;" onclick="closeModalAction('aiEngineModal')">நன்றி TOBI (Thanks)</button>`;
+            playAiTyping(`" ${randomQuote} "\n\n- TOBI (Your Daily Anchor)`, document.getElementById('aiTypingText'));
+            
+            // இன்று காட்டியதை பதிவு செய்தல்[cite: 1]
+            localStorage.setItem('daily_wisdom_shown_' + todayStr, 'true');
+        }, 5000);
+    }
+}
 // ஜிம் போகாத நாட்களை எண்ணுவதற்கான பங்க்ஷன்
 function getMissedGymDays(daysToLookBack) {
     let missedCount = 0;
@@ -1504,7 +1548,39 @@ function loadBodyMetrics() {
         if(savedTdee) document.getElementById('tdeeDisplay').innerText = savedTdee + " Kcal";
     }
 }
-function logGymMood(mood, elem) { let appToday = getAppToday(); let todayStr = appToday.toDateString(); let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; moods[todayStr] = mood; localStorage.setItem('gym_moods', JSON.stringify(moods)); document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected')); elem.classList.add('selected'); displayPremiumToastNotification(`Mood: ${mood.split(' ')[0]}`, "🧠"); }
+function logGymMood(mood, elem) { 
+    let appToday = getAppToday(); 
+    let todayStr = appToday.toDateString(); 
+    let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; 
+    moods[todayStr] = mood; 
+    localStorage.setItem('gym_moods', JSON.stringify(moods)); 
+    document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected')); 
+    elem.classList.add('selected'); 
+    displayPremiumToastNotification(`Mood: ${mood.split(' ')[0]}`, "🧠"); 
+
+    // 🦚 TOBI-யின் தத்துவங்கள் (Philosophical Anchor Engine)
+    if(mood.includes('Tired') || mood.includes('Sore')) {
+        const gitaQuotes = [
+            "உன்னை உருவாக்குவதும் நீயே, உன்னை அழிப்பதும் நீயே. சோர்வு என்பது உடலுக்கு மட்டுமே, மனதிற்கு அல்ல. எழுந்து நில்! 🔥",
+            "பலனை எதிர்பார்க்காமல் கடமையைச் செய். இன்றைய இந்த வலி, நாளை உனக்கு மிகப்பெரிய வலிமையாக மாறும். 💪",
+            "எது நடந்ததோ அது நன்றாகவே நடந்தது. இன்றைய கடின உழைப்பு, நாளைய வெற்றிக்கான விதை. தளர்ந்து விடாதே! 🌿",
+            "உன் மனம் தான் உனக்குச் சிறந்த நண்பன், அதுவே உனக்குப் பரம எதிரி. மனதை வென்றவனுக்கு உலகமே அடிமை. 🧘‍♂️",
+            "கஷ்டங்கள் வரும்போது விலகி ஓடுவதை விட, அதை எதிர்கொண்டு நிற்பதே உண்மையான தைரியம். நீ ஒரு வீரன், இன்று போராடு! ⚡",
+            "உடலின் சோர்வு தற்காலிகமானது, ஆனால் நீ அடையும் இலக்கின் பெருமை நிரந்தரமானது. 🎯",
+            "எல்லாமே உன் எண்ணங்களைப் பொறுத்தது. உன்னால் முடியும் என்று நம்பு, பாதி வெற்றி அங்கே கிடைத்துவிடும். 🦚"
+        ];
+        let randomQuote = gitaQuotes[Math.floor(Math.random() * gitaQuotes.length)];
+        
+        // அரை விநாடி கழித்து AI Modal ஓபன் ஆகும்
+        setTimeout(() => {
+            triggerDeviceHapticPulse();
+            openModalWithHistory('aiEngineModal');
+            document.getElementById('aiHeaderTitle').innerText = "🦚 TOBI-யின் தத்துவம்";
+            document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-gold); color:black;" onclick="closeModalAction('aiEngineModal')">உணர்ந்தேன் (Understood)</button>`;
+            playAiTyping(`" ${randomQuote} "\n\n- TOBI (Your Philosophical Anchor)`, document.getElementById('aiTypingText'));
+        }, 500); 
+    }
+}
 function reviewWeeklyMoods() { let appToday = getAppToday(); let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; let counts = {"Energetic":0,"Normal":0,"Tired":0,"Sore":0}; let total = 0; for(let i=0;i<7;i++) { let d = new Date(appToday); d.setDate(d.getDate()-i); let m = moods[d.toDateString()]; if(m) { if(m.includes('Energetic')) counts["Energetic"]++; if(m.includes('Normal')) counts["Normal"]++; if(m.includes('Tired')) counts["Tired"]++; if(m.includes('Sore')) counts["Sore"]++; total++; } } let aiReport = `📊 Weekly Mood Analysis (${total} Days)\n======================\n🤩 Energetic: ${counts["Energetic"]}\n🥱 Tired: ${counts["Tired"]}\n🤕 Sore: ${counts["Sore"]}\n\n`; if(counts["Tired"]+counts["Sore"] > 3) aiReport += "⚠️ Overtraining detected!"; else aiReport += "✅ Optimal training state!"; openModalWithHistory('aiEngineModal'); document.getElementById('aiHeaderTitle').innerText = "TOBI RECOVERY AI"; document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`; playAiTyping(aiReport, document.getElementById('aiTypingText')); }
 
 function addWater(ml) { let appToday = getAppToday(); triggerDeviceHapticPulse(); currentWater += ml; if(currentWater > 4000) currentWater = 4000; localStorage.setItem('TOBI_water_intake_v6', currentWater); renderWater(); updateRecoveryRing(); updateCEODashboard(); if(currentWater === 4000 && !localStorage.getItem('water_goal_met_' + appToday.toDateString())) { displayPremiumToastNotification("Daily Water Goal Completed!", "🌊"); localStorage.setItem('water_goal_met_' + appToday.toDateString(), 'true'); } }
@@ -3524,7 +3600,7 @@ window.addEventListener('DOMContentLoaded', () => {
     checkAndResetDailyTasks();
     renderCurrentDay(); loadBioStates(); renderWakeupLogs();
     renderMealLogsAndMacros(); renderWater(); renderSavings(); renderExpenses();
-    renderMonthlyCalendar(); checkRemindersPopup(); checkSundayAudit();
+    renderMonthlyCalendar(); checkRemindersPopup(); checkSundayAudit();checkDailyWisdom();
     renderReminders(); renderTodayNaturalCare(); showTomorrowPlan();
     loadBodyMetrics();
     updateRecoveryRing(); updateCalorieTargets(); updateCEODashboard(); updatePredictiveAnalytics();
