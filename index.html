@@ -48,21 +48,30 @@ input, select, textarea {
 * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif; }
 body { background-color:var(--bg-ultra); color:var(--text-primary); margin:0; padding:0; display:flex; flex-direction:column; min-height:100vh; overflow-x:hidden; -webkit-font-smoothing:antialiased; }
 .app-container { width:100%; max-width:480px; margin:0 auto; background:var(--bg-ultra); min-height:100vh; display:flex; flex-direction:column; position:relative; padding-bottom:95px; }
-header { padding:30px 20px 15px 20px; display:flex; justify-content:space-between; align-items:center; }
-header h1 { margin:0; font-size:1.5rem; font-weight:900; letter-spacing:-0.8px; background:linear-gradient(90deg,#ffffff,#64748b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-header p { margin:4px 0 0 0; font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700; }
-.ambient-audio-widget { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:14px; padding:6px 12px; display:flex; align-items:center; gap:8px; font-size:0.72rem; font-weight:700; cursor:pointer; color:var(--text-secondary); transition:all 0.3s; }
+header { padding:14px 16px 10px 16px; display:flex; justify-content:space-between; align-items:center; }
+header h1 { margin:0; font-size:1.05rem; font-weight:800; letter-spacing:-0.4px; background:linear-gradient(90deg,#ffffff,#64748b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+header p { margin:2px 0 0 0; font-size:0.65rem; color:var(--text-secondary); text-transform:uppercase; font-weight:600; }
+.ambient-audio-widget { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:10px; padding:5px 10px; display:flex; align-items:center; gap:6px; font-size:0.65rem; font-weight:700; cursor:pointer; color:var(--text-secondary); transition:all 0.3s; white-space:nowrap; }
 .ambient-audio-widget.playing { border-color:var(--neon-cyan); color:var(--neon-cyan); box-shadow:0 0 10px rgba(6,182,212,0.2); }
 .audio-wave-dot { width:3px; height:10px; background:currentColor; border-radius:2px; animation:wave 0.6s ease-in-out infinite alternate; display:none; }
 .ambient-audio-widget.playing .audio-wave-dot { display:inline-block; }
 @keyframes wave { from{transform:scaleY(0.4);} to{transform:scaleY(1.2);} }
-.nav-tabs { display:flex; margin:5px 15px 18px 15px; gap:8px; overflow-x:auto; padding:4px; scrollbar-width:none; }
+.nav-tabs { display:flex; margin:4px 12px 12px 12px; gap:6px; overflow-x:auto; padding:3px; scrollbar-width:none; }
 .nav-tabs::-webkit-scrollbar { display:none; }
-.tab-btn { flex:0 0 auto; border:1px solid var(--glass-border); background:var(--surface-ultra); padding:10px 16px; font-size:0.82rem; font-weight:700; color:var(--text-secondary); cursor:pointer; border-radius:20px; transition:all 0.3s; }
-.tab-btn.active { background:#ffffff; color:#05070f; border-color:#ffffff; box-shadow:0 4px 20px rgba(255,255,255,0.2); transform:translateY(-1px); }
-.main-content { padding:0 16px; flex-grow:1; display:flex; flex-direction:column; }
-.page { display:none; opacity:0; transition:opacity 0.3s ease; }
+.tab-btn { flex:0 0 auto; border:1px solid var(--glass-border); background:var(--surface-ultra); padding:7px 12px; font-size:0.72rem; font-weight:700; color:var(--text-secondary); cursor:pointer; border-radius:16px; transition:all 0.3s; }
+.tab-btn.active { background:#ffffff; color:#05070f; border-color:#ffffff; box-shadow:0 3px 12px rgba(255,255,255,0.15); transform:translateY(-1px); }
+.main-content { padding:0 16px; flex-grow:1; display:flex; flex-direction:column; overflow:hidden; }
+.page { display:none; opacity:0; }
 .page.active { display:block; opacity:1; }
+/* Swipe slide-in animations */
+.page.slide-in-left  { display:block; animation:slideInLeft  0.28s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+.page.slide-in-right { display:block; animation:slideInRight 0.28s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+.page.slide-out-left  { display:block; animation:slideOutLeft  0.22s ease-in forwards; }
+.page.slide-out-right { display:block; animation:slideOutRight 0.22s ease-in forwards; }
+@keyframes slideInLeft  { from{opacity:0;transform:translateX(55px);}  to{opacity:1;transform:translateX(0);} }
+@keyframes slideInRight { from{opacity:0;transform:translateX(-55px);} to{opacity:1;transform:translateX(0);} }
+@keyframes slideOutLeft  { from{opacity:1;transform:translateX(0);} to{opacity:0;transform:translateX(-40px);} }
+@keyframes slideOutRight { from{opacity:1;transform:translateX(0);} to{opacity:0;transform:translateX(40px);} }
 .app-card { background:var(--surface-ultra); border-radius:28px; padding:22px; margin-bottom:16px; border:1px solid var(--glass-border); box-shadow:0 12px 40px 0 rgba(0,0,0,0.4); position:relative; }
 .card-title { font-size:1.05rem; font-weight:800; margin:0 0 15px 0; display:flex; align-items:center; gap:8px; text-transform:uppercase; }
 .day-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed rgba(255,255,255,0.1); padding-bottom:12px; margin-bottom:12px; }
@@ -218,13 +227,13 @@ body.theme-sharingan .toast-notification-hub {
 .day-pill { display:inline-block; padding:3px 10px; border-radius:12px; background:var(--neon-green); color:#000; font-size:0.75rem; font-weight:700; margin-right:6px; }
 .day-pill-accent { background:var(--neon-gold); }
 .day-pill-info { background:var(--neon-cyan); color:#000; }
-.ceo-dashboard { background:linear-gradient(135deg, rgba(6,182,212,0.08), rgba(99,102,241,0.08)); border:1px solid rgba(6,182,212,0.15); border-radius:28px; padding:20px; margin-bottom:18px; }
-.ceo-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:12px; }
-.ceo-stat { background:rgba(0,0,0,0.25); border-radius:16px; padding:12px 8px; text-align:center; border:1px solid var(--glass-border); }
-.ceo-stat-val { font-size:1.1rem; font-weight:900; color:var(--neon-cyan); }
-.ceo-stat-lbl { font-size:0.65rem; color:var(--text-secondary); font-weight:700; text-transform:uppercase; margin-top:4px; }
-.ceo-overall-ring { position:relative; width:80px; height:80px; margin:0 auto 10px; }
-.ceo-overall-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:1.1rem; font-weight:900; }
+.ceo-dashboard { background:linear-gradient(135deg, rgba(6,182,212,0.08), rgba(99,102,241,0.08)); border:1px solid rgba(6,182,212,0.15); border-radius:20px; padding:14px; margin-bottom:14px; }
+.ceo-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px; }
+.ceo-stat { background:rgba(0,0,0,0.25); border-radius:12px; padding:8px 4px; text-align:center; border:1px solid var(--glass-border); }
+.ceo-stat-val { font-size:0.85rem; font-weight:800; color:var(--neon-cyan); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
+.ceo-stat-lbl { font-size:0.55rem; color:var(--text-secondary); font-weight:700; text-transform:uppercase; margin-top:3px; }
+.ceo-overall-ring { position:relative; width:70px; height:70px; margin:0 auto 8px; }
+.ceo-overall-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:0.95rem; font-weight:900; }
 .diet-check-wrap { display:flex; align-items:flex-start; gap:10px; cursor:pointer; }
 .diet-check-wrap input { width:18px; height:18px; accent-color:var(--neon-gold); margin-top:2px; flex-shrink:0; }
 .diet-check-wrap input:checked ~ .diet-text { text-decoration:line-through; opacity:0.4; }
@@ -558,12 +567,12 @@ body.theme-sharingan .toast-notification-hub {
 <!-- GLOW UP PAGE -->
 <div id="page-glowup" class="page active">
 <div class="ceo-dashboard">
-<div style="text-align:center; margin-bottom:4px;"><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700; text-transform:uppercase; letter-spacing:1px;">📊 CEO Daily Command Center</div></div>
+<div style="text-align:center; margin-bottom:4px;"><div style="font-size:0.62rem; color:var(--text-secondary); font-weight:700; text-transform:uppercase; letter-spacing:1px;">📊 CEO Daily Command Center</div></div>
 <div class="ceo-overall-ring">
-<svg width="80" height="80"><circle cx="40" cy="40" r="35" stroke="rgba(255,255,255,0.05)" stroke-width="6" fill="transparent"/>
-<circle id="ceoOverallRing" cx="40" cy="40" r="35" stroke="var(--neon-cyan)" stroke-width="6" fill="transparent" stroke-dasharray="220" stroke-dashoffset="220" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s ease; transform:rotate(-90deg); transform-origin:50% 50%;"/></svg>
+<svg width="70" height="70"><circle cx="35" cy="35" r="30" stroke="rgba(255,255,255,0.05)" stroke-width="5" fill="transparent"/>
+<circle id="ceoOverallRing" cx="35" cy="35" r="30" stroke="var(--neon-cyan)" stroke-width="5" fill="transparent" stroke-dasharray="188" stroke-dashoffset="188" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s ease; transform:rotate(-90deg); transform-origin:50% 50%;"/></svg>
 <div class="ceo-overall-text" id="ceoOverallText">0%</div></div>
-<div style="text-align:center; font-size:0.75rem; color:var(--neon-gold); font-weight:700; margin-bottom:12px;" id="ceoOverallLabel">System Initializing...</div>
+<div style="text-align:center; font-size:0.68rem; color:var(--neon-gold); font-weight:700; margin-bottom:10px;" id="ceoOverallLabel">System Initializing...</div>
 <div class="ceo-grid">
 <div class="ceo-stat"><div class="ceo-stat-val" id="ceoWater">0L</div><div class="ceo-stat-lbl">Water</div></div>
 <div class="ceo-stat"><div class="ceo-stat-val" id="ceoProtein">0g</div><div class="ceo-stat-lbl">Protein</div></div>
@@ -572,10 +581,10 @@ body.theme-sharingan .toast-notification-hub {
 <div class="ceo-stat"><div class="ceo-stat-val" id="ceoWeight">--</div><div class="ceo-stat-lbl">Weight</div></div>
 <div class="ceo-stat"><div class="ceo-stat-val" id="ceoSleep">--</div><div class="ceo-stat-lbl">Sleep</div></div>
 </div>
-<div style="margin-top:12px; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px; border:1px solid var(--glass-border);">
-<div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-secondary); font-weight:700;"><span>💰 Budget Left</span><span id="ceoBudget">₹0</span></div>
+<div style="margin-top:10px; background:rgba(0,0,0,0.2); border-radius:10px; padding:8px 10px; border:1px solid var(--glass-border);">
+<div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-secondary); font-weight:700;"><span>💰 Budget Left</span><span id="ceoBudget">₹0</span></div>
 </div>
-</div> <!-- ✅ இது CEO Dashboard-ஐ சரியாக மூடுகிறது -->
+</div>
 <!-- 👇👇👇 ITHU MUNNAADI PASTE PANNUNGA 👇👇👇 -->
 
 
@@ -1168,7 +1177,20 @@ function safeGetItem(key, defaultValue) {
 const startDate = new Date('2026-06-22T00:00:00');
 const daysOfWeek = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function getAppToday() { let actualToday = new Date(); if (actualToday.getTime() < startDate.getTime()) { let fakeDate = new Date(startDate); fakeDate.setHours(actualToday.getHours(), actualToday.getMinutes(), actualToday.getSeconds()); return fakeDate; } return actualToday; }
+// FIX 4: IST timezone-safe getAppToday — midnight rollover issue fix
+function getAppToday() {
+    // IST offset: +5:30 = 330 minutes — UTC-ல் இருந்து சரியான local date எடுக்கிறோம்
+    const now = new Date();
+    // Local midnight-ஐ basis-ஆ வச்சு date object create பண்றோம் (timezone safe)
+    const localDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                               now.getHours(), now.getMinutes(), now.getSeconds());
+    if(localDate.getTime() < startDate.getTime()) {
+        let fakeDate = new Date(startDate);
+        fakeDate.setHours(localDate.getHours(), localDate.getMinutes(), localDate.getSeconds());
+        return fakeDate;
+    }
+    return localDate;
+}
 function getIsoDateStr(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 let neuralAnimationId; // அனிமேஷனை கண்ட்ரோல் செய்ய
 let isAppVisible = true; // ஆப் திரையில் இருக்கிறதா என்று பார்க்க
@@ -1212,41 +1234,47 @@ let chatHistory = JSON.parse(localStorage.getItem('TOBI_chat_history')) || [];
 let GEMINI_API_KEY = localStorage.getItem('gemini_api_key') || null;
 
 // Gemini API-ஐ அழைக்கும் function (SECURITY FIXED)
-async function askGemini(prompt) {
+// FIX 1: askGemini now supports optional base64 image for Vision API
+async function askGemini(prompt, imageBase64 = null, imageMimeType = 'image/jpeg') {
     // 🔐 API Key check
     if (!GEMINI_API_KEY) {
         displayPremiumToastNotification("⚠️ API Key Missing!", "❌");
         triggerDeviceHapticPulse();
-        
-        // Ask user to add key in settings
         openModalWithHistory('aiEngineModal');
         document.getElementById('aiHeaderTitle').innerText = "🔑 SETUP REQUIRED";
         document.getElementById('aiTypingText').innerHTML = "⚠️ Gemini API Key இல்லை!\n\nSettings → API Key section-ல paste பண்ணுங்க.\n\n1. https://aistudio.google.com/app/apikey-ல போய் key generate செய்யுங்க\n2. Copy பண்ணி Settings-ல paste பண்ணுங்க\n3. மீண்டும் try பண்ணுங்க";
         document.getElementById('aiActionButtons').innerHTML = '<button class="ai-btn-close" onclick="closeModalAction(\'aiEngineModal\')">Understood</button>';
-        
         return "Please add Gemini API Key in Settings";
     }
-    
-    // சரியான URL மற்றும் மாடல் பெயர்: gemini-3.1-flash-lite
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
-    
+
+    // Vision API தேவைப்பட்டால் gemini-1.5-flash உபயோகி (image support உண்டு)
+    const model = imageBase64 ? 'gemini-1.5-flash' : 'gemini-2.0-flash-lite';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+
+    // parts array build பண்றோம் — image இருந்தா முதல்ல image, பிறகு text
+    const parts = [];
+    if (imageBase64) {
+        // base64 data URL-ல இருந்து "data:image/jpeg;base64," prefix நீக்கணும்
+        const pureBase64 = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+        parts.push({ inline_data: { mime_type: imageMimeType, data: pureBase64 } });
+    }
+    parts.push({ text: prompt });
+
     try {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
+            body: JSON.stringify({ contents: [{ parts }] })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.error) {
             console.error("Gemini API Error:", data.error);
             displayPremiumToastNotification("Invalid API Key!", "❌");
             return "API Error: " + data.error.message + "\n\nSettings-ல correct API Key add பண்ணுங்க.";
         }
-        
+
         return data.candidates[0].content.parts[0].text;
     } catch (error) {
         console.error("Network Error:", error);
@@ -1379,56 +1407,160 @@ function verifyGymLocation() { if(navigator.geolocation) { navigator.geolocation
 window.addEventListener('popstate', (e) => { const modals = document.querySelectorAll('.universal-modal, .ai-modal-overlay'); let modalClosed = false; modals.forEach(m => { if(m.style.display === 'flex' || m.style.display === 'block') { m.style.display = 'none'; modalClosed = true; } }); if(modalClosed) { history.pushState({app_running:true}, ""); } });
 function openModalWithHistory(modalId, displayType='flex') { document.querySelectorAll('.universal-modal, .ai-modal-overlay').forEach(m => m.style.display = 'none'); history.pushState({modalOpen:true}, ""); document.getElementById(modalId).style.display = displayType; }
 function closeModalAction(modalId) { document.getElementById(modalId).style.display = 'none'; if(history.state && history.state.modalOpen) { history.back(); } }
-function checkAndResetDailyTasks() { let appToday = getAppToday(); const todayDateStr = appToday.toDateString(); const lastOpenedDate = localStorage.getItem('last_opened_date'); if(lastOpenedDate !== todayDateStr) { ['t-d','t-w','t-g','t-oil','t-h1','t-h2','t-f1','t-f2','t-scrub','t-nail','t-cheat','t-lip','t-supp-1','t-supp-2','bio-1', 'bio-2', 'bio-3'].forEach(id => { localStorage.removeItem(id); if(document.getElementById(id)) document.getElementById(id).checked = false; }); const gymPrefixes = ['mon','tue','wed','thu','fri','sat','sun']; gymPrefixes.forEach(p => { for(let i=1;i<=8;i++) { localStorage.removeItem(`gym-${p}-${i}`); let cb=document.getElementById(`gym-${p}-${i}`); if(cb) cb.checked=false; } }); const days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']; days.forEach(d => { let list=customWorkouts[d]||[]; list.forEach(ex => { localStorage.removeItem(`cw_${d}_${ex.id}`); }); }); for(let i=1;i<=8;i++) { localStorage.removeItem(`diet_${todayDateStr}_${i}`); } localStorage.setItem('TOBI_water_intake_v6', 0); currentWater = 0; localStorage.setItem('last_opened_date', todayDateStr); } }
+// FIX: t-dresswash (Saturday) + t-dressiron (Sunday) added to reset list
+function checkAndResetDailyTasks() {
+    let appToday = getAppToday();
+    const todayDateStr = appToday.toDateString();
+    const lastOpenedDate = localStorage.getItem('last_opened_date');
+    if(lastOpenedDate !== todayDateStr) {
+        ['t-d','t-w','t-g','t-oil','t-h1','t-h2','t-f1','t-f2','t-scrub','t-nail','t-cheat','t-lip','t-supp-1','t-supp-2','t-dresswash','t-dressiron','bio-1','bio-2','bio-3'].forEach(id => {
+            localStorage.removeItem(id);
+            if(document.getElementById(id)) document.getElementById(id).checked = false;
+        });
+        const gymPrefixes = ['mon','tue','wed','thu','fri','sat','sun'];
+        gymPrefixes.forEach(p => {
+            for(let i=1;i<=8;i++) {
+                localStorage.removeItem(`gym-${p}-${i}`);
+                let cb = document.getElementById(`gym-${p}-${i}`);
+                if(cb) cb.checked = false;
+            }
+        });
+        const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+        days.forEach(d => {
+            let list = customWorkouts[d] || [];
+            list.forEach(ex => { localStorage.removeItem(`cw_${d}_${ex.id}`); });
+        });
+        for(let i=1;i<=8;i++) { localStorage.removeItem(`diet_${todayDateStr}_${i}`); }
+        localStorage.setItem('TOBI_water_intake_v6', 0);
+        currentWater = 0;
+        localStorage.setItem('last_opened_date', todayDateStr);
+    }
+}
 function triggerDeviceHapticPulse() { if("vibrate" in navigator) navigator.vibrate(12); }
 function displayPremiumToastNotification(msgText, iconToken='🔥') { const toast = document.getElementById('premiumAppToast'); document.getElementById('toastIconElement').innerText = iconToken; document.getElementById('toastMessageText').innerText = msgText; triggerDeviceHapticPulse(); toast.classList.add('active-toast'); setTimeout(() => { toast.classList.remove('active-toast'); }, 4200); }
 
-function switchPage(pageId) {
+// Page order for swipe direction detection
+const PAGE_ORDER = ['glowup','gym','diet','expense','sleep','notes','calendar'];
+let currentPageId = 'glowup';
+let isPageTransitioning = false;
+
+function switchPage(pageId, swipeDir) {
+    if(isPageTransitioning) return;
+    if(pageId === currentPageId) return;
+
     triggerDeviceHapticPulse();
-    // Remove active class from all pages - CSS handles display:none
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+    // Determine slide direction
+    const fromIdx = PAGE_ORDER.indexOf(currentPageId);
+    const toIdx   = PAGE_ORDER.indexOf(pageId);
+    // swipeDir override: 'left' = new page comes from right, 'right' = from left
+    let dir = swipeDir;
+    if(!dir) dir = (toIdx > fromIdx) ? 'left' : 'right';
+
+    const outClass  = dir === 'left'  ? 'slide-out-left'  : 'slide-out-right';
+    const inClass   = dir === 'left'  ? 'slide-in-left'   : 'slide-in-right';
+
+    const prevPage = document.getElementById('page-' + currentPageId);
+    const nextPage = document.getElementById('page-' + pageId);
+    if(!prevPage || !nextPage) return;
+
+    isPageTransitioning = true;
+
+    // Animate out current page
+    prevPage.classList.remove('active');
+    prevPage.classList.add(outClass);
+
+    // Animate in new page
+    nextPage.style.display = 'block';
+    nextPage.classList.remove('active','slide-in-left','slide-in-right');
+    nextPage.classList.add(inClass);
+
+    // Update tab highlight immediately
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    // Add active to selected page and tab
-    const selectedPage = document.getElementById('page-' + pageId);
-    if(selectedPage) selectedPage.classList.add('active');
     const selectedTab = document.getElementById('tab-' + pageId);
-    if(selectedTab) selectedTab.classList.add('active');
-    // Page-specific data load
-    if(pageId === 'glowup') {
-        renderCurrentDay();
-        loadBioStates();
-        renderWakeupLogs();
-        updateProgressBars();
-        renderTodayNaturalCare();
-        updateCEODashboard();
-        let cachedPred = localStorage.getItem('tobi_ai_predictions');
-        if(cachedPred) {
-            try {
-                let pred = JSON.parse(cachedPred);
-                if(pred.date === getAppToday().toDateString()) {
-                    if(document.getElementById('predictWeightVal')) document.getElementById('predictWeightVal').innerText = pred.weight.toFixed(1) + ' kg';
-                    if(document.getElementById('predictWeightBar')) document.getElementById('predictWeightBar').style.width = Math.min(100, ((pred.weight - 62) / 8) * 100) + '%';
-                    if(document.getElementById('predictBudgetVal')) document.getElementById('predictBudgetVal').innerText = pred.budget > 100 ? 'OVER ⚠️' : Math.round(pred.budget) + '%';
-                    if(document.getElementById('predictBudgetBar')) document.getElementById('predictBudgetBar').style.width = Math.min(100, pred.budget) + '%';
-                    if(document.getElementById('predictOvertrainVal')) document.getElementById('predictOvertrainVal').innerText = Math.round(pred.overtrain) + '%';
-                    if(document.getElementById('predictOvertrainBar')) document.getElementById('predictOvertrainBar').style.width = Math.min(100, pred.overtrain) + '%';
-                    if(document.getElementById('predictMuscleVal')) document.getElementById('predictMuscleVal').innerText = Math.round(pred.muscle) + '%';
-                    if(document.getElementById('predictMuscleBar')) document.getElementById('predictMuscleBar').style.width = Math.min(100, pred.muscle) + '%';
-                    if(pred.insight && document.getElementById('predictAiInsight')) { document.getElementById('predictAiInsight').innerText = pred.insight; document.getElementById('predictAiInsight').style.display = 'block'; }
-                }
-            } catch(e) {}
-        }
-        updatePredictiveAnalytics();
-        renderCardioLogs();
+    if(selectedTab) {
+        selectedTab.classList.add('active');
+        selectedTab.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
     }
-    if(pageId === 'gym') { initGymDay(); updateCalorieTargets(); renderWeightsCircleAndLists(); generateAdaptiveWorkout(); }
-    if(pageId === 'diet') { renderMealLogsAndMacros(); renderWater(); updateCalorieTargets(); loadDietCheckboxes(); generateSmartGrocery(); }
-    if(pageId === 'expense') { renderExpenses(); renderSavings(); }
-    if(pageId === 'sleep') { renderSleepLogs(); calculateSleepParagraphAnalysis(); }
-    if(pageId === 'notes') { renderReminders(); }
-    if(pageId === 'calendar') { renderMonthlyCalendar(); }
-    history.replaceState({app_running: true}, "");
+
+    setTimeout(() => {
+        // Cleanup outgoing page
+        prevPage.classList.remove(outClass);
+        prevPage.style.display = '';
+
+        // Settle incoming page
+        nextPage.classList.remove(inClass);
+        nextPage.classList.add('active');
+
+        currentPageId = pageId;
+        isPageTransitioning = false;
+
+        // Load page data
+        if(pageId === 'glowup') {
+            renderCurrentDay(); loadBioStates(); renderWakeupLogs();
+            updateProgressBars(); renderTodayNaturalCare(); updateCEODashboard();
+            let cachedPred = localStorage.getItem('tobi_ai_predictions');
+            if(cachedPred) { try { let pred = JSON.parse(cachedPred); if(pred.date === getAppToday().toDateString()) { if(document.getElementById('predictWeightVal')) document.getElementById('predictWeightVal').innerText = pred.weight.toFixed(1) + ' kg'; if(document.getElementById('predictWeightBar')) document.getElementById('predictWeightBar').style.width = Math.min(100, ((pred.weight - 62) / 8) * 100) + '%'; if(document.getElementById('predictBudgetVal')) document.getElementById('predictBudgetVal').innerText = pred.budget > 100 ? 'OVER ⚠️' : Math.round(pred.budget) + '%'; if(document.getElementById('predictBudgetBar')) document.getElementById('predictBudgetBar').style.width = Math.min(100, pred.budget) + '%'; if(document.getElementById('predictOvertrainVal')) document.getElementById('predictOvertrainVal').innerText = Math.round(pred.overtrain) + '%'; if(document.getElementById('predictOvertrainBar')) document.getElementById('predictOvertrainBar').style.width = Math.min(100, pred.overtrain) + '%'; if(document.getElementById('predictMuscleVal')) document.getElementById('predictMuscleVal').innerText = Math.round(pred.muscle) + '%'; if(document.getElementById('predictMuscleBar')) document.getElementById('predictMuscleBar').style.width = Math.min(100, pred.muscle) + '%'; if(pred.insight && document.getElementById('predictAiInsight')) { document.getElementById('predictAiInsight').innerText = pred.insight; document.getElementById('predictAiInsight').style.display = 'block'; } } } catch(e) {} }
+            updatePredictiveAnalytics(); renderCardioLogs();
+        }
+        if(pageId === 'gym')     { initGymDay(); updateCalorieTargets(); renderWeightsCircleAndLists(); generateAdaptiveWorkout(); }
+        if(pageId === 'diet')    { renderMealLogsAndMacros(); renderWater(); updateCalorieTargets(); loadDietCheckboxes(); generateSmartGrocery(); }
+        if(pageId === 'expense') { renderExpenses(); renderSavings(); }
+        if(pageId === 'sleep')   { renderSleepLogs(); calculateSleepParagraphAnalysis(); }
+        if(pageId === 'notes')   { renderReminders(); }
+        if(pageId === 'calendar'){ renderMonthlyCalendar(); }
+        history.replaceState({app_running: true}, "");
+    }, 280);
 }
+
+// ===== TOUCH SWIPE ENGINE =====
+(function initSwipeEngine() {
+    let touchStartX = 0, touchStartY = 0;
+    let touchStartTime = 0;
+    const SWIPE_THRESHOLD = 50;   // minimum px to count as swipe
+    const ANGLE_LIMIT = 35;       // max vertical degrees — prevent scroll conflicts
+    const TIME_LIMIT  = 400;      // max ms for swipe
+
+    function onTouchStart(e) {
+        // Modal/chat open ஆ இருந்தா swipe block பண்ணு
+        const anyModalOpen = [...document.querySelectorAll('.universal-modal, .ai-modal-overlay')]
+            .some(m => m.style.display === 'flex' || m.style.display === 'block');
+        if(anyModalOpen) return;
+        const chatOpen = document.getElementById('TOBIChatPanel')?.classList.contains('active');
+        if(chatOpen) return;
+
+        touchStartX    = e.touches[0].clientX;
+        touchStartY    = e.touches[0].clientY;
+        touchStartTime = Date.now();
+    }
+
+    function onTouchEnd(e) {
+        if(!touchStartX) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        const dt = Date.now() - touchStartTime;
+
+        // Reset
+        touchStartX = 0; touchStartY = 0;
+
+        if(dt > TIME_LIMIT) return;
+        if(Math.abs(dx) < SWIPE_THRESHOLD) return;
+        // Horizontal swipe-ஆ? (vertical scroll-ஐ தவிர்க்க)
+        if(Math.abs(dy) / Math.abs(dx) > Math.tan(ANGLE_LIMIT * Math.PI / 180)) return;
+
+        const curIdx  = PAGE_ORDER.indexOf(currentPageId);
+        if(dx < 0) {
+            // Swipe LEFT → next page
+            if(curIdx < PAGE_ORDER.length - 1) switchPage(PAGE_ORDER[curIdx + 1], 'left');
+        } else {
+            // Swipe RIGHT → prev page
+            if(curIdx > 0) switchPage(PAGE_ORDER[curIdx - 1], 'right');
+        }
+    }
+
+    document.addEventListener('touchstart', onTouchStart, { passive: true });
+    document.addEventListener('touchend',   onTouchEnd,   { passive: true });
+})();
 
 function handleBioChange(id) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(id).checked; localStorage.setItem(id, isChecked); updateCEODashboard(); }
 function loadBioStates() { ['bio-1','bio-2','bio-3'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).checked = localStorage.getItem(id) === 'true'; }); }
@@ -1475,7 +1607,28 @@ function addWakeupLog() {
     displayPremiumToastNotification(msg, icon); renderWakeupLogs(); updateCEODashboard();
 }
 function deleteWakeupLog(id) { triggerDeviceHapticPulse(); wakeupLogs = wakeupLogs.filter(w => w.id !== id); localStorage.setItem('person_wakeup_logs', JSON.stringify(wakeupLogs)); renderWakeupLogs(); updateCEODashboard(); }
-function renderWakeupLogs() { const container = document.getElementById('wakeupListContainer'); if(!container) return; container.innerHTML = ''; wakeupLogs.forEach(w => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = 'var(--neon-orange)'; li.innerHTML = `<div><b>${w.time} AM</b> - ${w.quality}<br><small style="color:var(--text-secondary)">${w.date}</small></div><button class="delete-btn" onclick="deleteWakeupLog(${w.id})">🗑️</button>`; container.appendChild(li); }); }
+// FIX 5: AM/PM hard-coded இருந்தது நீக்கி proper time display
+function renderWakeupLogs() {
+    const container = document.getElementById('wakeupListContainer');
+    if(!container) return;
+    container.innerHTML = '';
+    wakeupLogs.forEach(w => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.style.borderLeftColor = 'var(--neon-orange)';
+        // time format: HH:MM → AM/PM சரியா calculate பண்றோம்
+        let displayTime = w.time;
+        if(w.time && w.time.includes(':')) {
+            const [hStr, mStr] = w.time.split(':');
+            const h = parseInt(hStr);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+            displayTime = `${String(h12).padStart(2,'0')}:${mStr} ${ampm}`;
+        }
+        li.innerHTML = `<div><b>${displayTime}</b> - ${w.quality}<br><small style="color:var(--text-secondary)">${w.date}</small></div><button class="delete-btn" onclick="deleteWakeupLog(${w.id})">🗑️</button>`;
+        container.appendChild(li);
+    });
+}
 
 // --- UPDATED: Body Metrics Calculation with Monthly Memory ---
 function calcBodyMetrics() {
@@ -2049,37 +2202,51 @@ function analyzeMealInputFallback(input) {
     playAiTyping(aiReport, document.getElementById('aiTypingText'));
 }
 
+// FIX 3: push() மாத்தி unshift() — newest meal always first (consistent order)
 function confirmMealLog() {
     if(!pendingMealData) return;
-    mealLogs.push(pendingMealData);
+    mealLogs.unshift(pendingMealData);
     localStorage.setItem('person_meal_logs', JSON.stringify(mealLogs));
     document.getElementById('mealFoodInput').value = '';
+    pendingMealData = null;
     renderMealLogsAndMacros();
     calculateDietMacrosFromSchedule();
     updateCEODashboard();
     playSuccessSound();
 }
 
+// FIX 1b: Now passes image base64 + mime type to askGemini Vision API
 async function handleMealPhotoScanWithAI(input) {
     if(!input.files || !input.files[0]) return;
     const file = input.files[0];
+    const mimeType = file.type || 'image/jpeg'; // actual mime type எடுக்கிறோம்
     const reader = new FileReader();
     reader.onload = async (e) => {
-        const imgData = e.target.result;
+        const imgData = e.target.result; // "data:image/jpeg;base64,..." format
         document.getElementById('mealPhotoPreview').src = imgData;
         document.getElementById('mealPhotoPreview').style.display = 'block';
         document.getElementById('scannerAnalyzing').style.display = 'block';
         try {
-            const imagePrompt = `Analyze this food image and provide: FOOD_NAME: [name]\nPROTEIN_G: [grams]\nCARBS_G: [grams]\nFATS_G: [grams]\nCALORIES: [kcal]`;
-            const aiResponse = await askGemini(imagePrompt);
+            const imagePrompt = `You are a food nutrition expert. Analyze this food image carefully and respond ONLY in this exact format with no extra text:\nFOOD_NAME: [detected food name in English]\nPROTEIN_G: [protein in grams as number only]\nCARBS_G: [carbs in grams as number only]\nFATS_G: [fats in grams as number only]\nCALORIES: [calories as number only]`;
+            // FIX: imgData (base64) + mimeType இப்போ pass ஆகுது — Vision API work பண்ணும்
+            const aiResponse = await askGemini(imagePrompt, imgData, mimeType);
             const nutritionData = parseAINutritionResponse(aiResponse);
+            document.getElementById('scannerAnalyzing').style.display = 'none';
             if(nutritionData.success) {
                 document.getElementById('mealFoodInput').value = nutritionData.foodName;
                 let actualNow = new Date();
                 pendingMealData = { id: Date.now(), date: getAppToday().toDateString(), time: actualNow.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), foodText: nutritionData.foodName, p: nutritionData.protein, c: nutritionData.carbs, f: nutritionData.fats, cal: nutritionData.calories, rawInput: nutritionData.foodName, aiPowered: true, photoScanned: true };
-                confirmMealLog();
+                // FIX 3: unshift use பண்றோம் (newest first, consistent with rest of app)
+                mealLogs.unshift(pendingMealData);
+                localStorage.setItem('person_meal_logs', JSON.stringify(mealLogs));
+                pendingMealData = null;
+                renderMealLogsAndMacros();
+                updateCEODashboard();
+                displayPremiumToastNotification("📸 AI Photo Meal Logged!", "✅");
+                playSuccessSound();
+            } else {
+                displayPremiumToastNotification("Photo scan: format match இல்லை, retry பண்ணுங்க", "⚠️");
             }
-            document.getElementById('scannerAnalyzing').style.display = 'none';
         } catch(error) {
             console.error("Photo scan error:", error);
             document.getElementById('scannerAnalyzing').style.display = 'none';
@@ -2977,12 +3144,12 @@ function updateCEODashboard() {
     calculateDietMacrosFromSchedule(); document.getElementById('ceoProtein').innerText = currentLoggedProtein + 'g'; document.getElementById('ceoCals').innerText = currentLoggedCal;
     const todayName = daysOfWeek[appToday.getDay()]; 
     const ceoGymMap = {
-        'Monday': 'Chest & Tri',
-        'Tuesday': 'Back & Bi',
-        'Wednesday': 'Shoul & Abs',
-        'Thursday': 'Legs & Glu',
-        'Friday': 'Chest & Back',
-        'Saturday': 'Arms & Shoul',
+        'Monday': 'Chest+Tri',
+        'Tuesday': 'Back+Bi',
+        'Wednesday': 'Shoul+Abs',
+        'Thursday': 'Legs+Glutes',
+        'Friday': 'Chest+Back',
+        'Saturday': 'Arms+Shoul',
         'Sunday': 'Rest Day'
     };
     let gymLabel = ceoGymMap[todayName] || 'Rest Day'; 
@@ -2993,7 +3160,8 @@ function updateCEODashboard() {
     let scores = []; const glowCbs = document.querySelectorAll('#dayCard input[type="checkbox"]'); if(glowCbs.length > 0) { let gDone = 0; glowCbs.forEach(cb => { if(cb.checked) gDone++; }); scores.push((gDone/glowCbs.length)*100); } let bioDone = 0; ['bio-1','bio-2','bio-3'].forEach(id => { if(localStorage.getItem(id) === 'true') bioDone++; }); scores.push((bioDone/3)*100); scores.push((currentWater/4000)*100); let dietDone = 0; for(let i=1;i<=8;i++) { if(localStorage.getItem(`diet_${todayStr}_${i}`) === 'true') dietDone++; } scores.push((dietDone/8)*100); const activeCard = document.getElementById(`workout-${todayName}`); if(activeCard && todayName !== 'Sunday') { const gymCbs = activeCard.querySelectorAll('input[type="checkbox"]'); if(gymCbs.length > 0) { let gDone = 0; gymCbs.forEach(cb => { if(cb.checked) gDone++; }); scores.push((gDone/gymCbs.length)*100); } }  if(sleepLogs.length > 0 && sleepLogs[0].date === todayStr) scores.push(sleepLogs[0].score);
     let overall = scores.length > 0 ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0; if(overall > 100) overall = 100;
     document.getElementById('ceoOverallText').innerText = overall + '%'; document.getElementById('ceoOverallText').style.color = overall >= 80 ? 'var(--neon-green)' : (overall >= 50 ? 'var(--neon-gold)' : 'var(--neon-red)'); document.getElementById('ceoOverallLabel').innerText = overall >= 80 ? '🔥 Beast Mode Activated' : (overall >= 50 ? '⚡ Keep Pushing' : '⚠️ System Needs Attention');
-    const ring = document.getElementById('ceoOverallRing'); if(ring) { let circ = 220; ring.style.strokeDashoffset = circ - (overall/100)*circ; }
+    // FIX: ring circumference updated for r=30 → 2*π*30 ≈ 188
+    const ring = document.getElementById('ceoOverallRing'); if(ring) { let circ = 188; ring.style.strokeDashoffset = circ - (overall/100)*circ; }
 }
 async function runMonthlyAudit() {
     let appToday = getAppToday();
@@ -3890,18 +4058,18 @@ function playHapticSound() {
   playTone(1200, 'triangle', 0.03, 0.015);
 }
 
-// Override original triggerDeviceHapticPulse to add sound
+// FIX 2: Haptic override — try/catch guard சேர்க்கப்பட்டது, original call fail ஆனாலும் sound play ஆகும்
 const originalHaptic = triggerDeviceHapticPulse;
 triggerDeviceHapticPulse = function() {
-  originalHaptic();
+  try { originalHaptic(); } catch(e) { console.warn("Haptic pulse error:", e); }
   playHapticSound();
 };
 
 // Override switchPage to add click sound and check achievements
 const originalSwitchPage = switchPage;
-switchPage = function(pageId) {
+switchPage = function(pageId, swipeDir) {
   playClickSound();
-  originalSwitchPage(pageId);
+  originalSwitchPage(pageId, swipeDir);
   setTimeout(checkAchievements, 500);
 };
 
