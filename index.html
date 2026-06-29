@@ -885,39 +885,6 @@ body.theme-sharingan .toast-notification-hub {
 <div style="font-size:0.85rem; font-weight:800; color:var(--neon-purple); margin-bottom:6px;">🔍 Detected Items:</div><div id="photoScanDetected" style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:8px;"></div>
 <div style="display:flex; gap:10px; font-size:0.8rem; font-weight:700;"><span style="color:var(--neon-red)">P: <span id="photoScanP">0</span>g</span><span style="color:var(--neon-cyan)">C: <span id="photoScanC">0</span>g</span><span style="color:var(--neon-gold)">Cal: <span id="photoScanCal">0</span></span></div>
 <button class="btn-universal" style="background:var(--neon-purple); margin-top:10px; font-size:0.85rem; padding:10px;" onclick="confirmPhotoScan()">✅ Log This Meal</button></div></div>
-<!-- Custom Food DB Card Starts -->
-<div class="app-card" style="border-top:4px solid var(--neon-purple); margin-bottom:16px;">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 class="card-title" style="margin:0; color:var(--neon-purple);">➕ Custom Food DB</h3>
-    </div>
-    <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">புது உணவை ஒருமுறை Save பண்ணுங்க, TOBI ஞாபகம் வச்சுக்கும்:</p>
-    <div class="form-group"><input type="text" id="cfName" class="form-control" placeholder="Food Name (e.g. mutton biryani, paneer)"></div>
-    <div style="display:flex; gap:8px; margin-bottom:12px;">
-        <input type="number" id="cfProtein" class="custom-input w-box" placeholder="Pro (g)" style="flex:1;">
-        <input type="number" id="cfCarbs" class="custom-input w-box" placeholder="Carb (g)" style="flex:1;">
-        <input type="number" id="cfFats" class="custom-input w-box" placeholder="Fat (g)" style="flex:1;">
-        <input type="number" id="cfKcal" class="custom-input w-box" placeholder="Kcal" style="flex:1;">
-    </div>
-    <button class="btn-universal" style="background:var(--neon-purple); color:white; padding:10px;" onclick="saveCustomFood()">💾 Save to TOBI Memory</button>
-</div>
-<!-- Custom Food DB Card Ends -->
-
-<!-- Custom Foods List Display (Arrow Box Style) -->
-<div class="app-card" style="border-top:4px solid var(--neon-purple); margin-bottom:16px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleCustomFoodList()">
-        <h3 class="card-title" style="margin:0; color:var(--neon-purple);">📋 Saved Custom Foods ▾</h3>
-    </div>
-    <!-- இது ஆரம்பத்தில் மறைந்திருக்கும் -->
-    <ul class="list-container" id="customFoodListContainer" style="max-height:0; overflow:hidden; transition:max-height 0.3s ease; margin-top:0;">
-    </ul>
-</div>
-<!-- Meal Scanner -->
-<div class="app-card" style="border-top:4px solid var(--neon-cyan);">
-    <div style="display:flex; justify-content:space-between; align-items:center;"><h3 class="card-title" style="margin:0;">🔬 Meal Scanner</h3><button class="water-btn" onclick="generateGroceryList()" style="font-size:0.7rem;">🛒 Auto-Grocery</button></div>
-    <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Ippo enna saptenga nu type pannunga (Ex: 4 idli, 2 egg, 1 milk):</p>
-    <div class="form-group"><input type="text" id="mealFoodInput" class="form-control" placeholder="Type here..."></div>
-    <div style="display:flex; gap:10px;"><button class="btn-universal" style="background:var(--neon-cyan); color:black;" onclick="analyzeMealInputWithAI()">🤖 AI Analyze & Log</button><button class="btn-universal" style="background:var(--neon-purple); color:white; width:60px; font-size:1.2rem;" onclick="initVoiceCommand()">🎙️</button></div>
-</div>
 
 <!-- Water Matrix -->
 <div class="app-card" style="border-top:4px solid #0ea5e9; text-align:center;">
