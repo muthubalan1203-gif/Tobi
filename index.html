@@ -776,65 +776,6 @@ body.theme-sharingan .toast-notification-hub {
 <select id="workoutDaySelect" class="form-control" onchange="showSelectedWorkout(this.value)" style="font-weight:800; background:var(--surface-ultra); border-radius:16px; padding:12px; color:white;">
 <option value="Monday">Monday (Chest & Triceps)</option>
 <option value="Tuesday">Tuesday (Back & Biceps)</option>
-<option value="Wednesday">Wednesday (Yoga 🧘‍♂️)</option>
-<option value="Thursday">Thursday (Shoulder & Abs)</option>
-<option value="Friday">Friday (Legs & Glutes)</option>
-<option value="Saturday">Saturday (Yoga 🧘‍♂️)</option>
-<option value="Sunday">Sunday (Rest Day 🧘‍♂️)</option>
-</select></div>
-
-<!-- MONDAY: Chest & Triceps -->
-<div id="workout-Monday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-red);">
-<div class="workout-day-title">Monday Routine <span class="gym-target-tag">Chest & Triceps 💥</span></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-1" onchange="saveGymCheck('gym-mon-1')"><span>Dumbell Incline Bench Press</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-1')">🔍 Guide</span><span class="gym-sets-info">4 x 10</span></div><div id="tips-mon-1" class="exercise-popdown-details"><b>Execution:</b> 30-45° incline bench-ல் அமர்ந்து, டம்பல்ஸை நெஞ்சின் மேல் பகுதி அளவுக்கு இறக்கி மேல் நோக்கி அழுத்தவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-2" onchange="saveGymCheck('gym-mon-2')"><span>Dumbell Bench Press</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-2')">🔍 Guide</span><span class="gym-sets-info">4 x 10</span></div><div id="tips-mon-2" class="exercise-popdown-details"><b>Execution:</b> Flat bench-ல் படுத்து, டம்பல்ஸை நெஞ்சு level வரை இறக்கி, மேல் நோக்கி push பண்ணவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-3" onchange="saveGymCheck('gym-mon-3')"><span>Dumbell Decline Bench Press</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-3')">🔍 Guide</span><span class="gym-sets-info">3 x 10</span></div><div id="tips-mon-3" class="exercise-popdown-details"><b>Execution:</b> Decline bench-ல் படுத்து கால்களை fix செய்து, கீழ் நெஞ்சு level-ல் டம்பல்ஸை இறக்கி அழுத்தவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-4" onchange="saveGymCheck('gym-mon-4')"><span>Stright arm pullover</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-4')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-mon-4" class="exercise-popdown-details"><b>Execution:</b> Bench-ல் மல்லாந்து படுத்து, டம்பலை தலைக்கு பின்னால் கொண்டு போய் செஸ்ட் stretch feel பண்ணி மேலே கொண்டு வரவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-5" onchange="saveGymCheck('gym-mon-5')"><span>Fly</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-5')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-mon-5" class="exercise-popdown-details"><b>Execution:</b> Flat bench-ல் படுத்து, டம்பல்ஸை பக்கவாட்டில் விரித்து chest-ஐ stretch பண்ணி மேலே கொண்டு வரவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-6" onchange="saveGymCheck('gym-mon-6')"><span>Lying Hammer Press</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-6')">🔍 Guide</span><span class="gym-sets-info">3 x 10</span></div><div id="tips-mon-6" class="exercise-popdown-details"><b>Execution:</b> Neutral grip-ல் டம்பல்ஸை பிடித்து, நெஞ்சு வரை இறக்கி மேலே push பண்ணவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-7" onchange="saveGymCheck('gym-mon-7')"><span>Standing triceps Extension</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-7')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-mon-7" class="exercise-popdown-details"><b>Execution:</b> நின்று தலைக்கு மேல் டம்பலை பிடித்து, முழங்கைகளை மட்டும் மடக்கி நீட்டவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-8" onchange="saveGymCheck('gym-mon-8')"><span>Lying Triceps Extension</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-8')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-mon-8" class="exercise-popdown-details"><b>Execution:</b> Flat bench-ல் படுத்து டம்பல்ஸை தலைக்கு நோக்கி மடக்கி மீண்டும் நேராக்கவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-9" onchange="saveGymCheck('gym-mon-9')"><span>Bench dip</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-9')">🔍 Guide</span><span class="gym-sets-info">3 x Max</span></div><div id="tips-mon-9" class="exercise-popdown-details"><b>Execution:</b> Bench edge-ல் கைகளை வைத்து உடலை கீழ் நோக்கி dip செய்து மேலே எழவும்.</div></div>
-</div>
-
-<!-- TUESDAY: Back & Biceps -->
-<div id="workout-Tuesday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-cyan);">
-<div class="workout-day-title">Tuesday Routine <span class="gym-target-tag">Back & Biceps 🦍</span></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-1" onchange="saveGymCheck('gym-tue-1')"><span>One Arm Bent-Over Row</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-1')">🔍 Guide</span><span class="gym-sets-info">4 x 10</span></div><div id="tips-tue-1" class="exercise-popdown-details"><b>Execution:</b> Bench-ல் கை ஊன்றி, மறு கையால் டம்பலை இழுக்கவும். Back twist ஆகாமல் பார்க்கவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-2" onchange="saveGymCheck('gym-tue-2')"><span>Dumbell Bent Over Row With Chest</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-2')">🔍 Guide</span><span class="gym-sets-info">4 x 10</span></div><div id="tips-tue-2" class="exercise-popdown-details"><b>Execution:</b> Incline bench-ல் நெஞ்சை வைத்து படுத்து, இரண்டு டம்பல்களையும் இழுக்கவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-3" onchange="saveGymCheck('gym-tue-3')"><span>Incline Row</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-3')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-tue-3" class="exercise-popdown-details"><b>Execution:</b> Incline bench-ல் சாய்ந்து டம்பல்களை hips நோக்கி இழுக்கவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-4" onchange="saveGymCheck('gym-tue-4')"><span>Lever Bent over Row</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-4')">🔍 Guide</span><span class="gym-sets-info">4 x 10</span></div><div id="tips-tue-4" class="exercise-popdown-details"><b>Execution:</b> Chest-ஐ pad-ல் ஊன்றி barbell-ஐ இழுக்கவும். Elbows body-க்கு close-ஆக இருக்கட்டும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-5" onchange="saveGymCheck('gym-tue-5')"><span>Bar lateral Pulldown</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-5')">🔍 Guide</span><span class="gym-sets-info">4 x 10</span></div><div id="tips-tue-5" class="exercise-popdown-details"><b>Execution:</b> Wide grip-ல் bar பிடித்து நெஞ்சை நோக்கி கீழே இழுக்கவும். Lats-ஐ squeeze செய்யவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-6" onchange="saveGymCheck('gym-tue-6')"><span>Reverse-Grip Straight Back Seated high Row</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-6')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-tue-6" class="exercise-popdown-details"><b>Execution:</b> Underhand grip-ல் handle-ஐ upper abs-ஐ நோக்கி இழுக்கவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-7" onchange="saveGymCheck('gym-tue-7')"><span>Dumbell incline Curl</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-7')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-tue-7" class="exercise-popdown-details"><b>Execution:</b> 45° incline bench-ல் சாய்ந்து டம்பல்களை curl செய்யவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-8" onchange="saveGymCheck('gym-tue-8')"><span>Barbell Curl</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-8')">🔍 Guide</span><span class="gym-sets-info">3 x 10</span></div><div id="tips-tue-8" class="exercise-popdown-details"><b>Execution:</b> நின்று barbell-ஐ curl செய்யவும். Elbows இடுப்பில் fix பண்ணவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-9" onchange="saveGymCheck('gym-tue-9')"><span>Dumbell Standing one arm curl</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-9')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-tue-9" class="exercise-popdown-details"><b>Execution:</b> கையில் டம்பல் பிடித்து curl செய்யவும். Top-ல் rotate (supinate) செய்யவும்.</div></div>
-</div>
-
-<!-- WEDNESDAY: Yoga -->
-<div id="workout-Wednesday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-green);">
-    <div class="workout-day-title">Wednesday Yoga <span class="gym-target-tag">Recovery Focus 🧘‍♂️</span></div>
-    
-    <div class="gym-task-wrapper"><div class="gym-task-item"><span>Bhujangasana (Cobra Pose)</span><span class="guide-trigger-lbl" onclick="toggleDropdownTips('wed-yoga-1')">🔍 Guide</span><span class="gym-sets-info">3 x 30s</span></div><div id="tips-wed-yoga-1" class="exercise-popdown-details"><b>Execution:</b> குப்புறப் படுத்து, கைகளை ஊன்றி மார்பை மட்டும் மேலே தூக்கி முன்னோக்கிப் பார்க்கவும். செஸ்ட் தசைகள் விரியும்.</div></div>
-    
-    <div class="gym-task-wrapper"><div class="gym-task-item"><span>Ustrasana (Camel Pose)</span><span class="guide-trigger-lbl" onclick="toggleDropdownTips('wed-yoga-2')">🔍 Guide</span><span class="gym-sets-info">3 x 30s</span></div><div id="tips-wed-yoga-2" class="exercise-popdown-details"><b>Execution:</b> முட்டி போட்டு அமர்ந்து, பின்னோக்கிச் சாய்ந்து பாதங்களைத் தொடவும். தோள்பட்டை மற்றும் மார்புக்கு நல்லது.</div></div>
-    
-    <div class="gym-task-wrapper"><div class="gym-task-item"><span>Balasana (Child’s Pose)</span><span class="guide-trigger-lbl" onclick="toggleDropdownTips('wed-yoga-3')">🔍 Guide</span><span class="gym-sets-info">3 x 60s</span></div><div id="tips-wed-yoga-3" class="exercise-popdown-details"><b>Execution:</b> குதிகால் மீது அமர்ந்து குனிந்து நெற்றியைத் தரையில் வைக்கவும். முதுகு தசை ரிலாக்ஸ் ஆகும்.</div></div>
-    
-    <div class="gym-task-wrapper"><div class="gym-task-item"><span>Marjariasana (Cat-Cow)</span><span class="guide-trigger-lbl" onclick="toggleDropdownTips('wed-yoga-4')">🔍 Guide</span><span class="gym-sets-info">3 x 15 reps</span></div><div id="tips-wed-yoga-4" class="exercise-popdown-details"><b>Execution:</b> நான்கு கால்களில் நின்று, மூச்சை விடும்போது முதுகை வளைத்து, மூச்சை இழுக்கும்போது முதுகைத் தாழ்த்தவும்.</div></div>
-</div>
-
-<!-- THURSDAY: Shoulder & Abs -->
-<div id="workout-Thursday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-gold);">
-<div class="workout-day-title">Thursday Routine <span class="gym-target-tag">Shoulder & Abs 🎯</span></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-thu-1" onchange="saveGymCheck('gym-thu-1')"><span>Seated Shoulder Press</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('thu-1')">🔍 Guide</span><span class="gym-sets-info">4 x 10</span></div><div id="tips-thu-1" class="exercise-popdown-details"><b>Execution:</b> Bench-ல் அமர்ந்து டம்பல்களை ear level-ல் வைத்து, நேரே மேலே push பண்ணவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-thu-2" onchange="saveGymCheck('gym-thu-2')"><span>Front Raise</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('thu-2')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-thu-2" class="exercise-popdown-details"><b>Execution:</b> நின்று, நேரான கைகளால் டம்பல்களை shoulder height வரை தூக்கவும்.</div></div>
-<div id="workoutListContainer" style="display:none;">
-
-<div class="form-group" style="margin-bottom:16px;">
-<select id="workoutDaySelect" class="form-control" onchange="showSelectedWorkout(this.value)" style="font-weight:800; background:var(--surface-ultra); border-radius:16px; padding:12px; color:white;">
-<option value="Monday">Monday (Chest & Triceps)</option>
-<option value="Tuesday">Tuesday (Back & Biceps)</option>
 <option value="Wednesday">Wednesday (Yoga & Recovery 🧘‍♂️)</option>
 <option value="Thursday">Thursday (Shoulder & Abs)</option>
 <option value="Friday">Friday (Legs & Glutes)</option>
@@ -912,7 +853,10 @@ body.theme-sharingan .toast-notification-hub {
 <div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-sun-3" onchange="saveGymCheck('gym-sun-3')"><span>Light walking</span></label><span class="gym-sets-info">15 Mins</span></div></div>
 </div>
 
-</div>
+</div>                                                                                                                                                                            
+  
+
+
 
 
 <div class="app-card" style="border-left:5px solid var(--neon-cyan); margin-top:20px;">
