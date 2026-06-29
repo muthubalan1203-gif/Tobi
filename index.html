@@ -3447,44 +3447,46 @@ function runWimHofRound() {
     document.getElementById('breathCountdown').innerText = timeLeft;
     document.getElementById('breathRoundDisplay').innerText = `Breath: ${wimHofRound} / ${maxBreaths}`;
     
-    // முதல் செகண்ட் தொடங்கும் போது ஒரு High Pitch Beep சத்தம்
+    // Inhale-க்கு ஒரு சத்தம் (High Pitch)
     playTone(800, 'sine', 0.2, 0.05);
 
     wimHofInterval = setInterval(() => {
         timeLeft--;
         
         if (timeLeft <= 0) {
-            // Phase மாறும்போது...
+            // Phase மாறும்போது சத்தங்கள் (Sound Cues)
             if (currentPhase === 'inhale') {
                 currentPhase = 'hold';
                 document.getElementById('breathInstruction').innerText = 'HOLD';
                 document.getElementById('breathInstruction').style.color = 'var(--neon-gold)';
+                playTone(600, 'square', 0.2, 0.05); // Hold-க்கு ஒரு சத்தம்
             } else if (currentPhase === 'hold') {
                 currentPhase = 'exhale';
                 document.getElementById('breathInstruction').innerText = 'EXHALE';
                 document.getElementById('breathInstruction').style.color = 'var(--neon-red)';
+                playTone(400, 'sawtooth', 0.2, 0.05); // Exhale-க்கு ஒரு சத்தம்
             } else if (currentPhase === 'exhale') {
-                wimHofRound++;
-                if (wimHofRound > maxBreaths) {
-                    clearInterval(wimHofInterval);
-                    stopWimHof();
-                    playSuccessSound(); // முடித்தவுடன் ஒரு Success சத்தம்
-                    displayPremiumToastNotification("Breathing Protocol Complete! 🫁", "✅");
-                    return;
-                } else {
-                    currentPhase = 'inhale';
-                    document.getElementById('breathInstruction').innerText = 'INHALE';
-                    document.getElementById('breathInstruction').style.color = 'var(--neon-cyan)';
-                    document.getElementById('breathRoundDisplay').innerText = `Breath: ${wimHofRound} / ${maxBreaths}`;
-                }
+                // EXHALE முடிந்ததும் ஒரு 3 விநாடி இடைவெளி (Gap)
+                clearInterval(wimHofInterval); // தற்காலிகமாக நிறுத்திவிட்டு இடைவெளி தருகிறோம்
+                document.getElementById('breathInstruction').innerText = 'RELAX / GAP';
+                document.getElementById('breathCountdown').innerText = '...';
+                
+                setTimeout(() => {
+                    wimHofRound++;
+                    if (wimHofRound > maxBreaths) {
+                        stopWimHof();
+                        playSuccessSound();
+                        displayPremiumToastNotification("Breathing Protocol Complete! 🫁", "✅");
+                    } else {
+                        currentPhase = 'inhale';
+                        runWimHofRound(); // அடுத்த சுற்றை தொடங்கும்
+                    }
+                }, 3000); // இங்கே தான் அந்த 3 விநாடி இடைவெளி
+                return;
             }
             timeLeft = 4;
-            
-            // புது Phase (Inhale/Hold/Exhale) தொடங்கும்போது ஒரு அலர்ட் சத்தம் (High Pitch)
-            playTone(800, 'sine', 0.2, 0.05);
-            
         } else {
-            // விநாடிகள் ஓடும்போது ஒவ்வொரு செகண்டுக்கும் Tick சத்தம் (Low Pitch)
+            // விநாடிகள் ஓடும்போது Tick சத்தம்
             playTone(400, 'sine', 0.1, 0.02);
         }
         
@@ -4012,16 +4014,24 @@ function getAudioCtx() {
   }
   return audioCtx;
 }
-function playTone(freq, type, duration, vol=0.05) {
+// ஒலியை இன்னும் தெளிவாகவும் சத்தமாகவும் கேட்கும் வகையில் மாற்றுதல்
+function playTone(freq, type, duration, vol=0.5) { // vol=0.05 லிருந்து 0.5 ஆக மாற்றியுள்ளேன்
   const audioCtx = getAudioCtx();
   if(!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  
+  osc.type = type; 
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  
+  // ஒலியின் அளவை 0.2 வரை உயர்த்தியுள்ளேன்
   gain.gain.setValueAtTime(vol, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-  osc.connect(gain); gain.connect(audioCtx.destination);
-  osc.start(); osc.stop(audioCtx.currentTime + duration);
+  
+  osc.connect(gain); 
+  gain.connect(audioCtx.destination);
+  osc.start(); 
+  osc.stop(audioCtx.currentTime + duration);
 }
 function playBootSound(step) {
   playTone(200 + step*50, 'sine', 0.15, 0.03);
