@@ -684,15 +684,27 @@ body.theme-sharingan .toast-notification-hub {
 </div>
 
 <div class="app-card adaptive-workout-card" style="margin-bottom:16px;">
-<h3 class="card-title" style="color:var(--neon-red);">🧠 Adaptive Workout AI</h3>
-<p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">TOBI analyzes your Recovery, Sleep, Mood & Overload data:</p>
-<div class="adaptive-recovery-meter"><span style="font-size:0.75rem; color:var(--text-secondary); font-weight:700;">Recovery</span>
-<div class="adaptive-recovery-bar"><div id="adaptiveRecoveryFill" class="adaptive-recovery-fill" style="width:0%; background:var(--neon-red);"></div></div>
-<span id="adaptiveRecoveryPct" style="font-size:0.8rem; font-weight:900; color:var(--neon-red);">0%</span></div>
-<div class="adaptive-suggestion" id="adaptiveSuggestionText"><b>💡 TOBI:</b> Analyzing your biometric data... Please log sleep and mood for accurate suggestions.</div>
-<div style="margin-top:12px; display:flex; gap:8px;">
-<button class="btn-universal" style="background:var(--neon-cyan); color:black; font-size:0.85rem; padding:10px;" onclick="generateAdaptiveWorkout()">🔄 Generate Today's Plan</button>
-<button class="tts-btn" style="margin-top:0;" onclick="speakTamil(document.getElementById('adaptiveSuggestionText').innerText.replace(/<[^>]*>/g,''))">🔊</button></div>
+    <h3 class="card-title" style="color:var(--neon-red);">🧠 Adaptive Workout AI</h3>
+    <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">TOBI analyzes your Recovery, Sleep, Mood & Overload data:</p>
+    <div class="adaptive-recovery-meter">
+        <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:700;">Recovery</span>
+        <div class="adaptive-recovery-bar">
+            <div id="adaptiveRecoveryFill" class="adaptive-recovery-fill" style="width:0%; background:var(--neon-red);"></div>
+        </div>
+        <span id="adaptiveRecoveryPct" style="font-size:0.8rem; font-weight:900; color:var(--neon-red);">0%</span>
+    </div>
+    <div class="adaptive-suggestion" id="adaptiveSuggestionText"><b>💡 TOBI:</b> Analyzing your biometric data... Please log sleep and mood for accurate suggestions.</div>
+    
+    <div style="margin-top:12px; display:flex; gap:8px;">
+        <button class="btn-universal" style="background:var(--neon-cyan); color:black; font-size:0.85rem; padding:10px;" onclick="generateAdaptiveWorkout()">🔄 Generate Today's Plan</button>
+        <button class="tts-btn" style="margin-top:0;" onclick="speakTamil(document.getElementById('adaptiveSuggestionText').innerText.replace(/<[^>]*>/g,''))">🔊</button>
+    </div>
+
+    <!-- Emergency Recovery Trigger Button -->
+    <div style="margin-top:12px; border-top:1px dashed rgba(239,68,68,0.3); padding-top:12px;">
+        <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">Missed a workout? Let AI re-schedule your week:</p>
+        <button class="btn-universal" style="background:transparent; border:1px solid var(--neon-red); color:var(--neon-red); font-size:0.85rem; padding:10px; width: 100%;" onclick="triggerEmergencyRecovery()">🚨 Emergency Recovery Trigger</button>
+    </div>
 </div>
 
 <div class="app-card" style="border-top:4px solid var(--neon-purple);">
@@ -1121,7 +1133,55 @@ function getMissedGymDays(daysToLookBack) {
     }
     return missedCount;
 }
+// ==========================================
+// 🚨 EMERGENCY RECOVERY PROTOCOL AI
+// ==========================================
+function triggerEmergencyRecovery() {
+    triggerDeviceHapticPulse();
+    let appToday = getAppToday();
+    let todayName = daysOfWeek[appToday.getDay()];
+    let todayStr = appToday.toDateString();
 
+    // இன்று ஜிம் சென்றாரா இல்லையா என்பதை செக் செய்வது
+    let gymStatus = localStorage.getItem(`gym_done_${todayStr}`);
+
+    let recoveryPlan = "";
+    let recoveryTitle = "🚨 EMERGENCY RECOVERY PROTOCOL";
+
+    if (gymStatus === 'true') {
+        recoveryPlan = "முத்துபாலன், நீங்கள் இன்று ஏற்கனவே ஜிம் சென்றுவிட்டீர்கள்! உங்களுக்கு Emergency Recovery தேவையில்லை. மாஸ் பண்ணுங்க! 🔥";
+    } else {
+        // ஜிம் போகாத நாளுக்கு ஏற்றவாறு AI பிளானை மாற்றுவது
+        recoveryPlan = `⚠️ TOBI SYSTEM ALERT: ${todayName} Workout Missed!\n\n`;
+        recoveryPlan += `கவலை வேண்டாம் முத்துபாலன்! ஒரு நாள் தவறினாலும் Consistency கெடாமல் இருக்க, உங்களின் இந்த வார பிளானை நான் மாற்றி அமைத்துள்ளேன்:\n\n`;
+
+        if (todayName === 'Monday') {
+            recoveryPlan += "👉 **நாளை (Tuesday):** Chest, Triceps & Back (Combined Upper Body)\n👉 **புதன் (Wednesday):** Biceps & Yoga\n";
+        } else if (todayName === 'Tuesday') {
+            recoveryPlan += "👉 **நாளை (Wednesday):** Back & Biceps (நாளை Yoga-வை கேன்சல் செய்துவிடுங்கள்)\n👉 **வியாழன் (Thursday):** Shoulder & Abs\n";
+        } else if (todayName === 'Thursday') {
+            recoveryPlan += "👉 **நாளை (Friday):** Legs, Glutes & Shoulder (Combined)\n👉 **சனி (Saturday):** Active Yoga Recovery\n";
+        } else if (todayName === 'Friday') {
+            recoveryPlan += "👉 **நாளை (Saturday):** Legs & Glutes (நாளை Yoga-வை கேன்சல் செய்துவிடுங்கள்)\n";
+        } else if (todayName === 'Wednesday' || todayName === 'Saturday') {
+            recoveryPlan += "👉 **இன்று Yoga நாள் தான்!** ஜிம் மிஸ் ஆனது பற்றி கவலை வேண்டாம். வீட்டிலேயே 10 நிமிடம் Stretching மட்டும் செய்யுங்கள்.\n";
+        } else {
+            recoveryPlan += "👉 **நாளை:** இன்றைய ஒர்க்அவுட்டை நாளைக்கு மாற்றிச் செய்யுங்கள். ஞாயிறு (Sunday) ரெஸ்ட் எடுப்பதற்குப் பதிலாக அன்றும் ஒரு சின்ன செஷன் செய்யலாம்.\n";
+        }
+
+        recoveryPlan += "\n💡 **TOBI ADVICE:** நீங்கள் இன்று எந்த உடல் உழைப்பும் செய்யாததால், உங்கள் Diet-ல் இன்று கார்போஹைட்ரேட் (Carbs) அளவை 20% குறைத்துக் கொள்ளவும்.";
+
+        // Recovery Active என சேமிப்பது
+        localStorage.setItem(`recovery_active_${todayStr}`, 'true');
+    }
+
+    // AI Modal-ஐ ஓபன் செய்து அனிமேஷனுடன் காட்டுவது
+    openModalWithHistory('aiEngineModal');
+    document.getElementById('aiHeaderTitle').innerText = recoveryTitle;
+    document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-red); color:white;" onclick="closeModalAction('aiEngineModal')">Acknowledge Protocol</button>`;
+
+    playAiTyping(recoveryPlan, document.getElementById('aiTypingText'));
+}
 function logGymAttendance(didGo) {
     // இன்றைய தேதியை எடுப்பது
     let appToday = getAppToday();
