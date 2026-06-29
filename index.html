@@ -3448,7 +3448,7 @@ function runWimHofRound() {
     document.getElementById('breathRoundDisplay').innerText = `Breath: ${wimHofRound} / ${maxBreaths}`;
     
     // Inhale-க்கு ஒரு சத்தம் (High Pitch)
-    playTone(800, 'sine', 0.2, 0.7);
+    playTone(800, 'sine', 0.2, 2.5);
 
     wimHofInterval = setInterval(() => {
         timeLeft--;
@@ -3459,12 +3459,12 @@ function runWimHofRound() {
                 currentPhase = 'hold';
                 document.getElementById('breathInstruction').innerText = 'HOLD';
                 document.getElementById('breathInstruction').style.color = 'var(--neon-gold)';
-                playTone(600, 'square', 0.2, 0.7); // Hold-க்கு ஒரு சத்தம்
+                playTone(600, 'square', 0.2, 2.5); // Hold-க்கு ஒரு சத்தம்
             } else if (currentPhase === 'hold') {
                 currentPhase = 'exhale';
                 document.getElementById('breathInstruction').innerText = 'EXHALE';
                 document.getElementById('breathInstruction').style.color = 'var(--neon-red)';
-                playTone(400, 'sawtooth', 0.2, 0.7); // Exhale-க்கு ஒரு சத்தம்
+                playTone(400, 'sawtooth', 0.2, 2.5); // Exhale-க்கு ஒரு சத்தம்
             } else if (currentPhase === 'exhale') {
                 // EXHALE முடிந்ததும் ஒரு 3 விநாடி இடைவெளி (Gap)
                 clearInterval(wimHofInterval); // தற்காலிகமாக நிறுத்திவிட்டு இடைவெளி தருகிறோம்
@@ -3487,7 +3487,7 @@ function runWimHofRound() {
             timeLeft = 4;
         } else {
             // விநாடிகள் ஓடும்போது Tick சத்தம்
-            playTone(400, 'sine', 0.1, 0.7);
+            playTone(400, 'sine', 0.1, 2.5);
         }
         
         document.getElementById('breathCountdown').innerText = timeLeft;
@@ -4015,7 +4015,7 @@ function getAudioCtx() {
   return audioCtx;
 }
 // ஒலியை இன்னும் தெளிவாகவும் சத்தமாகவும் கேட்கும் வகையில் மாற்றுதல்
-function playTone(freq, type, duration, vol=0.7) { // vol=0.05 லிருந்து 0.5 ஆக மாற்றியுள்ளேன்
+function playTone(freq, type, duration, vol=2.5) { // vol=0.05 லிருந்து 0.5 ஆக மாற்றியுள்ளேன்
   const audioCtx = getAudioCtx();
   if(!audioCtx) return;
   const osc = audioCtx.createOscillator();
