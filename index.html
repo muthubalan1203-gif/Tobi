@@ -571,24 +571,41 @@ body.theme-sharingan .toast-notification-hub {
 <!-- GLOW UP PAGE -->
 <div id="page-glowup" class="page active">
 <div class="ceo-dashboard">
-<div style="text-align:center; margin-bottom:4px;"><div style="font-size:0.62rem; color:var(--text-secondary); font-weight:700; text-transform:uppercase; letter-spacing:1px;">📊 CEO Daily Command Center</div></div>
-<div class="ceo-overall-ring">
-<svg width="70" height="70"><circle cx="35" cy="35" r="30" stroke="rgba(255,255,255,0.05)" stroke-width="5" fill="transparent"/>
-<circle id="ceoOverallRing" cx="35" cy="35" r="30" stroke="var(--neon-cyan)" stroke-width="5" fill="transparent" stroke-dasharray="188" stroke-dashoffset="188" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s ease; transform:rotate(-90deg); transform-origin:50% 50%;"/></svg>
-<div class="ceo-overall-text" id="ceoOverallText">0%</div></div>
-<div style="text-align:center; font-size:0.68rem; color:var(--neon-gold); font-weight:700; margin-bottom:10px;" id="ceoOverallLabel">System Initializing...</div>
-<div class="ceo-grid">
-<div class="ceo-stat"><div class="ceo-stat-val" id="ceoWater">0L</div><div class="ceo-stat-lbl">Water</div></div>
-<div class="ceo-stat"><div class="ceo-stat-val" id="ceoProtein">0g</div><div class="ceo-stat-lbl">Protein</div></div>
-<div class="ceo-stat"><div class="ceo-stat-val" id="ceoCals">0</div><div class="ceo-stat-lbl">Kcal</div></div>
-<div class="ceo-stat"><div class="ceo-stat-val" id="ceoGym">--</div><div class="ceo-stat-lbl">Today's Gym</div></div>
-<div class="ceo-stat"><div class="ceo-stat-val" id="ceoWeight">--</div><div class="ceo-stat-lbl">Weight</div></div>
-<div class="ceo-stat"><div class="ceo-stat-val" id="ceoSleep">--</div><div class="ceo-stat-lbl">Sleep</div></div>
+    <div style="text-align:center; margin-bottom:4px;">
+        <div style="font-size:0.62rem; color:var(--text-secondary); font-weight:700; text-transform:uppercase; letter-spacing:1px;">📊 CEO Daily Command Center</div>
+    </div>
+    
+    <!-- Energy Matrix Score Visualization -->
+    <div class="ceo-overall-ring">
+        <svg width="70" height="70">
+            <circle cx="35" cy="35" r="30" stroke="rgba(255,255,255,0.05)" stroke-width="5" fill="transparent"/>
+            <circle id="ceoOverallRing" cx="35" cy="35" r="30" stroke="var(--neon-cyan)" stroke-width="5" fill="transparent" stroke-dasharray="188" stroke-dashoffset="188" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s ease; transform:rotate(-90deg); transform-origin:50% 50%;"/>
+        </svg>
+        <div class="ceo-overall-text" id="ceoOverallText">0%</div>
+    </div>
+    <div style="text-align:center; font-size:0.68rem; color:var(--neon-gold); font-weight:700; margin-bottom:10px;" id="ceoOverallLabel">System Initializing...</div>
+
+    <!-- Stats Grid -->
+    <div class="ceo-grid">
+        <div class="ceo-stat"><div class="ceo-stat-val" id="ceoWater">0L</div><div class="ceo-stat-lbl">Water</div></div>
+        <div class="ceo-stat"><div class="ceo-stat-val" id="ceoProtein">0g</div><div class="ceo-stat-lbl">Protein</div></div>
+        <div class="ceo-stat"><div class="ceo-stat-val" id="ceoCals">0</div><div class="ceo-stat-lbl">Kcal</div></div>
+        <div class="ceo-stat"><div class="ceo-stat-val" id="ceoGym">--</div><div class="ceo-stat-lbl">Today's Gym</div></div>
+        <div class="ceo-stat"><div class="ceo-stat-val" id="ceoWeight">--</div><div class="ceo-stat-lbl">Weight</div></div>
+        <div class="ceo-stat"><div class="ceo-stat-val" id="ceoSleep">--</div><div class="ceo-stat-lbl">Sleep</div></div>
+    </div>
+
+    <!-- Budget Row -->
+    <div style="margin-top:10px; background:rgba(0,0,0,0.2); border-radius:10px; padding:8px 10px; border:1px solid var(--glass-border);">
+        <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-secondary); font-weight:700;"><span>💰 Budget Left</span><span id="ceoBudget">₹0</span></div>
+    </div>
+
+    <!-- New Energy Matrix AI Button -->
+    <div style="margin-top: 15px;">
+        <button class="btn-universal" style="background:var(--neon-purple); color:white; padding:10px; font-size:0.75rem; width:100%; border-radius:12px;" onclick="calculateLifeEnergyMatrix()">⚡ Calculate Life Energy Score</button>
+    </div>
 </div>
-<div style="margin-top:10px; background:rgba(0,0,0,0.2); border-radius:10px; padding:8px 10px; border:1px solid var(--glass-border);">
-<div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-secondary); font-weight:700;"><span>💰 Budget Left</span><span id="ceoBudget">₹0</span></div>
-</div>
-</div>
+
 <!-- 👇👇👇 ITHU MUNNAADI PASTE PANNUNGA 👇👇👇 -->
 
 
@@ -1765,6 +1782,45 @@ function loadBodyMetrics() {
         if(savedTdee) document.getElementById('tdeeDisplay').innerText = savedTdee + " Kcal";
     }
 }
+async function calculateLifeEnergyMatrix() {
+    triggerDeviceHapticPulse();
+    
+    // 1. ஆப்பில் உள்ள அனைத்து தரவுகளையும் திரட்டுதல்
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
+    
+    let dailyData = {
+        date: todayStr,
+        tasksCompleted: document.querySelectorAll('#dayCard input:checked').length,
+        gymStats: localStorage.getItem('gym_streak') || 0,
+        waterIntake: (currentWater / 1000).toFixed(1) + "L",
+        dietMacros: { protein: currentLoggedProtein, carbs: currentLoggedCarbs, cal: currentLoggedCal },
+        sleepScore: sleepLogs.length > 0 ? sleepLogs[0].score : 50,
+        mood: JSON.parse(localStorage.getItem('gym_moods') || '{}')[todayStr] || "Normal"
+    };
+
+    // 2. AI-க்கான கட்டளை (Prompt)
+    let prompt = `
+    நீ முத்துபாலனின் AI Life Coach (TOBI). கீழே உள்ள தரவுகளைக் கொண்டு, 0 முதல் 100 வரை ஒரு 'Life Energy Score'-ஐ கணக்கிடு.
+    அதே சமயம், அவன் செய்த வேலைகளையும் (Tasks), ஜிம் ஒர்க்அவுட்டையும், டயட்டையும் அனலைஸ் செய்து ஒரு ஆழமான பின்னூட்டம் (Feedback) கொடு.
+    
+    தரவு (Data): ${JSON.stringify(dailyData)}
+    
+    பதிலை கீழே உள்ள பார்மட்டில் மட்டும் கொடு:
+    SCORE: [0-100]
+    ANALYSIS: [ஒரு பாராவில் ஆழமான அனாலிசிஸ் - தமிழ்ல]
+    SUGGESTION: [நாளைக்கு எதை மாற்றினால் ஸ்கோர் கூடும்? - தமிழ்ல]
+    `;
+
+    openModalWithHistory('aiEngineModal');
+    document.getElementById('aiHeaderTitle').innerText = "⚡ TOBI LIFE ENERGY MATRIX";
+    document.getElementById('aiTypingText').innerHTML = "Calculating your energy levels...";
+
+    // 3. AI அனாலிசிஸ்
+    let aiResponse = await askGemini(prompt);
+    playAiTyping(aiResponse, document.getElementById('aiTypingText'));
+  }
+  
 function logGymMood(mood, elem) { 
     let appToday = getAppToday(); 
     let todayStr = appToday.toDateString(); 
