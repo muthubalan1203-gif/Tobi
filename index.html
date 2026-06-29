@@ -759,10 +759,10 @@ body.theme-sharingan .toast-notification-hub {
 <select id="workoutDaySelect" class="form-control" onchange="showSelectedWorkout(this.value)" style="font-weight:800; background:var(--surface-ultra); border-radius:16px; padding:12px; color:white;">
 <option value="Monday">Monday (Chest & Triceps)</option>
 <option value="Tuesday">Tuesday (Back & Biceps)</option>
-<option value="Wednesday">Wednesday (Yoga)</option>
+<option value="Wednesday">Wednesday (Yoga 🧘‍♂️)</option>
 <option value="Thursday">Thursday (Shoulder & Abs)</option>
-<option value="Friday">Friday (Leg and Glutes)</option>
-<option value="Saturday">Saturday (Yoga)</option>
+<option value="Friday">Friday (Legs & Glutes)</option>
+<option value="Saturday">Saturday (Yoga 🧘‍♂️)</option>
 <option value="Sunday">Sunday (Rest Day 🧘‍♂️)</option>
 </select></div>
 
@@ -821,7 +821,7 @@ body.theme-sharingan .toast-notification-hub {
 
 <!-- FRIDAY: Leg and Glutes -->
 <div id="workout-Friday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-orange);">
-<div class="workout-day-title">Friday Routine <span class="gym-target-tag">Leg and Glutes 🦵</span></div>
+<div class="workout-day-title">Friday Routine <span class="gym-target-tag">Legs & Glutes 🦵</span></div>
 <div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-fri-1" onchange="saveGymCheck('gym-fri-1')"><span>Sit (Squat Hold)</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('fri-1')">🔍 Guide</span><span class="gym-sets-info">3 x 60 sec</span></div><div id="tips-fri-1" class="exercise-popdown-details"><b>Execution:</b> Deep squat position-ல் அமர்ந்து hold பண்ணவும்.</div></div>
 <div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-fri-2" onchange="saveGymCheck('gym-fri-2')"><span>Dumbell Walking Lunge</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('fri-2')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-fri-2" class="exercise-popdown-details"><b>Execution:</b> முன்னே அடி வைத்து, back knee தரையைத் தொட குனிந்து எழவும்.</div></div>
 <div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-fri-3" onchange="saveGymCheck('gym-fri-3')"><span>Dumbell Spilit Squat</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('fri-3')">🔍 Guide</span><span class="gym-sets-info">3 x 10</span></div><div id="tips-fri-3" class="exercise-popdown-details"><b>Execution:</b> ஒரு கால் முன்னே இருக்க lunge position-ல் நின்று குனிந்து எழவும்.</div></div>
@@ -1144,17 +1144,19 @@ function triggerEmergencyRecovery() {
         recoveryPlan += `கவலை வேண்டாம் முத்துபாலன்! ஒரு நாள் தவறினாலும் Consistency கெடாமல் இருக்க, உங்களின் இந்த வார பிளானை நான் மாற்றி அமைத்துள்ளேன்:\n\n`;
 
         if (todayName === 'Monday') {
-            recoveryPlan += "👉 **நாளை (Tuesday):** Chest, Triceps & Back (Combined Upper Body)\n👉 **புதன் (Wednesday):** Biceps & Yoga\n";
+            recoveryPlan += "👉 **நாளை (Tuesday):** Back & Biceps (scheduled-ஐ continue பண்ணுங்க)\n👉 **மாற்று:** இன்றைய Chest & Triceps-ஐ Saturday Yoga-க்கு பதிலாக செய்யுங்கள்.\n";
         } else if (todayName === 'Tuesday') {
-            recoveryPlan += "👉 **நாளை (Wednesday):** Back & Biceps (நாளை Yoga-வை கேன்சல் செய்துவிடுங்கள்)\n👉 **வியாழன் (Thursday):** Shoulder & Abs\n";
+            recoveryPlan += "👉 **நாளை (Wednesday):** Yoga day — இன்றைய Back & Biceps-ஐ Thursday-க்கு shift செய்யுங்கள்.\n👉 **வியாழன் (Thursday):** Back & Biceps + Shoulder & Abs (combined)\n";
+        } else if (todayName === 'Wednesday') {
+            recoveryPlan += "👉 **இன்று Yoga நாள்!** ஜிம் workout இல்லை, Yoga/Stretching மட்டும். கவலை வேண்டாம்.\n";
         } else if (todayName === 'Thursday') {
-            recoveryPlan += "👉 **நாளை (Friday):** Legs, Glutes & Shoulder (Combined)\n👉 **சனி (Saturday):** Active Yoga Recovery\n";
+            recoveryPlan += "👉 **நாளை (Friday):** Legs & Glutes (scheduled-ஐ continue பண்ணுங்கள்)\n👉 **மாற்று:** இன்றைய Shoulder & Abs-ஐ Saturday Yoga-க்கு பதிலாக செய்யலாம்.\n";
         } else if (todayName === 'Friday') {
-            recoveryPlan += "👉 **நாளை (Saturday):** Legs & Glutes (நாளை Yoga-வை கேன்சல் செய்துவிடுங்கள்)\n";
-        } else if (todayName === 'Wednesday' || todayName === 'Saturday') {
-            recoveryPlan += "👉 **இன்று Yoga நாள் தான்!** ஜிம் மிஸ் ஆனது பற்றி கவலை வேண்டாம். வீட்டிலேயே 10 நிமிடம் Stretching மட்டும் செய்யுங்கள்.\n";
+            recoveryPlan += "👉 **நாளை (Saturday):** Yoga day — இன்றைய Legs & Glutes-ஐ Sunday Rest-க்கு பதிலாக செய்யலாம்.\n";
+        } else if (todayName === 'Saturday') {
+            recoveryPlan += "👉 **இன்று Yoga நாள்!** Yoga/Stretching மட்டும். ஞாயிறு Rest day-ல் extra stretching செய்யலாம்.\n";
         } else {
-            recoveryPlan += "👉 **நாளை:** இன்றைய ஒர்க்அவுட்டை நாளைக்கு மாற்றிச் செய்யுங்கள். ஞாயிறு (Sunday) ரெஸ்ட் எடுப்பதற்குப் பதிலாக அன்றும் ஒரு சின்ன செஷன் செய்யலாம்.\n";
+            recoveryPlan += "👉 **நாளை:** இன்றைய ஒர்க்அவுட்டை நாளைக்கு மாற்றிச் செய்யுங்கள். Sunday Rest-ஐ use பண்ணுங்கள்.\n";
         }
 
         recoveryPlan += "\n💡 **TOBI ADVICE:** நீங்கள் இன்று எந்த உடல் உழைப்பும் செய்யாததால், உங்கள் Diet-ல் இன்று கார்போஹைட்ரேட் (Carbs) அளவை 20% குறைத்துக் கொள்ளவும்.";
@@ -1308,7 +1310,7 @@ async function askGemini(prompt, imageBase64 = null, imageMimeType = 'image/jpeg
     }
 
     // Vision API தேவைப்பட்டால் gemini-1.5-flash உபயோகி (image support உண்டு)
-    const model = imageBase64 ? 'gemini-3.5-flash' : 'gemini-3.1-flash-lite';
+    const model = imageBase64 ? 'gemini-1.5-flash' : 'gemini-2.0-flash-lite';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
     // parts array build பண்றோம் — image இருந்தா முதல்ல image, பிறகு text
@@ -1852,7 +1854,7 @@ function renderCustomWorkouts() {
 function handleCustomGymCheck(day, id) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(`cw_${day}_${id}`).checked; localStorage.setItem(`cw_${day}_${id}`, isChecked); renderCustomWorkouts(); calculateGymStreak(); updateCEODashboard(); }
 function deleteCustomWorkout(day, id) { customWorkouts[day] = customWorkouts[day].filter(x => x.id !== id); localStorage.setItem('custom_workouts', JSON.stringify(customWorkouts)); renderCustomWorkouts(); calculateGymStreak(); updateCEODashboard(); }
 function saveGymCheck(id) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(id).checked; localStorage.setItem(id, isChecked); calculateGymStreak(); updateCEODashboard(); }
-function calculateGymStreak() { let appToday = getAppToday(); let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list')) || {}; const todayStr = appToday.toDateString(); const todayName = daysOfWeek[appToday.getDay()]; const activeCard = document.getElementById(`workout-${todayName}`); let allDone = true; let dayHasWorkout = false; if(activeCard) { const checkboxes = activeCard.querySelectorAll('input[type="checkbox"]'); if(checkboxes.length > 0) { dayHasWorkout = true; checkboxes.forEach(cb => { if(!cb.checked) allDone = false; }); if(allDone) loggedStreakDays[todayStr] = true; else delete loggedStreakDays[todayStr]; } else { dayHasWorkout = false; allDone = false; } } else { dayHasWorkout = false; allDone = false; } if(!dayHasWorkout && todayName === 'Sunday') { loggedStreakDays[todayStr] = true; allDone = true; } localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays)); updateStreakDisplay(); }
+function calculateGymStreak() { let appToday = getAppToday(); let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list')) || {}; const todayStr = appToday.toDateString(); const todayName = daysOfWeek[appToday.getDay()]; const activeCard = document.getElementById(`workout-${todayName}`); let allDone = true; let dayHasWorkout = false; if(activeCard) { const checkboxes = activeCard.querySelectorAll('input[type="checkbox"]'); if(checkboxes.length > 0) { dayHasWorkout = true; checkboxes.forEach(cb => { if(!cb.checked) allDone = false; }); if(allDone) loggedStreakDays[todayStr] = true; else delete loggedStreakDays[todayStr]; } else { dayHasWorkout = false; allDone = false; } } else { dayHasWorkout = false; allDone = false; } if(!dayHasWorkout && (todayName === 'Sunday' || todayName === 'Wednesday' || todayName === 'Saturday')) { loggedStreakDays[todayStr] = true; allDone = true; } localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays)); updateStreakDisplay(); }
 function updateStreakDisplay() { let appToday = getAppToday(); let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list')) || {}; let streakCount = 0; let checkDate = new Date(appToday); while(true) { const dateStr = checkDate.toDateString(); if(loggedStreakDays[dateStr]) { streakCount++; checkDate.setDate(checkDate.getDate()-1); } else { if(checkDate.toDateString() === appToday.toDateString()) { checkDate.setDate(checkDate.getDate()-1); if(loggedStreakDays[checkDate.toDateString()]) { checkDate.setDate(checkDate.getDate()-1); streakCount = 1; continue; } } break; } } if(document.getElementById('gymStreakDisplay')) document.getElementById('gymStreakDisplay').innerText = `🔥 ${streakCount} Days`; localStorage.setItem('gym_streak', streakCount.toString()); }
 
 function setWeeklyTarget() { const val = prompt("Set Weekly Budget Target (₹):", weeklyBudgetTarget); if(val !== null) { weeklyBudgetTarget = parseFloat(val) || 0; localStorage.setItem('weekly_budget_target', weeklyBudgetTarget); renderExpenses(); updateCEODashboard(); } }
@@ -2263,18 +2265,6 @@ function confirmMealLog() {
 
 
 
-function confirmAndSaveMeal() { 
-    if(pendingMealData) { 
-        mealLogs.unshift(pendingMealData); 
-        localStorage.setItem('person_meal_logs', JSON.stringify(mealLogs)); 
-        document.getElementById('mealFoodInput').value = ''; 
-        renderMealLogsAndMacros(); 
-        displayPremiumToastNotification("Meal Logged!", "✅"); 
-        pendingMealData = null; 
-    } 
-    closeModalAction('aiEngineModal'); 
-}
-
 
 function checkPhaseShifter(val) { if(val >= 70 && localStorage.getItem('training_mode') !== 'cutting') { localStorage.setItem('training_mode', 'cutting'); localStorage.setItem('daily_tdee', 2000); updateCalorieTargets(); displayPremiumToastNotification("Target 70kg Reached! Phase shifted to Cutting Mode (2000 Kcal).", "🚀"); } }
 function addWeight() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const val = parseFloat(document.getElementById('weightVal').value); if(!val) return; weights = weights.filter(w => w.date !== todayStr); weights.unshift({ id: Date.now(), val: val, date: todayStr }); localStorage.setItem('person_weights', JSON.stringify(weights)); document.getElementById('weightVal').value = ''; displayPremiumToastNotification("Weight log updated.", "⚖️"); renderWeightsCircleAndLists(); checkPhaseShifter(val); updateCEODashboard(); }
@@ -2291,7 +2281,49 @@ function completeReminder(id) { triggerDeviceHapticPulse(); notes = notes.map(n 
 function deleteReminder(id) { triggerDeviceHapticPulse(); notes = notes.filter(n => n.id !== id); localStorage.setItem('person_notes', JSON.stringify(notes)); renderReminders(); }
 function renderReminders() { const container = document.getElementById('remindersListContainer'); if(!container) return; container.innerHTML = ''; notes.forEach(n => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = n.completed ? 'var(--text-secondary)' : 'var(--neon-purple)'; let html = `<div style="word-break:break-all; max-width:75%; line-height:1.4; ${n.completed ? 'text-decoration:line-through; color:var(--text-secondary);' : ''}">${n.text}<br><span style="color:var(--neon-gold); font-size:0.7rem; font-weight:bold;">⏰ ${n.dateTarget}</span></div><div style="display:flex; gap:8px;">`; if(!n.completed) { html += `<button class="btn-universal" style="background:var(--neon-green); color:black; padding:4px 8px; font-size:0.7rem; width:auto;" onclick="completeReminder(${n.id})">✅</button>`; } html += `<button class="delete-btn" onclick="deleteReminder(${n.id})">🗑️</button></div>`; li.innerHTML = html; container.appendChild(li); }); }
 
-function checkRemindersPopup() { let appToday = getAppToday(); const realNow = new Date(); const tzOffset = appToday.getTimezoneOffset() * 60000; const localISOTime = (new Date(appToday.getTime() - tzOffset)).toISOString().slice(0, 10); let tomorrow = new Date(appToday); tomorrow.setDate(tomorrow.getDate() + 1); const tomorrowLocalISO = (new Date(tomorrow.getTime() - tzOffset)).toISOString().slice(0, 10); let activeAlerts = []; notes.forEach(n => { if(!n.completed && n.dateTarget) { if(n.dateTarget === localISOTime) { activeAlerts.push("இன்று: " + n.text); } else if(n.dateTarget === tomorrowLocalISO && realNow.getHours() >= 18) { activeAlerts.push("நாளை: " + n.text); } } }); if(activeAlerts.length > 0) { setTimeout(() => { triggerDeviceHapticPulse(); openModalWithHistory('aiEngineModal'); document.getElementById('aiHeaderTitle').innerText = "⏰ REMINDER ALERT"; document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`; let aiReport = "🔔 MUTHUBALAN, ATTENTION PLEASE!\n=========================\n\n"; activeAlerts.forEach(a => aiReport += "⚡ " + a + "\n\n"); aiReport += "குறிப்பு: நீங்கள் இதை 'Complete' செய்யும் வரை இந்த அறிவிப்பு ஆப் திறக்கும்போதெல்லாம் வரும்."; playAiTyping(aiReport, document.getElementById('aiTypingText')); }, 800); } }
+function checkRemindersPopup() {
+    let appToday = getAppToday();
+    const realNow = new Date();
+    const tzOffset = appToday.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(appToday.getTime() - tzOffset)).toISOString().slice(0, 10);
+    let tomorrow = new Date(appToday);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowLocalISO = (new Date(tomorrow.getTime() - tzOffset)).toISOString().slice(0, 10);
+    let activeAlerts = [];
+    let alertKeys = [];
+    notes.forEach(n => {
+        if (!n.completed && n.dateTarget) {
+            if (n.dateTarget === localISOTime) {
+                const sessionKey = `reminder_popup_${n.id}_${localISOTime}`;
+                if (!sessionStorage.getItem(sessionKey)) {
+                    activeAlerts.push("இன்று: " + n.text);
+                    alertKeys.push(sessionKey);
+                }
+            } else if (n.dateTarget === tomorrowLocalISO && realNow.getHours() >= 18) {
+                const sessionKey = `reminder_popup_${n.id}_tomorrow_${localISOTime}`;
+                if (!sessionStorage.getItem(sessionKey)) {
+                    activeAlerts.push("நாளை: " + n.text);
+                    alertKeys.push(sessionKey);
+                }
+            }
+        }
+    });
+    if (activeAlerts.length > 0) {
+        setTimeout(() => {
+            const anyModalOpen = document.getElementById('aiEngineModal');
+            if (anyModalOpen && (anyModalOpen.style.display === 'flex' || anyModalOpen.style.display === 'block')) return;
+            alertKeys.forEach(k => sessionStorage.setItem(k, 'shown'));
+            triggerDeviceHapticPulse();
+            openModalWithHistory('aiEngineModal');
+            document.getElementById('aiHeaderTitle').innerText = "⏰ REMINDER ALERT";
+            document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`;
+            let aiReport = "🔔 MUTHUBALAN, ATTENTION PLEASE!\n=========================\n\n";
+            activeAlerts.forEach(a => aiReport += "⚡ " + a + "\n\n");
+            aiReport += "குறிப்பு: Reminders பக்கத்தில் ✅ Complete செய்யும் வரை\nஆப் திறக்கும் ஒவ்வொரு முறையும் ஒரு முறை மட்டும் வரும்.";
+            playAiTyping(aiReport, document.getElementById('aiTypingText'));
+        }, 1500);
+    }
+}
 
 function checkSundayAudit() { let appToday = getAppToday(); const realNow = new Date(); if(appToday.getDay() === 0) { let btn = document.getElementById('sundayAuditBtn'); if(btn) btn.style.display = 'block'; if(realNow.getHours() >= 18) { const weekKey = 'weekly_ai_audit_' + getIsoDateStr(appToday); if(!localStorage.getItem(weekKey)) { runWeeklyAudit(); localStorage.setItem(weekKey, 'true'); } } } }
 
@@ -3727,14 +3759,11 @@ let batteryIntervalNightly = null;
 document.addEventListener("visibilitychange", () => {
     isAppVisible = !document.hidden;
     if (isAppVisible) {
-        // App திரும்ப வந்தா எல்லாமே resume
         drawNeural();
-        if (!batteryIntervalReminder) batteryIntervalReminder = setInterval(checkRemindersPopup, 60000);
+        checkRemindersPopup();
         if (!batteryIntervalNightly) batteryIntervalNightly = setInterval(checkNightlyPlanningTimer, 60000);
     } else {
-        // App மறைஞ்சா எல்லாமே stop — battery save
         cancelAnimationFrame(neuralAnimationId);
-        clearInterval(batteryIntervalReminder); batteryIntervalReminder = null;
         clearInterval(batteryIntervalNightly); batteryIntervalNightly = null;
     }
 });
@@ -3749,7 +3778,6 @@ window.addEventListener('DOMContentLoaded', () => {
     loadBodyMetrics();
     updateRecoveryRing(); updateCalorieTargets(); updateCEODashboard(); updatePredictiveAnalytics();
     verifyGymLocation();
-    batteryIntervalReminder = setInterval(checkRemindersPopup, 60000);
     batteryIntervalNightly = setInterval(checkNightlyPlanningTimer, 60000);
     checkNightlyPlanningTimer();
     if('Notification' in window && Notification.permission === 'default') { setTimeout(requestNotificationPermission, 3000); }
