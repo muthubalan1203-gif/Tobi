@@ -7,22 +7,37 @@
 <meta http-equiv="Expires" content="0">
 <script>
   if ('serviceWorker' in navigator) {
-    // SW path — தானாக detect பண்ணி register பண்ணும்
-    const swPath = location.pathname.includes('/Tobi/') ? '/Tobi/sw.js' : '/sw.js';
-    navigator.serviceWorker.register(swPath)
-      .then(reg => {
-        console.log('SW registered:', swPath);
-        setInterval(() => reg.update(), 30000);
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-    window.location.reload();
-}
+    // Check if running on Claude's domain - skip SW there (can't serve files from that domain)
+    const isClaudeEnvironment = location.hostname.includes('claudeusercontent.com') || 
+                                location.hostname.includes('localhost') ||
+                                location.protocol === 'file:';
+    
+    if (isClaudeEnvironment) {
+      console.log('ℹ️ Running in Claude/Local environment - Service Worker skipped (app works fine without it)');
+      console.log('💡 For full offline support, deploy to Netlify or GitHub Pages with sw.js');
+    } else {
+      // SW path — தானாக detect பண்ணி register பண்ணும்
+      const swPath = location.pathname.includes('/Tobi/') ? '/Tobi/sw.js' : '/sw.js';
+      navigator.serviceWorker.register(swPath)
+        .then(reg => {
+          console.log('✅ SW registered successfully:', swPath);
+          setInterval(() => reg.update(), 30000);
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('🔄 New Service Worker activated, reloading...');
+                window.location.reload();
+              }
+            });
           });
+        })
+        .catch(err => {
+          console.log('⚠️ Service Worker registration failed (offline mode still works):', err.message);
+          console.log('Hint: Make sure sw.js exists in the same directory as this file');
+          // App continues to work without SW - no crash
         });
-      })
-      .catch(err => console.log('SW not available (offline mode ok):', err.message));
+    }
   }
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -270,16 +285,7 @@ body.theme-sharingan .toast-notification-hub {
 .predict-val { font-weight:900; color:var(--neon-purple); }
 .predict-bar { height:4px; background:rgba(255,255,255,0.03); border-radius:2px; margin-top:4px; overflow:hidden; }
 .predict-bar-fill { height:100%; background:linear-gradient(90deg, var(--neon-purple), var(--neon-cyan)); border-radius:2px; transition:width 0.6s ease; }
-.photo-scanner-area { border:2px dashed rgba(6,182,212,0.3); border-radius:20px; padding:20px; text-align:center; background:rgba(6,182,212,0.03); cursor:pointer; transition:all 0.3s; position:relative; overflow:hidden; }
-.photo-scanner-area:hover { border-color:var(--neon-cyan); background:rgba(6,182,212,0.06); }
-.photo-scanner-area input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; }
-.scanner-preview { width:100%; max-height:200px; object-fit:cover; border-radius:12px; margin-top:10px; display:none; }
-.scanner-analyzing { display:none; margin-top:12px; }
-.scanner-dots { display:flex; gap:6px; justify-content:center; margin-bottom:8px; }
-.scan-dot { width:8px; height:8px; background:var(--neon-cyan); border-radius:50%; animation:scanBounce 1.4s infinite ease-in-out both; }
-.scan-dot:nth-child(1) { animation-delay:-0.32s; }
-.scan-dot:nth-child(2) { animation-delay:-0.16s; }
-@keyframes scanBounce { 0%,80%,100%{transform:scale(0);} 40%{transform:scale(1);} }
+
 .breath-circle { width:120px; height:120px; border-radius:50%; border:3px solid var(--neon-cyan); margin:15px auto; display:flex; align-items:center; justify-content:center; position:relative; background:rgba(6,182,212,0.05); }
 .breath-circle.active { animation:breathPulse 4s infinite ease-in-out; }
 @keyframes breathPulse { 0%,100%{transform:scale(1);box-shadow:0 0 10px rgba(6,182,212,0.2);} 50%{transform:scale(1.15);box-shadow:0 0 30px rgba(6,182,212,0.5);} }
@@ -874,17 +880,15 @@ body.theme-sharingan .toast-notification-hub {
 <li class="task-item" style="border-bottom:none;"><label class="diet-check-wrap"><input type="checkbox" id="diet-8" onchange="handleDietCheck(7)"><div class="diet-text"><div class="diet-time-tag">9:30 PM</div>🥛 250 ml Milk<span class="diet-macro-tag">P:8g | C:12g | F:8g | ~150 Kcal</span></div></label></li>
 </ul></div>
 
-<div class="app-card" style="border-top:4px solid var(--neon-purple); margin-top:16px;">
-<h3 class="card-title" style="color:var(--neon-purple);">📸 AI Meal Photo Scanner</h3>
-<p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:12px;">சாப்பாட்டின் போட்டோ எடுத்தாலே TOBI macros-ஐ estimate பண்ணும்:</p>
-<div class="photo-scanner-area" id="photoScannerArea">
-<input type="file" id="mealPhotoInput" accept="image/*" capture="environment" onchange="handleMealPhotoScanWithAI(this)">
-<div style="font-size:2rem; margin-bottom:8px;">📷</div><div style="font-size:0.85rem; font-weight:700; color:var(--neon-cyan);">Tap to Capture Meal</div><div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">or upload from gallery</div>
-<img id="mealPhotoPreview" class="scanner-preview"><div class="scanner-analyzing" id="scannerAnalyzing"><div class="scanner-dots"><div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div></div><div style="font-size:0.8rem; color:var(--neon-cyan); font-weight:700;">TOBI Analyzing...</div></div></div>
-<div id="photoScanResult" style="display:none; margin-top:12px; background:rgba(168,85,247,0.05); border:1px solid rgba(168,85,247,0.2); border-radius:14px; padding:12px;">
-<div style="font-size:0.85rem; font-weight:800; color:var(--neon-purple); margin-bottom:6px;">🔍 Detected Items:</div><div id="photoScanDetected" style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:8px;"></div>
-<div style="display:flex; gap:10px; font-size:0.8rem; font-weight:700;"><span style="color:var(--neon-red)">P: <span id="photoScanP">0</span>g</span><span style="color:var(--neon-cyan)">C: <span id="photoScanC">0</span>g</span><span style="color:var(--neon-gold)">Cal: <span id="photoScanCal">0</span></span></div>
-<button class="btn-universal" style="background:var(--neon-purple); margin-top:10px; font-size:0.85rem; padding:10px;" onclick="confirmPhotoScan()">✅ Log This Meal</button></div></div>
+
+
+
+<!-- AI Meal Log -->
+<div class="app-card" style="border-top:4px solid var(--neon-cyan); margin-top:16px;">
+    <h3 class="card-title" style="color:var(--neon-cyan);">🤖 AI Meal Log</h3>
+    <div class="form-group"><input type="text" id="mealFoodInput" class="form-control" placeholder="Type food (Ex: 4 idli, 2 egg, 1 milk)"></div>
+    <div style="display:flex; gap:10px;"><button class="btn-universal" style="background:var(--neon-cyan); color:black;" onclick="analyzeMealInputWithAI()">🤖 AI Analyze & Log</button><button class="btn-universal" style="background:var(--neon-purple); color:white; width:60px; font-size:1.2rem;" onclick="initVoiceCommand()">🎙️</button></div>
+</div>
 
 <!-- Water Matrix -->
 <div class="app-card" style="border-top:4px solid #0ea5e9; text-align:center;">
@@ -1105,7 +1109,8 @@ function checkDailyWisdom() {
 // ஜிம் போகாத நாட்களை எண்ணுவதற்கான பங்க்ஷன்
 function getMissedGymDays(daysToLookBack) {
     let missedCount = 0;
-    let d = new Date();
+    let appToday = getAppToday();
+    let d = new Date(appToday);
     for (let i = 0; i < daysToLookBack; i++) {
         let dateStr = d.toDateString();
         if (localStorage.getItem(`gym_done_${dateStr}`) === 'false') {
@@ -1115,46 +1120,11 @@ function getMissedGymDays(daysToLookBack) {
     }
     return missedCount;
 }
-// 1. லிஸ்ட்டை காட்ட/மறைக்க (Arrow Box)
-function toggleCustomFoodList() {
-    const list = document.getElementById('customFoodListContainer');
-    if (list.style.maxHeight === '0px' || list.style.maxHeight === '') {
-        list.style.maxHeight = '250px';
-    } else {
-        list.style.maxHeight = '0px';
-    }
-}
 
-// 2. லிஸ்ட்டை அப்டேட் செய்ய (Save செய்தவுடன் இது கால் ஆகும்)
-function renderCustomFoods() {
-    const container = document.getElementById('customFoodListContainer');
-    container.innerHTML = '';
-    let customFoodsDB = JSON.parse(localStorage.getItem('custom_foods_db')) || {};
-    
-    Object.keys(customFoodsDB).forEach(name => {
-        let food = customFoodsDB[name];
-        const li = document.createElement('li');
-        li.className = 'list-item';
-        li.innerHTML = `
-            <div><b>${name.toUpperCase()}</b><br>
-            <small style="color:var(--text-secondary)">P:${food.p} C:${food.c} F:${food.f} Cal:${food.cal}</small></div>
-            <button class="delete-btn" onclick="removeCustomFood('${name}')">🗑️</button>
-        `;
-        container.appendChild(li);
-    });
-}
-
-// 3. Remove செய்ய
-function removeCustomFood(name) {
-    let customFoodsDB = JSON.parse(localStorage.getItem('custom_foods_db')) || {};
-    delete customFoodsDB[name];
-    localStorage.setItem('custom_foods_db', JSON.stringify(customFoodsDB));
-    renderCustomFoods();
-    displayPremiumToastNotification("Food removed!", "🗑️");
-}
 function logGymAttendance(didGo) {
     // இன்றைய தேதியை எடுப்பது
-    let todayStr = new Date().toDateString();
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
     
     // ஜிம் சென்றாரா இல்லையா என்பதை லோக்கல் ஸ்டோரேஜில் சேமிப்பது (ரிப்போர்ட்டுக்காக)
     localStorage.setItem(`gym_done_${todayStr}`, didGo ? 'true' : 'false');
@@ -1167,6 +1137,11 @@ function logGymAttendance(didGo) {
         // NO கொடுத்தால்: பாக்ஸ் மெசேஜ் மாறி, AI உங்களை திட்டும்
         document.getElementById('gymAttendanceBox').innerHTML = `<h3 style="color:#ff4757; margin-bottom: 10px;">⚠️ Gym Session Skipped Today.</h3>`;
         document.getElementById('workoutListContainer').style.display = 'none';
+        
+        // Remove from streak days
+        let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list')) || {};
+        delete loggedStreakDays[todayStr];
+        localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays));
         
         // TOBI மோட்டிவேஷன் & திட்டும் மெசேஜ்
         openModalWithHistory('aiEngineModal');
@@ -1182,7 +1157,8 @@ function logGymAttendance(didGo) {
 }
 // ஆப் திறக்கும்போது பழைய மெமரியை செக் செய்யும் கோட்
 function checkGymAttendanceStatus() {
-    let todayStr = new Date().toDateString();
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
     let gymStatus = localStorage.getItem(`gym_done_${todayStr}`);
     
     let attendanceBox = document.getElementById('gymAttendanceBox');
@@ -1257,7 +1233,6 @@ let ambientAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/16/
 ambientAudio.loop = true;
 let isPlayingAudio = false;
 let selectedInjurySeverity = 0;
-let photoScanData = null;
 let sunExposureTimer = null;
 let sunSeconds = 0;
 let wimHofInterval = null;
@@ -1284,7 +1259,7 @@ async function askGemini(prompt, imageBase64 = null, imageMimeType = 'image/jpeg
     }
 
     // Vision API தேவைப்பட்டால் gemini-1.5-flash உபயோகி (image support உண்டு)
-    const model = imageBase64 ? 'gemini-3.5-flash' : 'gemini-3.1-flash-lite';
+    const model = imageBase64 ? 'gemini-1.5-flash' : 'gemini-2.0-flash-lite';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
     // parts array build பண்றோம் — image இருந்தா முதல்ல image, பிறகு text
@@ -1455,7 +1430,7 @@ function checkAndResetDailyTasks() {
         });
         const gymPrefixes = ['mon','tue','wed','thu','fri','sat','sun'];
         gymPrefixes.forEach(p => {
-            for(let i=1;i<=8;i++) {
+            for(let i=1;i<=9;i++) {
                 localStorage.removeItem(`gym-${p}-${i}`);
                 let cb = document.getElementById(`gym-${p}-${i}`);
                 if(cb) cb.checked = false;
@@ -1469,7 +1444,9 @@ function checkAndResetDailyTasks() {
         for(let i=1;i<=8;i++) { localStorage.removeItem(`diet_${todayDateStr}_${i}`); }
         localStorage.setItem('TOBI_water_intake_v6', 0);
         currentWater = 0;
+        renderWater();
         localStorage.setItem('last_opened_date', todayDateStr);
+        localStorage.removeItem('tomorrow_plan');
     }
 }
 function triggerDeviceHapticPulse() { if("vibrate" in navigator) navigator.vibrate(12); }
@@ -1775,7 +1752,7 @@ function reviewWeeklyMoods() { let appToday = getAppToday(); let moods = JSON.pa
 function addWater(ml) { let appToday = getAppToday(); triggerDeviceHapticPulse(); currentWater += ml; if(currentWater > 4000) currentWater = 4000; localStorage.setItem('TOBI_water_intake_v6', currentWater); renderWater(); updateRecoveryRing(); updateCEODashboard(); if(currentWater === 4000 && !localStorage.getItem('water_goal_met_' + appToday.toDateString())) { displayPremiumToastNotification("Daily Water Goal Completed!", "🌊"); localStorage.setItem('water_goal_met_' + appToday.toDateString(), 'true'); } }
 function renderWater() { let pct = (currentWater / 4000) * 100; const flask = document.getElementById('flaskWaterFill'); const lbl = document.getElementById('waterLabel'); if(flask) flask.style.height = `${pct}%`; if(lbl) lbl.innerText = `${(currentWater/1000).toFixed(1)} L`; }
 
-function generateGroceryList() { triggerDeviceHapticPulse(); let appToday = getAppToday(); let weekAgo = new Date(appToday); weekAgo.setDate(weekAgo.getDate()-7); let recentMeals = mealLogs.filter(m => new Date(m.date) >= weekAgo); let totalP = 0, totalC = 0; recentMeals.forEach(m => { totalP += m.p; totalC += m.c; }); let avgP = Math.round(totalP/7) || 0; let avgC = Math.round(totalC/7) || 0; let aiReport = "🛒 TOBI DYNAMIC GROCERY AI\n=========================================\n\n"; if(targetP === 0) { aiReport += "⚠️ முதலில் Gym பக்கத்தில் Height/Weight-ஐ பதிவு செய்யவும்!"; } else { aiReport += `கடந்த 7 நாட்களில் சராசரி Macros:\nProtein: ${avgP}g/day | Carbs: ${avgC}g/day\n\n🎯 TOBI பரிந்துரைக்கும் மளிகைப் பட்டியல்:\n\n`; if(avgP < targetP) { aiReport += `⚠️ Protein குறைவு (Target: ${targetP}g)!\n- 🥚 முட்டை: 2 ட்ரே (60 Nos)\n- 🍗 சிக்கன் பிரெஸ்ட்: 2 Kg\n- 🌱 சோயா சங்ஸ்: 1 Kg\n\n`; } else { aiReport += "✅ Protein டார்கெட் சூப்பர்!\n\n"; } if(avgC < targetC) { aiReport += `⚠️ Carbs பத்தவில்லை (Target: ${targetC}g)!\n- 🍌 வாழைப்பழம்: 3 டஜன்\n- 🍚 ஓட்ஸ் / பிரவுன் ரைஸ்: 2 Kg\n\n`; } else { aiReport += "✅ Carbs லெவல் பெர்ஃபெக்ட்!\n\n"; } aiReport += "TOBI: 'Eat Clean, Train Mean, Get Lean.'"; } openModalWithHistory('aiEngineModal'); document.getElementById('aiHeaderTitle').innerText = "TOBI GROCERY AI"; document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`; playAiTyping(aiReport, document.getElementById('aiTypingText')); }
+
 
 // --- UPDATED: Clickable Video Demo Button (Supports Custom Workouts) ---
 function toggleDropdownTips(id) { 
@@ -1843,7 +1820,7 @@ function renderCustomWorkouts() {
 function handleCustomGymCheck(day, id) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(`cw_${day}_${id}`).checked; localStorage.setItem(`cw_${day}_${id}`, isChecked); renderCustomWorkouts(); calculateGymStreak(); updateCEODashboard(); }
 function deleteCustomWorkout(day, id) { customWorkouts[day] = customWorkouts[day].filter(x => x.id !== id); localStorage.setItem('custom_workouts', JSON.stringify(customWorkouts)); renderCustomWorkouts(); calculateGymStreak(); updateCEODashboard(); }
 function saveGymCheck(id) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(id).checked; localStorage.setItem(id, isChecked); calculateGymStreak(); updateCEODashboard(); }
-function calculateGymStreak() { let appToday = getAppToday(); let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list')) || {}; const todayStr = appToday.toDateString(); const todayName = daysOfWeek[appToday.getDay()]; const activeCard = document.getElementById(`workout-${todayName}`); let allDone = true; if(activeCard) { const checkboxes = activeCard.querySelectorAll('input[type="checkbox"]'); if(checkboxes.length > 0) { checkboxes.forEach(cb => { if(!cb.checked) allDone = false; }); if(allDone) loggedStreakDays[todayStr] = true; else delete loggedStreakDays[todayStr]; } else { allDone = false; } } else { allDone = false; } localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays)); updateStreakDisplay(); }
+function calculateGymStreak() { let appToday = getAppToday(); let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list')) || {}; const todayStr = appToday.toDateString(); const todayName = daysOfWeek[appToday.getDay()]; const activeCard = document.getElementById(`workout-${todayName}`); let allDone = true; let dayHasWorkout = false; if(activeCard) { const checkboxes = activeCard.querySelectorAll('input[type="checkbox"]'); if(checkboxes.length > 0) { dayHasWorkout = true; checkboxes.forEach(cb => { if(!cb.checked) allDone = false; }); if(allDone) loggedStreakDays[todayStr] = true; else delete loggedStreakDays[todayStr]; } else { dayHasWorkout = false; allDone = false; } } else { dayHasWorkout = false; allDone = false; } if(!dayHasWorkout && todayName === 'Sunday') { loggedStreakDays[todayStr] = true; allDone = true; } localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays)); updateStreakDisplay(); }
 function updateStreakDisplay() { let appToday = getAppToday(); let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list')) || {}; let streakCount = 0; let checkDate = new Date(appToday); while(true) { const dateStr = checkDate.toDateString(); if(loggedStreakDays[dateStr]) { streakCount++; checkDate.setDate(checkDate.getDate()-1); } else { if(checkDate.toDateString() === appToday.toDateString()) { checkDate.setDate(checkDate.getDate()-1); if(loggedStreakDays[checkDate.toDateString()]) { checkDate.setDate(checkDate.getDate()-1); streakCount = 1; continue; } } break; } } if(document.getElementById('gymStreakDisplay')) document.getElementById('gymStreakDisplay').innerText = `🔥 ${streakCount} Days`; localStorage.setItem('gym_streak', streakCount.toString()); }
 
 function setWeeklyTarget() { const val = prompt("Set Weekly Budget Target (₹):", weeklyBudgetTarget); if(val !== null) { weeklyBudgetTarget = parseFloat(val) || 0; localStorage.setItem('weekly_budget_target', weeklyBudgetTarget); renderExpenses(); updateCEODashboard(); } }
@@ -2251,46 +2228,8 @@ function confirmMealLog() {
     playSuccessSound();
 }
 
-// FIX 1b: Now passes image base64 + mime type to askGemini Vision API
-async function handleMealPhotoScanWithAI(input) {
-    if(!input.files || !input.files[0]) return;
-    const file = input.files[0];
-    const mimeType = file.type || 'image/jpeg'; // actual mime type எடுக்கிறோம்
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        const imgData = e.target.result; // "data:image/jpeg;base64,..." format
-        document.getElementById('mealPhotoPreview').src = imgData;
-        document.getElementById('mealPhotoPreview').style.display = 'block';
-        document.getElementById('scannerAnalyzing').style.display = 'block';
-        try {
-            const imagePrompt = `You are a food nutrition expert. Analyze this food image carefully and respond ONLY in this exact format with no extra text:\nFOOD_NAME: [detected food name in English]\nPROTEIN_G: [protein in grams as number only]\nCARBS_G: [carbs in grams as number only]\nFATS_G: [fats in grams as number only]\nCALORIES: [calories as number only]`;
-            // FIX: imgData (base64) + mimeType இப்போ pass ஆகுது — Vision API work பண்ணும்
-            const aiResponse = await askGemini(imagePrompt, imgData, mimeType);
-            const nutritionData = parseAINutritionResponse(aiResponse);
-            document.getElementById('scannerAnalyzing').style.display = 'none';
-            if(nutritionData.success) {
-                document.getElementById('mealFoodInput').value = nutritionData.foodName;
-                let actualNow = new Date();
-                pendingMealData = { id: Date.now(), date: getAppToday().toDateString(), time: actualNow.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), foodText: nutritionData.foodName, p: nutritionData.protein, c: nutritionData.carbs, f: nutritionData.fats, cal: nutritionData.calories, rawInput: nutritionData.foodName, aiPowered: true, photoScanned: true };
-                // FIX 3: unshift use பண்றோம் (newest first, consistent with rest of app)
-                mealLogs.unshift(pendingMealData);
-                localStorage.setItem('person_meal_logs', JSON.stringify(mealLogs));
-                pendingMealData = null;
-                renderMealLogsAndMacros();
-                updateCEODashboard();
-                displayPremiumToastNotification("📸 AI Photo Meal Logged!", "✅");
-                playSuccessSound();
-            } else {
-                displayPremiumToastNotification("Photo scan: format match இல்லை, retry பண்ணுங்க", "⚠️");
-            }
-        } catch(error) {
-            console.error("Photo scan error:", error);
-            document.getElementById('scannerAnalyzing').style.display = 'none';
-            displayPremiumToastNotification("Photo analysis failed", "❌");
-        }
-    };
-    reader.readAsDataURL(file);
-}
+
+
 
 function confirmAndSaveMeal() { 
     if(pendingMealData) { 
@@ -2304,42 +2243,13 @@ function confirmAndSaveMeal() {
     closeModalAction('aiEngineModal'); 
 }
 
-function saveCustomFood() {
-    triggerDeviceHapticPulse();
-    
-    // Input மதிப்புகளை எடுத்தல்
-    let name = document.getElementById('cfName').value.toLowerCase().trim();
-    let p = parseFloat(document.getElementById('cfProtein').value) || 0;
-    let c = parseFloat(document.getElementById('cfCarbs').value) || 0;
-    let f = parseFloat(document.getElementById('cfFats').value) || 0;
-    let cal = parseFloat(document.getElementById('cfKcal').value) || 0;
 
-    // பெயர் இல்லை என்றால் Alert
-    if(!name) return displayPremiumToastNotification("Food Name Type பண்ணுங்க!", "❌");
-
-    // LocalStorage-ல் சேமித்தல்
-    let customFoodsDB = JSON.parse(localStorage.getItem('custom_foods_db')) || {};
-    customFoodsDB[name] = { p: p, c: c, f: f, cal: cal };
-    localStorage.setItem('custom_foods_db', JSON.stringify(customFoodsDB));
-
-    // Input-களை Clear செய்தல்
-    document.getElementById('cfName').value = '';
-    document.getElementById('cfProtein').value = '';
-    document.getElementById('cfCarbs').value = '';
-    document.getElementById('cfFats').value = '';
-    document.getElementById('cfKcal').value = '';
-
-    // புதிய உணவைச் சேர்த்த பிறகு லிஸ்ட்டை உடனே Refresh செய்யவும்
-    renderCustomFoods(); 
-
-    displayPremiumToastNotification(`"${name}" DB-யில் Save ஆகிவிட்டது!`, "💾");
-}
 function checkPhaseShifter(val) { if(val >= 70 && localStorage.getItem('training_mode') !== 'cutting') { localStorage.setItem('training_mode', 'cutting'); localStorage.setItem('daily_tdee', 2000); updateCalorieTargets(); displayPremiumToastNotification("Target 70kg Reached! Phase shifted to Cutting Mode (2000 Kcal).", "🚀"); } }
-function addWeight() { let appToday = getAppToday(); const val = parseFloat(document.getElementById('weightVal').value); if(!val) return; weights.unshift({ id: Date.now(), val: val, date: appToday.toDateString() }); localStorage.setItem('person_weights', JSON.stringify(weights)); document.getElementById('weightVal').value = ''; displayPremiumToastNotification("Weight log updated.", "⚖️"); renderWeightsCircleAndLists(); checkPhaseShifter(val); updateCEODashboard(); }
+function addWeight() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const val = parseFloat(document.getElementById('weightVal').value); if(!val) return; weights = weights.filter(w => w.date !== todayStr); weights.unshift({ id: Date.now(), val: val, date: todayStr }); localStorage.setItem('person_weights', JSON.stringify(weights)); document.getElementById('weightVal').value = ''; displayPremiumToastNotification("Weight log updated.", "⚖️"); renderWeightsCircleAndLists(); checkPhaseShifter(val); updateCEODashboard(); }
 function deleteWeight(id) { triggerDeviceHapticPulse(); weights = weights.filter(w => w.id !== id); localStorage.setItem('person_weights', JSON.stringify(weights)); renderWeightsCircleAndLists(); updateCEODashboard(); }
 function renderWeightsCircleAndLists() { const container = document.getElementById('weightListContainer'); if(!container) return; container.innerHTML = ''; let currentWt = 62.0; if(weights.length > 0) currentWt = weights[0].val; document.getElementById('weightCurrentStatusDisplay').innerText = `${currentWt.toFixed(1)} kg`; let delta = currentWt - 62.0; if(delta < 0) delta = 0; let scalePct = Math.round((delta / 8.0) * 100); if(scalePct > 100) scalePct = 100; document.getElementById('ringWeightPct').innerHTML = `${scalePct}%<span>Gained</span>`; const circle = document.getElementById('weightProgressCircle'); if(circle) { let circumference = 2 * Math.PI * 42; circle.style.strokeDashoffset = circumference - (scalePct / 100) * circumference; } weights.forEach(w => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = 'var(--neon-purple)'; li.innerHTML = `<div><b>${w.val} kg</b><br><small style="color:var(--text-secondary)">${w.date}</small></div><button class="delete-btn" onclick="deleteWeight(${w.id})">🗑️</button>`; container.appendChild(li); }); }
 
-function addAdvancedSleepLog() { let appToday = getAppToday(); const bedtime = document.getElementById('sleepBedtime').value; const wakeup = document.getElementById('sleepWakeup').value; const interruptions = parseInt(document.getElementById('sleepInterruptions').value); const dreamText = document.getElementById('dreamInput').value; if(!bedtime || !wakeup) return displayPremiumToastNotification("Fill Bedtime & Wakeup!", "❌"); let bParts = bedtime.split(':'); let wParts = wakeup.split(':'); let bMin = parseInt(bParts[0]) * 60 + parseInt(bParts[1]); let wMin = parseInt(wParts[0]) * 60 + parseInt(wParts[1]); let diffMin = wMin - bMin; if(diffMin < 0) diffMin += 1440; let totalHours = diffMin / 60; let baseEfficiency = 100 - (interruptions * 12); if(totalHours < 6) baseEfficiency -= (6 - totalHours) * 15; if(totalHours > 9) baseEfficiency -= (totalHours - 9) * 5; if(baseEfficiency < 20) baseEfficiency = 20; let finalScore = Math.round(baseEfficiency); sleepLogs.unshift({ id: Date.now(), hours: parseFloat(totalHours.toFixed(1)), bedtime: bedtime, wakeup: wakeup, score: finalScore, interruptions: interruptions, date: appToday.toDateString() }); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); if(dreamText.trim() !== '') localStorage.setItem('dream_log_' + appToday.toDateString(), dreamText); document.getElementById('sleepBedtime').value = ''; document.getElementById('sleepWakeup').value = ''; document.getElementById('dreamInput').value = ''; displayPremiumToastNotification("Sleep Cycle Logged!", "😴"); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
+function addAdvancedSleepLog() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const bedtime = document.getElementById('sleepBedtime').value; const wakeup = document.getElementById('sleepWakeup').value; const interruptions = parseInt(document.getElementById('sleepInterruptions').value); const dreamText = document.getElementById('dreamInput').value; if(!bedtime || !wakeup) return displayPremiumToastNotification("Fill Bedtime & Wakeup!", "❌"); let bParts = bedtime.split(':'); let wParts = wakeup.split(':'); let bMin = parseInt(bParts[0]) * 60 + parseInt(bParts[1]); let wMin = parseInt(wParts[0]) * 60 + parseInt(wParts[1]); let diffMin = wMin - bMin; if(diffMin < 0) diffMin += 1440; let totalHours = diffMin / 60; let baseEfficiency = 100 - (interruptions * 12); if(totalHours < 6) baseEfficiency -= (6 - totalHours) * 15; if(totalHours > 9) baseEfficiency -= (totalHours - 9) * 5; if(baseEfficiency < 20) baseEfficiency = 20; let finalScore = Math.round(baseEfficiency); sleepLogs = sleepLogs.filter(s => s.date !== todayStr); sleepLogs.unshift({ id: Date.now(), hours: parseFloat(totalHours.toFixed(1)), bedtime: bedtime, wakeup: wakeup, score: finalScore, interruptions: interruptions, date: todayStr }); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); if(dreamText.trim() !== '') localStorage.setItem('dream_log_' + todayStr, dreamText); document.getElementById('sleepBedtime').value = ''; document.getElementById('sleepWakeup').value = ''; document.getElementById('dreamInput').value = ''; displayPremiumToastNotification("Sleep Cycle Logged!", "😴"); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
 function deleteSleepLog(id) { triggerDeviceHapticPulse(); sleepLogs = sleepLogs.filter(s => s.id !== id); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
 function renderSleepLogs() { const container = document.getElementById('sleepListContainer'); if(!container) return; container.innerHTML = ''; sleepLogs.forEach(s => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = s.score >= 80 ? 'var(--neon-green)' : (s.score >= 55 ? 'var(--neon-gold)' : 'var(--neon-red)'); li.innerHTML = `<div><b>${s.hours} Hours</b> (${s.bedtime} - ${s.wakeup})<br><small style="color:var(--text-secondary)">Efficiency: ${s.score}% • Interrupts: ${s.interruptions}</small></div><button class="delete-btn" onclick="deleteSleepLog(${s.id})">🗑️</button>`; container.appendChild(li); }); }
 function calculateSleepParagraphAnalysis() { const display = document.getElementById('sleepDebtDisplay'); const advice = document.getElementById('sleepDebtAdvice'); if(!display) return; if(sleepLogs.length === 0) { display.innerText = "0% Score"; advice.innerText = "No logs recorded yet."; return; } let latest = sleepLogs[0]; display.innerText = `${latest.score}% Deep Sleep Efficiency`; if(latest.score >= 80) { display.style.color = "var(--neon-green)"; advice.innerText = "அருமையான தூக்கம் முத்துபாலன்! தசை வளர்ச்சி (Anabolic Growth) மற்றும் நரம்பு மண்டல ரெக்கவரி 100% சிறப்பாக உள்ளது. 🧘‍♂️"; } else if(latest.score >= 55) { display.style.color = "var(--neon-gold)"; advice.innerText = `தூக்கம் சற்றே பாதிக்கப்பட்டுள்ளது. நடுவில் ${latest.interruptions} முறை விழித்துள்ளீர்கள். படுக்கைக்குச் செல்லும் முன் மொபைல் பார்ப்பதைத் தவிர்க்கவும்! ⚠️`; } else { display.style.color = "var(--neon-red)"; advice.innerText = "ரொம்ப மோசமான தூக்க தரம்! 🥱 உடல் அசதி மற்றும் சோர்வு அதிகம் இருக்கும். இன்று இரவு சீக்கிரம் தூங்கச் செல்ல TOBI பரிந்துரைக்கிறது."; } }
@@ -2355,10 +2265,19 @@ function checkSundayAudit() { let appToday = getAppToday(); const realNow = new 
 
 async function runWeeklyAudit() {
     // வாராந்திர டேட்டாவைச் சேகரித்தல்
-let weeklyData = {
+    let appToday = getAppToday();
+    let weekAgo = new Date(appToday);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    
+    // Calculate 7-day average protein
+    let weeklyMeals = mealLogs.filter(m => new Date(m.date) >= weekAgo);
+    let totalProtein7d = weeklyMeals.reduce((s, m) => s + m.p, 0);
+    let avgProtein7d = weeklyMeals.length > 0 ? Math.round(totalProtein7d / 7) : 0;
+    
+    let weeklyData = {
         totalExpenses: expenses.reduce((s, e) => s + e.amount, 0),
         gymStreak: localStorage.getItem('gym_streak') || 0,
-        averageProtein: currentLoggedProtein,
+        averageProtein: avgProtein7d,
         missedGymDays: getMissedGymDays(7),
         // AI-க்கான புதிய கட்டளை:
         tobiInstruction: "வழக்கமான சின்ன ரிப்போர்ட் வேண்டாம். மிகவும் விரிவாக, 4 பிரிவுகளாக (Finance, Fitness & Diet, Discipline, Action Plan) ஆழமான அனாலிசிஸ் செய்யவும். ஜிம் செல்லாத நாட்களை (Missed Days) கடுமையாக விமர்சித்துப் பேசு. ஒரு கண்டிப்பான மற்றும் மோட்டிவேட் செய்யும் கோச் போல தமிழில் விரிவாக எழுதவும்."
@@ -2368,10 +2287,16 @@ let weeklyData = {
     document.getElementById('aiHeaderTitle').innerText = "TOBI WEEKLY MEETING";
     document.getElementById('aiTypingText').innerHTML = "Preparing your weekly performance review...";
     
-    const insights = await getGeminiInsights("Weekly", weeklyData);
-    playAiTyping(insights, document.getElementById('aiTypingText'));
-    
-    document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`;
+    try {
+        const insights = await getGeminiInsights("Weekly", weeklyData);
+        playAiTyping(insights, document.getElementById('aiTypingText'));
+        document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`;
+    } catch(err) {
+        console.error("Gemini API Error in Weekly Audit:", err);
+        document.getElementById('aiTypingText').innerHTML = "⚠️ API Error: Unable to generate insights right now. Try again later!";
+        document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Close</button>`;
+        displayPremiumToastNotification("API Error - Try again later", "❌");
+    }
 }
 function openDayModalLifelong(dateStr, displayDay) {
     document.getElementById('dayModalTitle').innerText = `📅 Date History: ${dateStr}`;
@@ -2990,6 +2915,11 @@ function checkNightlyPlanningTimer() {
     let todayDateStr = appToday.toDateString(); 
     // >= 21 nu change panniruken (9 PM mela eppo open pannalum varum)
     if(now.getHours() >= 21 && !localStorage.getItem('night_review_done_' + todayDateStr)) { 
+        // Check if a modal is already open
+        const existingModal = document.getElementById('aiEngineModal');
+        if(existingModal && (existingModal.style.display === 'flex' || existingModal.style.display === 'block')) {
+            return; // Modal already open, skip
+        }
         triggerNightlyStrictReview(); 
     } 
 }
@@ -3072,6 +3002,18 @@ function renderCurrentDay() {
 async function completeCurrentDay() {
     let appToday = getAppToday();
     let todayDateKey = getIsoDateStr(appToday);
+    
+    // Check if all tasks are actually completed (progress = 100%)
+    const checkBoxes = document.querySelectorAll('#dayCard input[type="checkbox"]');
+    let checkedCount = 0;
+    checkBoxes.forEach(cb => { if(cb.checked) checkedCount++; });
+    const progressPct = checkBoxes.length > 0 ? Math.round((checkedCount / checkBoxes.length) * 100) : 0;
+    
+    if(progressPct < 100) {
+        displayPremiumToastNotification(`All tasks must be 100% complete! Currently: ${progressPct}%`, "⚠️");
+        return;
+    }
+    
     localStorage.setItem(`day_completed_${todayDateKey}`, 'true');
 
     let dailyData = {
@@ -3530,24 +3472,8 @@ function stopWimHof() {
     document.getElementById('breathRoundDisplay').innerText = 'Breath: 0 / 15'; 
 }
 
-// 6. AI Photo Scanner (Meal) — Real AI scan only (mock removed)
-function confirmPhotoScan() {
-    // Real AI scan (handleMealPhotoScanWithAI) auto-logs — இந்த பட்டன் fallback மட்டும்
-    if(photoScanData) {
-        let actualNow = new Date();
-        let data = { id: Date.now(), date: getAppToday().toDateString(), time: actualNow.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), foodText: "[AI Photo] " + photoScanData.foodText, p: photoScanData.p, c: photoScanData.c, f: photoScanData.f, cal: photoScanData.cal };
-        mealLogs.unshift(data); localStorage.setItem('person_meal_logs', JSON.stringify(mealLogs));
-        renderMealLogsAndMacros(); updateCEODashboard();
-        document.getElementById('photoScanResult').style.display = 'none';
-        document.getElementById('mealPhotoPreview').style.display = 'none';
-        document.getElementById('mealPhotoInput').value = '';
-        photoScanData = null;
-        displayPremiumToastNotification("AI Meal Logged!", "✅");
-        playSuccessSound();
-    } else {
-        displayPremiumToastNotification("Photo scan பண்ணி மீண்டும் try பண்ணுங்க!", "⚠️");
-    }
-}
+
+
 
 // 7. Adaptive Workout AI
 function generateAdaptiveWorkout() {
