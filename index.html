@@ -1075,48 +1075,36 @@ body.theme-sharingan .toast-notification-hub {
 <button class="TOBI-chat-fab" id="TOBIChatFab" onclick="toggleChatPanel()">🤖<div class="TOBI-badge" id="TOBIChatBadge" style="display:none;">1</div></button>
 </div>
 <script>
-function checkDailyWisdom() {
+async function checkDailyWisdom() {
     let appToday = getAppToday();
     let todayStr = appToday.toDateString();
     
-    // இன்று ஏற்கனவே தத்துவத்தை காட்டிவிட்டோமா என்று பார்க்க
     if (!localStorage.getItem('daily_wisdom_shown_' + todayStr)) {
-        const gitaQuotes = [
-            "உன்னை உருவாக்குவதும் நீயே, உன்னை அழிப்பதும் நீயே. சோர்வு உடலுக்கு மட்டுமே! 🔥",
-            "பலனை எதிர்பார்க்காமல் கடமையைச் செய். இன்றைய வலி, நாளை உனக்கு மிகப்பெரிய வலிமை. 💪",
-            "எது நடந்ததோ அது நன்றாகவே நடந்தது. தளர்ந்து விடாதே! 🌿",
-            "மனதை வென்றவனுக்கு உலகமே அடிமை. நீயும் இன்று உன் சோர்வை வெல்! 🧘‍♂️",
-            "கஷ்டங்கள் வரும்போது எதிர்கொண்டு நில். நீ ஒரு வீரன், இன்று போராடு! ⚡",
-            "உடலின் சோர்வு தற்காலிகமானது, உன் இலக்கின் பெருமை நிரந்தரமானது. 🎯",
-            "எல்லாமே உன் எண்ணங்களைப் பொறுத்தது. உன்னால் முடியும்! 🦚",
-            "வெற்றி என்பது வீழ்ந்து விடாமல் இருப்பதல்ல, விழுந்த போதெல்லாம் மீண்டும் எழுவது. 🏆",
-            "தன்னம்பிக்கை உடையவன் எதையும் சாதிக்கலாம். இன்று உன் ஜிம் செஷனை முடித்துவிட்டு வா! 🧗",
-            "ஒவ்வொரு சொட்டு வியர்வையும் உன் வெற்றிக்கான படிக்கட்டு. 💧",
-            "உன் இலக்கு உன்னைத் தூங்க விடாமல் செய்தால், அதுவே சிறந்த வெற்றி. 💤",
-            "உழைப்பவன் ஒருபோதும் தோற்பதில்லை. உழைப்பைப் போல சிறந்த நண்பன் யாருமில்லை. ⚒️",
-            "தடைகள் வரும்போது திரும்பிப் பார்க்காதே, இலக்கை மட்டும் பார். 🚀",
-            "சிங்கம் ஓய்வு எடுப்பது தோற்பதற்காக அல்ல, மீண்டும் பாய்வதற்காக! 🦁",
-            "வலி உன்னை மாற்றும். சோர்வு உன்னை வளர்க்கும். 🔱",
-            "நேற்று செய்த தவறை இன்று திருத்திக்கொள். அதுவே வளர்ச்சி. 📈",
-            "உன்னால் முடியாதது என்று எதுவும் இல்லை. முயற்சி செய்! 🌟",
-            "கடமை தவறாதவனுக்குக் காலம் தானாகவே கைகூடும். ⏳",
-            "உன் திறமை உனக்குத் தெரியும், அதை உலகுக்கு நிரூபிக்கும் நேரம் இது. ⚔️",
-            "பெரிய வெற்றிகளுக்குப் பின்னால் பெரிய தியாகங்கள் இருக்கின்றன. பொறுமையுடன் தொடரு! ✨"
-        ];
+        const prompt = "கிருஷ்ணரின் உபதேசங்களை (Bhagavad Gita quotes) பற்றி ஒரு சிறிய, ஊக்கமளிக்கும் தத்துவத்தை தமிழில் கொடு. ஒரு வரியில் இருக்கட்டும்.";
         
-        let randomQuote = gitaQuotes[Math.floor(Math.random() * gitaQuotes.length)];
-        
-        // ஆப் திறந்த 5 விநாடிகள் கழித்து தானாக வரும்
-        setTimeout(() => {
+        setTimeout(async () => {
             triggerDeviceHapticPulse();
             openModalWithHistory('aiEngineModal');
-            document.getElementById('aiHeaderTitle').innerText = "🌞 TOBI-யின் தினசரி ஊக்கம்";
-            document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-gold); color:black;" onclick="closeModalAction('aiEngineModal')">நன்றி TOBI (Thanks)</button>`;
-            playAiTyping(`" ${randomQuote} "\n\n- TOBI (Your Daily Anchor)`, document.getElementById('aiTypingText'));
+            document.getElementById('aiHeaderTitle').innerText = "🌞 கிருஷ்ணரின் உபதேசம்"; // முதலில் தலைப்பை மட்டும் வைப்போம்
+            document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-gold); color:black;" onclick="closeModalAction('aiEngineModal')">நன்றி கிருஷ்ணா!</button>`;
             
-            // இன்று காட்டியதை பதிவு செய்தல்[cite: 1]
+            // 1. கிருஷ்ணரின் உபதேசத்தை AI மூலம் பெறுதல்
+            let krishnasWisdom = await askGemini(prompt);
+            
+            // 2. கிருஷ்ணரின் உபதேசத்தை மட்டும் முதலில் டைப் செய்தல்
+            let wisdomMsg = `கிருஷ்ணரின் உபதேசம்:\n\n" ${krishnasWisdom} "`;
+            
+            // playAiTyping முடிந்ததுமே "Good Morning Muthu" என்று சேர்க்க ஒரு சிறிய மாற்றம்
+            playAiTyping(wisdomMsg, document.getElementById('aiTypingText'));
+            
+            // 3. உபதேசம் டைப் ஆன பிறகு 3 விநாடிகள் கழித்து தலைப்பை மாற்றி மெசேஜை நிறைவு செய்தல்
+            setTimeout(() => {
+                document.getElementById('aiHeaderTitle').innerText = "🌞 Good Morning, Muthu!";
+                document.getElementById('aiTypingText').innerHTML += `\n\n------------------\nGood Morning Muthu🌅😘! உன் நாளை சிறப்பானதாகத் தொடங்கு! 🔥`;
+            }, 3000); 
+            
             localStorage.setItem('daily_wisdom_shown_' + todayStr, 'true');
-        }, 5000);
+        }, 3000);
     }
 }
 // ஜிம் போகாத நாட்களை எண்ணுவதற்கான பங்க்ஷன்
