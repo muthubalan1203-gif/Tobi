@@ -3752,12 +3752,26 @@ let gapiInited = false;
 let gisInited = false;
 
 function saveDriveClientId() {
-    const key = document.getElementById('driveClientIdInput').value.trim();
-    if (!key) { displayPremiumToastNotification("Client ID required!", "❌"); return; }
+    const inputField = document.getElementById('driveClientIdInput');
+    const key = inputField.value.trim();
+    
+    if (!key) {
+        displayPremiumToastNotification("❌ Client ID கொடுக்கவில்லை!", "❌");
+        return;
+    }
+    
+    // 1. LocalStorage-ல் சேமித்தல்
     localStorage.setItem('drive_client_id', key);
     DRIVE_CLIENT_ID = key;
-    document.getElementById('driveClientIdStatus').innerText = "✅ ID saved!";
-    gisLoaded();
+    
+    // 2. திரையில் மெசேஜ் காட்டுதல்
+    document.getElementById('driveClientIdStatus').innerText = "✅ ID பாதுகாப்பாகச் சேமிக்கப்பட்டது!";
+    displayPremiumToastNotification("✅ Client ID Save ஆகிவிட்டது!", "✅");
+    
+    // 3. API-ஐ மீண்டும் லோட் செய்து தயார் நிலையில் வைத்தல்
+    gisLoaded(); 
+    
+    console.log("Client ID saved: ", key); // சரிபார்க்க மட்டும்
 }
 
 function gapiLoaded() { gapi.load('client', initializeGapiClient); }
