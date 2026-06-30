@@ -602,7 +602,7 @@ body.theme-sharingan .toast-notification-hub {
 
     <!-- New Energy Matrix AI Button -->
     <div style="margin-top: 15px;">
-        <button class="btn-universal" style="background:var(--neon-purple); color:white; padding:10px; font-size:0.75rem; width:100%; border-radius:12px;" onclick="calculateLifeEnergyMatrix()">⚡ Calculate Life Energy Score</button>
+        <button class="btn-universal" style="background:var(--neon-purple); color:white; padding:10px; font-size:0.75rem; width:100%; border-radius:12px;" onclick="calculateLifeEnergyMatrix()">⚡ Daily AI Coach (Sleep+Steps+Gym+Diet)</button>
     </div>
 </div>
 
@@ -642,7 +642,7 @@ body.theme-sharingan .toast-notification-hub {
 <p style="font-size:0.75rem; color:var(--text-secondary);">Daily Morning System Boots:</p>
 <ul class="task-list">
 <li class="task-item"><div class="task-item-main"><label class="task-checkbox-side"><input type="checkbox" id="bio-1" onchange="handleBioChange('bio-1')"><span>🥶 Cold Shower (Testosterone Boost)</span></label></div></li>
-<li class="task-item"><div class="task-item-main"><label class="task-checkbox-side"><input type="checkbox" id="bio-2" onchange="handleBioChange('bio-2')"><span>☀️ 15 Mins Sunlight (Dopamine Fix) <span id="uvTrackerBadge" class="uv-badge uv-low" style="display:none;">UV: Low</span></span></label></div></li>
+<li class="task-item"><div class="task-item-main"><label class="task-checkbox-side"><input type="checkbox" id="bio-2" onchange="handleBioChange('bio-2')"><span>☀️ 15 Mins Sunlight (Dopamine Fix)</span></label></div></li>
 <li class="task-item"><div class="task-item-main"><label class="task-checkbox-side"><input type="checkbox" id="bio-3" onchange="handleBioChange('bio-3')"><span>💧 1L Water Empty Stomach (Detox)</span></label></div></li>
 </ul>
 <button class="tts-btn" onclick="speakTamil('குளிர் நீர் குளியல் எடுத்துட்டீங்களா? சன் லைட் பத்து நிமிஷம் பார்த்தீங்களா?')">🔊 Voice Coach</button>
@@ -675,9 +675,20 @@ body.theme-sharingan .toast-notification-hub {
 <button id="sundayAuditBtn" class="btn-universal" style="background:var(--neon-purple); color:white; display:none; margin-top:15px;" onclick="runWeeklyAudit()">📊 இந்த வார டாஸ்க்குகளை முடித்துவிட்டேன்</button>
 </div>
 
-<div class="app-card" style="border-top:5px solid var(--neon-green); margin-top:16px;">
-<h3 class="card-title" style="color:var(--neon-green);">🌿 இன்றைய இயற்கை பராமரிப்பு</h3>
-<div id="todayNaturalCareContainer" style="font-size:0.85rem; color:var(--text-secondary);"><p>Loading today's natural care protocol...</p></div></div>
+<div class="app-card" style="border-top:5px solid var(--neon-orange); margin-top:16px;">
+<h3 class="card-title" style="color:var(--neon-orange);">🚶 Steps Tracker</h3>
+<div class="form-row" style="margin-bottom:12px;">
+<div class="form-group" style="flex:1;"><label>இன்று நடந்த Steps:</label><input type="number" id="stepsInput" class="form-control" placeholder="எ.கா. 6000" style="background:#000; border-color:rgba(255,255,255,0.05); text-align:center; font-weight:700; color:white;"></div>
+</div>
+<button class="btn-universal" style="background:var(--neon-orange); color:black;" onclick="logStepsCardio()">📥 Steps Log பண்ணு</button>
+<div style="display:flex; justify-content:space-around; margin-top:14px; text-align:center;">
+<div><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">BURN / DISTANCE</div><div id="cardioBurnDisplay" style="font-weight:900; color:var(--neon-green); font-size:1rem; margin-top:4px;">0 Kcal 🔥 | 0.00 km</div></div>
+</div>
+<div id="stepsBenefitText" style="margin-top:12px; font-size:0.8rem; color:var(--text-secondary); background:rgba(0,0,0,0.2); padding:10px; border-radius:10px;">இன்னும் steps log பண்ணல.</div>
+<div id="stepsWeightGainAdvice" style="margin-top:8px; font-size:0.78rem; color:var(--neon-gold); background:rgba(0,0,0,0.2); padding:10px; border-radius:10px;"></div>
+<ul id="cardioLogList" class="task-list" style="margin-top:12px;"></ul>
+</div>
+
 
 
 <div class="app-card" style="border-top:5px solid var(--neon-cyan); margin-top:16px;">
@@ -982,7 +993,14 @@ body.theme-sharingan .toast-notification-hub {
 <h3 class="card-title" style="color:var(--neon-red);">⚖️ Advanced Recovery Analysis</h3>
 <p style="font-size:0.8rem; color:var(--text-secondary);">Sleep Cycle Matrix:</p>
 <div style="font-size:1.4rem; font-weight:900; color:#fff; margin:10px 0;" id="sleepDebtDisplay">0% Sleep Score</div>
-<p id="sleepDebtAdvice" style="font-size:0.75rem; color:var(--neon-gold); font-weight:bold;">No logs recorded yet.</p></div>
+<p id="sleepDebtAdvice" style="font-size:0.75rem; color:var(--neon-gold); font-weight:bold;">No logs recorded yet.</p>
+<button class="btn-universal" style="background:var(--neon-purple); margin-top:10px;" onclick="analyzeSleepWithAI()">🧠 TOBI AI Recovery Analysis</button>
+<div id="aiSleepAnalysisBox" style="margin-top:12px; display:none; background:rgba(0,0,0,0.25); border-radius:12px; padding:12px;">
+<div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">AI RECOVERY SCORE</div>
+<div style="font-size:1.6rem; font-weight:900; margin:4px 0;" id="aiSleepRecoveryPct">--%</div>
+<p id="aiSleepTips" style="font-size:0.78rem; color:var(--text-secondary); white-space:pre-line; margin-top:6px;"></p>
+</div>
+</div>
 <div class="app-card" style="border-top:4px solid var(--neon-indigo);">
 <h3 class="card-title">Log Sleep Matrix Data</h3>
 <div class="form-group"><label>Bedtime (தூங்கச் சென்ற நேரம்):</label><input type="time" id="sleepBedtime" class="form-control" style="background:#000; color:white;"></div>
@@ -1275,7 +1293,6 @@ let mealLogs = safeGetItem('person_meal_logs', []);
 let customWorkouts = safeGetItem('custom_workouts', {});
 let dayRatings = safeGetItem('person_day_ratings', {});
 let savings = safeGetItem('person_savings', []);
-let naturalTasks = safeGetItem('person_natural_tasks', {});
 let injuryLogs = safeGetItem('person_injury_logs', []);
 
 let weeklyBudgetTarget = parseFloat(localStorage.getItem('weekly_budget_target')) || 0;
@@ -1292,8 +1309,6 @@ let ambientAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/16/
 ambientAudio.loop = true;
 let isPlayingAudio = false;
 let selectedInjurySeverity = 0;
-let sunExposureTimer = null;
-let sunSeconds = 0;
 let wimHofInterval = null;
 let wimHofRound = 0;
 let wimHofPhase = 'idle';
@@ -1434,7 +1449,7 @@ function shareDailyReportToWhatsApp() {
     
     // ===== SLEEP & OVERALL =====
     let sleepText = '--';
-    if(sleepLogs.length > 0 && sleepLogs[0].date === dateStr) sleepText = sleepLogs[0].score + '%';
+    let effDate = getEffectiveSleepScore(dateStr); if(effDate !== null) sleepText = effDate + '%';
     
     let overallText = '0%';
     let overallEl = document.getElementById('ceoOverallText');
@@ -1505,7 +1520,6 @@ function checkAndResetDailyTasks() {
         currentWater = 0;
         renderWater();
         localStorage.setItem('last_opened_date', todayDateStr);
-        localStorage.removeItem('tomorrow_plan');
     }
 }
 function triggerDeviceHapticPulse() { if("vibrate" in navigator) navigator.vibrate(12); }
@@ -1570,7 +1584,7 @@ function switchPage(pageId, swipeDir) {
         // Load page data
         if(pageId === 'glowup') {
             renderCurrentDay(); loadBioStates(); renderWakeupLogs();
-            updateProgressBars(); renderTodayNaturalCare(); updateCEODashboard();
+            updateProgressBars(); updateCEODashboard();
             let cachedPred = localStorage.getItem('tobi_ai_predictions');
             if(cachedPred) { try { let pred = JSON.parse(cachedPred); if(pred.date === getAppToday().toDateString()) { if(document.getElementById('predictWeightVal')) document.getElementById('predictWeightVal').innerText = pred.weight.toFixed(1) + ' kg'; if(document.getElementById('predictWeightBar')) document.getElementById('predictWeightBar').style.width = Math.min(100, ((pred.weight - 62) / 8) * 100) + '%'; if(document.getElementById('predictBudgetVal')) document.getElementById('predictBudgetVal').innerText = pred.budget > 100 ? 'OVER ⚠️' : Math.round(pred.budget) + '%'; if(document.getElementById('predictBudgetBar')) document.getElementById('predictBudgetBar').style.width = Math.min(100, pred.budget) + '%'; if(document.getElementById('predictOvertrainVal')) document.getElementById('predictOvertrainVal').innerText = Math.round(pred.overtrain) + '%'; if(document.getElementById('predictOvertrainBar')) document.getElementById('predictOvertrainBar').style.width = Math.min(100, pred.overtrain) + '%'; if(document.getElementById('predictMuscleVal')) document.getElementById('predictMuscleVal').innerText = Math.round(pred.muscle) + '%'; if(document.getElementById('predictMuscleBar')) document.getElementById('predictMuscleBar').style.width = Math.min(100, pred.muscle) + '%'; if(pred.insight && document.getElementById('predictAiInsight')) { document.getElementById('predictAiInsight').innerText = pred.insight; document.getElementById('predictAiInsight').style.display = 'block'; } } } catch(e) {} }
             updatePredictiveAnalytics(); renderCardioLogs();
@@ -1639,7 +1653,7 @@ function loadBioStates() { ['bio-1','bio-2','bio-3'].forEach(id => { if(document
 
 function updateRecoveryRing() {
     let appToday = getAppToday(); let todayStr = appToday.toDateString();
-    let sleepScore = (sleepLogs.length > 0 && sleepLogs[0].date === todayStr) ? sleepLogs[0].score : 50;
+    let sleepScore = getEffectiveSleepScore(todayStr) ?? 50;
     let waterScore = (currentWater / 4000) * 100; if(waterScore > 100) waterScore = 100;
     let recoveryPct = Math.round((sleepScore * 0.6) + (waterScore * 0.4)); if(recoveryPct > 100) recoveryPct = 100;
     const circle = document.getElementById('recoveryRingCircle');
@@ -1775,41 +1789,78 @@ function loadBodyMetrics() {
 }
 async function calculateLifeEnergyMatrix() {
     triggerDeviceHapticPulse();
-    
-    // 1. ஆப்பில் உள்ள அனைத்து தரவுகளையும் திரட்டுதல்
+
+    // 1. ஆப்பில் உள்ள அனைத்து தரவுகளையும் திரட்டுதல் (Sleep + Steps + Gym + Diet)
     let appToday = getAppToday();
     let todayStr = appToday.toDateString();
-    
+    let todayName = daysOfWeek[appToday.getDay()];
+
+    // --- GYM ---
+    const workoutMap = {
+        'Monday': 'Chest & Triceps 💥', 'Tuesday': 'Back & Biceps 🦍', 'Wednesday': 'Yoga 🧘‍♂️',
+        'Thursday': 'Shoulder & Abs 🎯', 'Friday': 'Legs & Glutes 🦵', 'Saturday': 'Yoga 🧘‍♂️', 'Sunday': 'Rest Day 🧘‍♂️'
+    };
+    let gymStatus = localStorage.getItem(`gym_done_${todayStr}`);
+    let gymLine = gymStatus === 'true' ? `✅ Done - ${workoutMap[todayName]}` : (gymStatus === 'false' ? '❌ Skip பண்ணிட்டாங்க' : '⏳ இன்னும் mark பண்ணல');
+    const activeCard = document.querySelector('.visible-workout');
+    let gymCompleted = 0, gymTotal = 0;
+    if(activeCard) { const gymCbs = activeCard.querySelectorAll('input[type="checkbox"]'); gymTotal = gymCbs.length; gymCbs.forEach(cb => { if(cb.checked) gymCompleted++; }); }
+
+    // --- STEPS ---
+    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    let todayCardio = cardioLogs.find(c => c.date === todayStr);
+    let stepsLine = todayCardio ? `🚶 ${todayCardio.steps} steps | 📏 ${todayCardio.distanceKm || 0}km | 🔥 ${todayCardio.burn} Kcal burn` : "Steps log பண்ணல";
+
+    // --- SLEEP ---
+    let sleepLine = "Sleep log பண்ணல";
+    if(sleepLogs.length > 0) {
+        let latestSleep = sleepLogs[0];
+        sleepLine = `${latestSleep.bedtime} ➜ ${latestSleep.wakeup} (${latestSleep.hours}hrs) | நடுவில் ${latestSleep.interruptions} முறை விழித்தது | Score: ${latestSleep.score}%`;
+    }
+
+    // --- DIET ---
+    calculateDietMacrosFromSchedule();
+
     let dailyData = {
         date: todayStr,
         tasksCompleted: document.querySelectorAll('#dayCard input:checked').length,
-        gymStats: localStorage.getItem('gym_streak') || 0,
-        waterIntake: (currentWater / 1000).toFixed(1) + "L",
-        dietMacros: { protein: currentLoggedProtein, carbs: currentLoggedCarbs, cal: currentLoggedCal },
-        sleepScore: sleepLogs.length > 0 ? sleepLogs[0].score : 50,
+        gym: gymLine,
+        gymExercises: gymTotal > 0 ? `${gymCompleted}/${gymTotal}` : "N/A",
+        steps: stepsLine,
+        sleep: sleepLine,
+        waterIntake: (currentWater / 1000).toFixed(1) + "L / 4L",
+        dietMacros: { protein: `${currentLoggedProtein}g/${targetP}g`, carbs: `${currentLoggedCarbs}g/${targetC}g`, cal: currentLoggedCal },
         mood: JSON.parse(localStorage.getItem('gym_moods') || '{}')[todayStr] || "Normal"
     };
 
-    // 2. AI-க்கான கட்டளை (Prompt)
+    // 2. AI-க்கான கட்டளை (Prompt) — Sleep + Steps + Gym + Diet ஒன்றாக இணைத்து
     let prompt = `
-    நீ முத்துபாலனின் AI Life Coach (TOBI). கீழே உள்ள தரவுகளைக் கொண்டு, 0 முதல் 100 வரை ஒரு 'Life Energy Score'-ஐ கணக்கிடு.
-    அதே சமயம், அவன் செய்த வேலைகளையும் (Tasks), ஜிம் ஒர்க்அவுட்டையும், டயட்டையும் அனலைஸ் செய்து ஒரு ஆழமான பின்னூட்டம் (Feedback) கொடு.
-    
+    நீ முத்துபாலனின் AI Life Coach (TOBI). கீழே உள்ள Sleep, Steps, Gym, Diet தரவுகள் அனைத்தையும் ஒன்றாக இணைத்து analyze செய்து, ஒரு unified Recovery & Performance assessment கொடு.
+
     தரவு (Data): ${JSON.stringify(dailyData)}
-    
+
     பதிலை கீழே உள்ள பார்மட்டில் மட்டும் கொடு:
-    SCORE: [0-100]
-    ANALYSIS: [ஒரு பாராவில் ஆழமான அனாலிசிஸ் - தமிழ்ல]
-    SUGGESTION: [நாளைக்கு எதை மாற்றினால் ஸ்கோர் கூடும்? - தமிழ்ல]
+    RECOVERY_PCT: [0-100 — Sleep quality + Steps activity load அடிப்படையில் உடல் எவ்வளவு recover ஆகியிருக்கு]
+    PERFORMANCE_PCT: [0-100 — Gym completion + Diet macros + Tasks அடிப்படையில் இன்றைய performance]
+    SCORE: [0-100 — Overall combined Life Energy Score]
+    ANALYSIS: [ஒரு பாராவில், Sleep+Steps+Gym+Diet நான்கையும் இணைத்து ஆழமான அனாலிசிஸ் - தமிழ்ல]
+    PRIORITY_ACTION: [இன்றைக்கு/நாளைக்கு செய்ய வேண்டிய ஒரே ஒரு மிக முக்கியமான Action - தமிழ்ல, ஒரு வரியில்]
     `;
 
     openModalWithHistory('aiEngineModal');
-    document.getElementById('aiHeaderTitle').innerText = "⚡ TOBI LIFE ENERGY MATRIX";
-    document.getElementById('aiTypingText').innerHTML = "Calculating your energy levels...";
+    document.getElementById('aiHeaderTitle').innerText = "⚡ TOBI DAILY AI COACH";
+    document.getElementById('aiTypingText').innerHTML = "Sleep, Steps, Gym, Diet தரவுகளை இணைத்து analyze பண்றேன்...";
 
     // 3. AI அனாலிசிஸ்
-    let aiResponse = await askGemini(prompt);
-    playAiTyping(aiResponse, document.getElementById('aiTypingText'));
+    try {
+        let aiResponse = await askGemini(prompt);
+        playAiTyping(aiResponse, document.getElementById('aiTypingText'));
+
+        let scoreMatch = aiResponse.match(/SCORE:\s*([0-9]+)/);
+        if(scoreMatch) localStorage.setItem('ai_life_energy_score', JSON.stringify({ date: todayStr, score: parseInt(scoreMatch[1]) }));
+    } catch(e) {
+        document.getElementById('aiTypingText').innerHTML = "AI இப்போ reach ஆகல. Network/API Key check பண்ணுங்க.";
+    }
   }
   
 function logGymMood(mood, elem) { 
@@ -2318,10 +2369,96 @@ function addWeight() { let appToday = getAppToday(); const todayStr = appToday.t
 function deleteWeight(id) { triggerDeviceHapticPulse(); weights = weights.filter(w => w.id !== id); localStorage.setItem('person_weights', JSON.stringify(weights)); renderWeightsCircleAndLists(); updateCEODashboard(); }
 function renderWeightsCircleAndLists() { const container = document.getElementById('weightListContainer'); if(!container) return; container.innerHTML = ''; let currentWt = 62.0; if(weights.length > 0) currentWt = weights[0].val; document.getElementById('weightCurrentStatusDisplay').innerText = `${currentWt.toFixed(1)} kg`; let delta = currentWt - 62.0; if(delta < 0) delta = 0; let scalePct = Math.round((delta / 8.0) * 100); if(scalePct > 100) scalePct = 100; document.getElementById('ringWeightPct').innerHTML = `${scalePct}%<span>Gained</span>`; const circle = document.getElementById('weightProgressCircle'); if(circle) { let circumference = 2 * Math.PI * 42; circle.style.strokeDashoffset = circumference - (scalePct / 100) * circumference; } weights.forEach(w => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = 'var(--neon-purple)'; li.innerHTML = `<div><b>${w.val} kg</b><br><small style="color:var(--text-secondary)">${w.date}</small></div><button class="delete-btn" onclick="deleteWeight(${w.id})">🗑️</button>`; container.appendChild(li); }); }
 
-function addAdvancedSleepLog() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const bedtime = document.getElementById('sleepBedtime').value; const wakeup = document.getElementById('sleepWakeup').value; const interruptions = parseInt(document.getElementById('sleepInterruptions').value); const dreamText = document.getElementById('dreamInput').value; if(!bedtime || !wakeup) return displayPremiumToastNotification("Fill Bedtime & Wakeup!", "❌"); let bParts = bedtime.split(':'); let wParts = wakeup.split(':'); let bMin = parseInt(bParts[0]) * 60 + parseInt(bParts[1]); let wMin = parseInt(wParts[0]) * 60 + parseInt(wParts[1]); let diffMin = wMin - bMin; if(diffMin < 0) diffMin += 1440; let totalHours = diffMin / 60; let baseEfficiency = 100 - (interruptions * 12); if(totalHours < 6) baseEfficiency -= (6 - totalHours) * 15; if(totalHours > 9) baseEfficiency -= (totalHours - 9) * 5; if(baseEfficiency < 20) baseEfficiency = 20; let finalScore = Math.round(baseEfficiency); sleepLogs = sleepLogs.filter(s => s.date !== todayStr); sleepLogs.unshift({ id: Date.now(), hours: parseFloat(totalHours.toFixed(1)), bedtime: bedtime, wakeup: wakeup, score: finalScore, interruptions: interruptions, date: todayStr }); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); if(dreamText.trim() !== '') localStorage.setItem('dream_log_' + todayStr, dreamText); document.getElementById('sleepBedtime').value = ''; document.getElementById('sleepWakeup').value = ''; document.getElementById('dreamInput').value = ''; displayPremiumToastNotification("Sleep Cycle Logged!", "😴"); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
+function addAdvancedSleepLog() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const bedtime = document.getElementById('sleepBedtime').value; const wakeup = document.getElementById('sleepWakeup').value; const interruptions = parseInt(document.getElementById('sleepInterruptions').value); const dreamText = document.getElementById('dreamInput').value; if(!bedtime || !wakeup) return displayPremiumToastNotification("Fill Bedtime & Wakeup!", "❌"); let bParts = bedtime.split(':'); let wParts = wakeup.split(':'); let bMin = parseInt(bParts[0]) * 60 + parseInt(bParts[1]); let wMin = parseInt(wParts[0]) * 60 + parseInt(wParts[1]); let diffMin = wMin - bMin; if(diffMin < 0) diffMin += 1440; let totalHours = diffMin / 60; let baseEfficiency = 100 - (interruptions * 12); if(totalHours < 6) baseEfficiency -= (6 - totalHours) * 15; if(totalHours > 9) baseEfficiency -= (totalHours - 9) * 5; if(baseEfficiency < 20) baseEfficiency = 20; let finalScore = Math.round(baseEfficiency); sleepLogs = sleepLogs.filter(s => s.date !== todayStr); sleepLogs.unshift({ id: Date.now(), hours: parseFloat(totalHours.toFixed(1)), bedtime: bedtime, wakeup: wakeup, score: finalScore, interruptions: interruptions, date: todayStr }); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); { let aiData = JSON.parse(localStorage.getItem('ai_sleep_recovery') || 'null'); if(aiData && aiData.date === todayStr) { localStorage.removeItem('ai_sleep_recovery'); if(document.getElementById('aiSleepAnalysisBox')) document.getElementById('aiSleepAnalysisBox').style.display = 'none'; } } if(dreamText.trim() !== '') localStorage.setItem('dream_log_' + todayStr, dreamText); document.getElementById('sleepBedtime').value = ''; document.getElementById('sleepWakeup').value = ''; document.getElementById('dreamInput').value = ''; displayPremiumToastNotification("Sleep Cycle Logged!", "😴"); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
 function deleteSleepLog(id) { triggerDeviceHapticPulse(); sleepLogs = sleepLogs.filter(s => s.id !== id); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
 function renderSleepLogs() { const container = document.getElementById('sleepListContainer'); if(!container) return; container.innerHTML = ''; sleepLogs.forEach(s => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = s.score >= 80 ? 'var(--neon-green)' : (s.score >= 55 ? 'var(--neon-gold)' : 'var(--neon-red)'); li.innerHTML = `<div><b>${s.hours} Hours</b> (${s.bedtime} - ${s.wakeup})<br><small style="color:var(--text-secondary)">Efficiency: ${s.score}% • Interrupts: ${s.interruptions}</small></div><button class="delete-btn" onclick="deleteSleepLog(${s.id})">🗑️</button>`; container.appendChild(li); }); }
-function calculateSleepParagraphAnalysis() { const display = document.getElementById('sleepDebtDisplay'); const advice = document.getElementById('sleepDebtAdvice'); if(!display) return; if(sleepLogs.length === 0) { display.innerText = "0% Score"; advice.innerText = "No logs recorded yet."; return; } let latest = sleepLogs[0]; display.innerText = `${latest.score}% Deep Sleep Efficiency`; if(latest.score >= 80) { display.style.color = "var(--neon-green)"; advice.innerText = "அருமையான தூக்கம் முத்துபாலன்! தசை வளர்ச்சி (Anabolic Growth) மற்றும் நரம்பு மண்டல ரெக்கவரி 100% சிறப்பாக உள்ளது. 🧘‍♂️"; } else if(latest.score >= 55) { display.style.color = "var(--neon-gold)"; advice.innerText = `தூக்கம் சற்றே பாதிக்கப்பட்டுள்ளது. நடுவில் ${latest.interruptions} முறை விழித்துள்ளீர்கள். படுக்கைக்குச் செல்லும் முன் மொபைல் பார்ப்பதைத் தவிர்க்கவும்! ⚠️`; } else { display.style.color = "var(--neon-red)"; advice.innerText = "ரொம்ப மோசமான தூக்க தரம்! 🥱 உடல் அசதி மற்றும் சோர்வு அதிகம் இருக்கும். இன்று இரவு சீக்கிரம் தூங்கச் செல்ல TOBI பரிந்துரைக்கிறது."; } }
+function calculateSleepParagraphAnalysis() { const display = document.getElementById('sleepDebtDisplay'); const advice = document.getElementById('sleepDebtAdvice'); if(!display) return; if(sleepLogs.length === 0) { display.innerText = "0% Score"; advice.innerText = "No logs recorded yet."; return; } let latest = sleepLogs[0]; let effectiveScore = getEffectiveSleepScore(latest.date); display.innerText = `${effectiveScore}% Deep Sleep Efficiency`; if(effectiveScore >= 80) { display.style.color = "var(--neon-green)"; advice.innerText = "அருமையான தூக்கம் முத்துபாலன்! தசை வளர்ச்சி (Anabolic Growth) மற்றும் நரம்பு மண்டல ரெக்கவரி 100% சிறப்பாக உள்ளது. 🧘‍♂️"; } else if(effectiveScore >= 55) { display.style.color = "var(--neon-gold)"; advice.innerText = `தூக்கம் சற்றே பாதிக்கப்பட்டுள்ளது. நடுவில் ${latest.interruptions} முறை விழித்துள்ளீர்கள். படுக்கைக்குச் செல்லும் முன் மொபைல் பார்ப்பதைத் தவிர்க்கவும்! ⚠️`; } else { display.style.color = "var(--neon-red)"; advice.innerText = "ரொம்ப மோசமான தூக்க தரம்! 🥱 உடல் அசதி மற்றும் சோர்வு அதிகம் இருக்கும். இன்று இரவு சீக்கிரம் தூங்கச் செல்ல TOBI பரிந்துரைக்கிறது."; } }
+
+// 🧠 SINGLE SOURCE OF TRUTH: AI Sleep Recovery Score (falls back to local rule-based score)
+function getAiSleepScoreForToday() {
+    let aiData = JSON.parse(localStorage.getItem('ai_sleep_recovery') || 'null');
+    let todayStr = getAppToday().toDateString();
+    if(aiData && aiData.date === todayStr) return aiData.pct;
+    return null;
+}
+function getEffectiveSleepScore(dateStr) {
+    let todayStr = getAppToday().toDateString();
+    if(dateStr === todayStr) {
+        let aiPct = getAiSleepScoreForToday();
+        if(aiPct !== null) return aiPct;
+    }
+    let log = sleepLogs.find(s => s.date === dateStr);
+    return log ? log.score : null;
+}
+
+// ========== GEMINI-POWERED SLEEP RECOVERY AI ==========
+async function analyzeSleepWithAI() {
+    if(sleepLogs.length === 0) { displayPremiumToastNotification("முதலில் Sleep Log பண்ணுங்க!", "❌"); return; }
+
+    const box = document.getElementById('aiSleepAnalysisBox');
+    const pctEl = document.getElementById('aiSleepRecoveryPct');
+    const tipsEl = document.getElementById('aiSleepTips');
+    box.style.display = 'block';
+    pctEl.innerText = '🧠...';
+    tipsEl.innerText = 'TOBI உங்க தூக்க pattern-ஐ analyze பண்றேன்...';
+
+    let latest = sleepLogs[0];
+    let recent = sleepLogs.slice(0, 7);
+    let avgScore = Math.round(recent.reduce((s,l)=>s+l.score,0) / recent.length);
+    let avgHours = (recent.reduce((s,l)=>s+l.hours,0) / recent.length).toFixed(1);
+    let totalInterrupts = recent.reduce((s,l)=>s+(l.interruptions||0), 0);
+
+    let historyLines = recent.map(l => `• ${l.date}: ${l.bedtime} ➜ ${l.wakeup} (${l.hours}hrs) | நடுவில் ${l.interruptions} முறை விழித்தது | Local Score: ${l.score}%`).join('\n');
+
+    let prompt = `You are TOBI, Muthubalan's elite personal sleep & recovery coach AI. Analyze his sleep pattern below and give a Recovery Analysis.
+
+**STRICT FORMAT — Return EXACTLY like this, nothing else:**
+
+RECOVERY_PCT: [0-100, an integer — overall body recovery quality based on sleep consistency, duration, and interruptions]
+TIPS: [3-4 short, specific, actionable tips in TAMIL, each on its own line starting with "👉 "]
+
+**Muthubalan's Last Night Sleep:**
+• Bedtime: ${latest.bedtime}
+• Wake-up Time: ${latest.wakeup}
+• Total Hours: ${latest.hours} hrs
+• Mid-night wake-ups (Interruptions): ${latest.interruptions} times
+
+**Last ${recent.length} Days Sleep History:**
+${historyLines}
+
+**7-Day Averages:**
+• Avg Hours/night: ${avgHours}
+• Avg Local Score: ${avgScore}%
+• Total Interruptions (7 days): ${totalInterrupts}
+
+Analyze deeply like a sleep scientist — factor in consistency of bedtime/wakeup, total interruptions, and sleep duration trend. Be honest, specific, and motivating in Tamil.`;
+
+    try {
+        let aiResponse = await askGemini(prompt);
+        let pctMatch = aiResponse.match(/RECOVERY_PCT:\s*([0-9]+)/);
+        let tipsMatch = aiResponse.match(/TIPS:\s*([\s\S]+)/);
+
+        let recoveryPct = pctMatch ? parseInt(pctMatch[1]) : latest.score;
+        let tipsText = tipsMatch ? tipsMatch[1].trim() : "இன்னிக்கு சீக்கிரம் தூங்கி, தொடர்ந்து ஒரே நேரத்துல எழுந்திருக்க முயற்சி பண்ணுங்க.";
+
+        pctEl.innerText = `${recoveryPct}%`;
+        pctEl.style.color = recoveryPct >= 80 ? "var(--neon-green)" : (recoveryPct >= 55 ? "var(--neon-gold)" : "var(--neon-red)");
+        tipsEl.innerText = tipsText;
+
+        localStorage.setItem('ai_sleep_recovery', JSON.stringify({ date: getAppToday().toDateString(), pct: recoveryPct, tips: tipsText }));
+
+        // 🔗 இந்த AI Score-ஐ app முழுவதும் single source of truth ஆக propagate பண்றோம்
+        calculateSleepParagraphAnalysis();
+        updateRecoveryRing();
+        updateCEODashboard();
+        if(document.getElementById('adaptiveRecoveryPct')) generateAdaptiveWorkout();
+        updatePredictiveAnalytics();
+        displayPremiumToastNotification("AI Recovery Analysis Ready!", "🧠");
+    } catch(e) {
+        pctEl.innerText = `${latest.score}%`;
+        tipsEl.innerText = "AI இப்போ reach ஆகல. Network/API Key check பண்ணுங்க. தற்போதைக்கு local score காட்டப்படுகிறது.";
+    }
+}
 
 function addReminder() { const text = document.getElementById('noteText').value.trim(); const rDate = document.getElementById('noteDateTarget').value; if(!text || !rDate) return displayPremiumToastNotification("Task/Date required!", "❌"); notes.unshift({ id: Date.now(), text: text, dateTarget: rDate, completed: false }); localStorage.setItem('person_notes', JSON.stringify(notes)); document.getElementById('noteText').value = ''; document.getElementById('noteDateTarget').value = ''; displayPremiumToastNotification("Reminder Set!", "⏰"); renderReminders(); }
 function completeReminder(id) { triggerDeviceHapticPulse(); notes = notes.map(n => { if(n.id === id) n.completed = true; return n; }); localStorage.setItem('person_notes', JSON.stringify(notes)); renderReminders(); displayPremiumToastNotification("Reminder Done!", "✅"); }
@@ -2844,6 +2981,18 @@ function triggerNightlyStrictReview() {
     let waterLiters = (currentWater / 1000).toFixed(1);
     let p = currentLoggedProtein;
     
+    // ===== STEPS / CARDIO =====
+    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    let todayCardio = cardioLogs.find(c => c.date === todayDateStr);
+    let stepsLine, weightGainAdviceLine;
+    if (todayCardio) {
+        stepsLine = `🚶 ${todayCardio.steps} steps | 📏 ${todayCardio.distanceKm || 0} km | 🔥 ${todayCardio.burn} Kcal Burn\n   ${getStepsBenefitText(todayCardio.steps)}`;
+        weightGainAdviceLine = getStepsWeightGainAdvice(todayCardio.burn);
+    } else {
+        stepsLine = "• இன்னிக்கு Steps log பண்ணல.";
+        weightGainAdviceLine = "";
+    }
+    
     // Build Report
     let aiReport = `📡 TOBI NIGHT SCAN - ${todayDateStr}\n=========================================\n\n`;
     aiReport += `🍽️ FOOD:\n${foodList}\n\n`;
@@ -2851,7 +3000,9 @@ function triggerNightlyStrictReview() {
     aiReport += `🏋️‍♂️ GYM: ${gymLine}\n`;
     if(gymTotal > 0) aiReport += `   Exercises Done: ${gymCompleted} / ${gymTotal}\n\n`;
     else aiReport += `\n`;
-    aiReport += `📊 SUMMARY:\n- தண்ணீர்: ${waterLiters}L / 4L\n- டாஸ்க்குகள்: ${completedTasks} / ${totalTasks}\n- Protein: ${p}g / ${targetP}g\n\n`;
+    aiReport += `🚶 STEPS:\n${stepsLine}\n`;
+    if(weightGainAdviceLine) aiReport += `${weightGainAdviceLine}\n`;
+    aiReport += `\n📊 SUMMARY:\n- தண்ணீர்: ${waterLiters}L / 4L\n- டாஸ்க்குகள்: ${completedTasks} / ${totalTasks}\n- Protein: ${p}g / ${targetP}g\n\n`;
     
     if(missedTasks.length > 0 || waterLiters < 4 || (gymTotal > 0 && gymCompleted < gymTotal) || p < targetP) { 
         aiReport += "⚠️ STRICT REVIEW: முத்துபாலன், இன்று சில விஷயங்களை கோட்டை விட்டுள்ளீர்கள்!\n"; 
@@ -2873,18 +3024,6 @@ function triggerNightlyStrictReview() {
         <button class="ai-btn-close" style="background:var(--neon-green); color:black;" onclick="shareNightlyReportToWhatsApp()">📲 Share to WhatsApp</button>
         <button class="ai-btn-close" style="background:var(--neon-cyan); color:black;" onclick="generateTomorrowProtocol()">நாளைக்கான Protocol-ஐ காட்டு</button>
     `; 
-}
-
-function setTomorrowPlan() { 
-    let appToday = getAppToday(); 
-    let plan = prompt("TOBI: நாளைக்கு முக்கியமாக என்ன செய்ய வேண்டும்?"); 
-    if(plan) { 
-        localStorage.setItem('tomorrow_plan', plan); 
-        localStorage.setItem('night_review_done_' + appToday.toDateString(), 'true'); 
-        showTomorrowPlan(); 
-        closeModalAction('aiEngineModal'); 
-        displayPremiumToastNotification("Plan Saved!", "📅"); 
-    } 
 }
 
 function shareNightlyReportToWhatsApp() {
@@ -2934,7 +3073,7 @@ function shareNightlyReportToWhatsApp() {
     
     // ===== SLEEP & OVERALL =====
     let sleepText = '--';
-    if(sleepLogs.length > 0 && sleepLogs[0].date === dateStr) sleepText = sleepLogs[0].score + '%';
+    let effDate = getEffectiveSleepScore(dateStr); if(effDate !== null) sleepText = effDate + '%';
     
     let overallText = '0%';
     let overallEl = document.getElementById('ceoOverallText');
@@ -3036,7 +3175,6 @@ function checkNightlyPlanningTimer() {
 }
 
 
-function showTomorrowPlan() { let plan = localStorage.getItem('tomorrow_plan'); let display = document.getElementById('tomorrow-task-display'); let card = document.getElementById('tomorrow-planner-card'); if(plan && display && card) { display.innerText = plan; card.style.display = 'block'; } }
 function applyDisciplinePenalty() { let appToday = getAppToday(); let todayDateKey = getIsoDateStr(appToday); if(localStorage.getItem('penalty_applied_' + todayDateKey)) return; let streak = parseInt(localStorage.getItem('gym_streak') || 0); if(streak < 2 && savings.length > 0) { savings.unshift({ id: Date.now(), amount: -100, date: appToday.toDateString(), note: 'Penalty' }); localStorage.setItem('person_savings', JSON.stringify(savings)); renderSavings(); localStorage.setItem('penalty_applied_' + todayDateKey, 'true'); displayPremiumToastNotification("Penalty Applied: ₹100 deducted.", "⚠️"); } }
 
 function renderCurrentDay() { 
@@ -3149,83 +3287,74 @@ async function completeCurrentDay() {
         <button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>
     `;
 }
-function renderTodayNaturalCare() {
-    let appToday = getAppToday(); const day = appToday.getDay(); const protocol = dailyNaturalProtocols[day]; 
-    const container = document.getElementById('todayNaturalCareContainer'); 
-    if(!container || !protocol) return; 
-    
-    let html = `<div style="margin-bottom:10px; font-weight:800; color:var(--neon-gold); font-size:0.95rem;">${protocol.title}</div><ul class="task-list">`; 
-    protocol.items.forEach(item => { 
-        // checkbox tag-ஐ நீக்கிவிட்டு சாதாரண span ஆக மாற்றிவிட்டேன்
-        html += `<li class="task-item" style="border-bottom:1px solid rgba(255,255,255,0.03); padding-left:5px;">
-            <span>🔸 ${item.text}</span>
-        </li>`; 
-    }); 
-    html += `</ul>`; 
-    container.innerHTML = html;
+
+function calcStepsMetrics(steps) {
+    // சராசரி அடி அளவு ~0.762m எடுத்து தூரம் கணக்கிடுகிறோம்
+    let distanceKm = (steps * 0.000762);
+    let burn = Math.round(steps * 0.04); // ஏற்கனவே app-ல் இருந்த steps→kcal factor
+    return { distanceKm: distanceKm.toFixed(2), burn };
 }
 
-function toggleNaturalTask(taskId) {
-    let appToday = getAppToday();
-    let todayStr = appToday.toDateString();
-    let cb = document.getElementById(taskId);
-    if(cb && cb.checked) {
-        localStorage.setItem(`${taskId}_${todayStr}`, 'true');
-    } else {
-        localStorage.removeItem(`${taskId}_${todayStr}`);
-    }
-    displayPremiumToastNotification("Protocol updated!", "✅");
+function getStepsBenefitText(steps) {
+    if(steps <= 0) return "இன்னும் steps log பண்ணல. நடந்தா இங்க தெரியும்.";
+    if(steps < 4000) return "🔴 மிகக் குறைவு (Sedentary). கொஞ்சம் அதிகமா நடக்க முயற்சி பண்ணுங்க.";
+    if(steps < 7000) return "🟠 சராசரி. உடல் ஆரோக்கியத்துக்கு இன்னும் கொஞ்சம் நடக்கலாம்.";
+    if(steps < 10000) return "🟢 நல்லா இருக்கு! Heart health & digestion-க்கு நல்லது.";
+    return "🟢🔥 அருமை! 10K+ steps — stamina & fat-burn-க்கு சிறந்தது.";
+}
+
+function getStepsWeightGainAdvice(burn) {
+    if(burn <= 0) return "";
+    // weight gain (bulking) goal-ஓட இருக்கிறதால, extra cardio burn-ஐ extra food intake-ஆ recover பண்ணணும்
+    let extraProteinG = Math.round(burn / 25); // rough: every ~25 kcal burnt → 1g extra protein buffer
+    return `⚠️ உடல் எடை அதிகரிக்கணும்னா (Weight Gain Goal): இன்னிக்கு நடந்ததால ${burn} Kcal extra burn ஆகிடுச்சு. இதை balance பண்ண, இன்னிக்கு meals-ல ~${burn} Kcal அதிகமா சாப்பிடணும் (குறிப்பா ${extraProteinG}g protein extra சேர்த்துக்கோங்க), இல்லனா weight gain slow ஆகும்.`;
 }
 
 function logStepsCardio() {
     let steps = parseInt(document.getElementById('stepsInput').value) || 0;
-    let walk = parseInt(document.getElementById('walkMin').value) || 0;
-    let run = parseInt(document.getElementById('runMin').value) || 0;
-    let cycle = parseInt(document.getElementById('cycleMin').value) || 0;
-    
-    let burn = (walk * 4) + (run * 10) + (cycle * 8) + (steps * 0.04);
-    let burnRounded = Math.round(burn);
-    
+    let { distanceKm, burn: burnRounded } = calcStepsMetrics(steps);
+
     let appToday = getAppToday();
     let todayStr = appToday.toDateString();
-    
+
     let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
     cardioLogs = cardioLogs.filter(c => c.date !== todayStr);
-    cardioLogs.unshift({ id: Date.now(), date: todayStr, steps, walk, run, cycle, burn: burnRounded });
+    cardioLogs.unshift({ id: Date.now(), date: todayStr, steps, distanceKm, burn: burnRounded });
     localStorage.setItem('cardio_logs', JSON.stringify(cardioLogs));
-    
-    document.getElementById('cardioBurnDisplay').innerText = `${burnRounded} Kcal 🔥`;
+
+    if(document.getElementById('cardioBurnDisplay')) document.getElementById('cardioBurnDisplay').innerText = `${burnRounded} Kcal 🔥 | ${distanceKm} km`;
+    if(document.getElementById('stepsBenefitText')) document.getElementById('stepsBenefitText').innerText = getStepsBenefitText(steps);
+    if(document.getElementById('stepsWeightGainAdvice')) document.getElementById('stepsWeightGainAdvice').innerText = getStepsWeightGainAdvice(burnRounded);
+
     renderCardioLogs();
-    displayPremiumToastNotification(`Burned ${burnRounded} Kcal! Great work!`, "🔥");
+    displayPremiumToastNotification(`${distanceKm} km நடந்தீங்க! ${burnRounded} Kcal Burn!`, "🚶");
     updateCEODashboard();
 }
 
 function renderCardioLogs() {
     let container = document.getElementById('cardioLogList');
-    if(!container) return;
     let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
     let appToday = getAppToday();
     let todayStr = appToday.toDateString();
-    
+
     let todayLog = cardioLogs.find(c => c.date === todayStr);
     if(todayLog) {
-        document.getElementById('stepsInput').value = todayLog.steps || '';
-        document.getElementById('walkMin').value = todayLog.walk || '';
-        document.getElementById('runMin').value = todayLog.run || '';
-        document.getElementById('cycleMin').value = todayLog.cycle || '';
-        document.getElementById('cardioBurnDisplay').innerText = `${todayLog.burn} Kcal 🔥`;
+        if(document.getElementById('stepsInput')) document.getElementById('stepsInput').value = todayLog.steps || '';
+        if(document.getElementById('cardioBurnDisplay')) document.getElementById('cardioBurnDisplay').innerText = `${todayLog.burn} Kcal 🔥 | ${todayLog.distanceKm || 0} km`;
+        if(document.getElementById('stepsBenefitText')) document.getElementById('stepsBenefitText').innerText = getStepsBenefitText(todayLog.steps);
+        if(document.getElementById('stepsWeightGainAdvice')) document.getElementById('stepsWeightGainAdvice').innerText = getStepsWeightGainAdvice(todayLog.burn);
     }
-    
+
+    if(!container) return;
     container.innerHTML = '';
     cardioLogs.slice(0, 5).forEach(c => {
         let li = document.createElement('li');
         li.className = 'list-item';
         li.style.borderLeftColor = 'var(--neon-indigo)';
-        li.innerHTML = `<div style="font-size:0.8rem;"><b>${c.date}</b><br>🚶 ${c.steps} steps | 🏃 ${c.run}m | 🚴 ${c.cycle}m</div><div style="color:var(--neon-orange); font-weight:900; font-size:0.9rem;">-${c.burn} 🔥</div>`;
+        li.innerHTML = `<div style="font-size:0.8rem;"><b>${c.date}</b><br>🚶 ${c.steps} steps | 📏 ${c.distanceKm || 0} km</div><div style="color:var(--neon-orange); font-weight:900; font-size:0.9rem;">-${c.burn} 🔥</div>`;
         container.appendChild(li);
     });
 }
-function toggleNaturalTaskMain(taskId) { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const key = todayStr + '_' + taskId; const cb = document.getElementById(taskId); if(cb && cb.checked) { naturalTasks[key] = true; } else { delete naturalTasks[key]; } localStorage.setItem('person_natural_tasks', JSON.stringify(naturalTasks)); renderTodayNaturalCare(); updateCEODashboard(); }
 
 function updateCEODashboard() {
     let appToday = getAppToday(); const todayStr = appToday.toDateString();
@@ -3244,9 +3373,9 @@ function updateCEODashboard() {
     let gymLabel = ceoGymMap[todayName] || 'Rest Day'; 
     document.getElementById('ceoGym').innerText = gymLabel;
     let currentWt = weights.length > 0 ? weights[0].val.toFixed(1) : '--'; document.getElementById('ceoWeight').innerText = currentWt + 'kg';
-    let sleepScore = (sleepLogs.length > 0 && sleepLogs[0].date === todayStr) ? sleepLogs[0].score + '%' : '--'; document.getElementById('ceoSleep').innerText = sleepScore;
+    let effSleep = getEffectiveSleepScore(todayStr); let sleepScore = effSleep !== null ? effSleep + '%' : '--'; document.getElementById('ceoSleep').innerText = sleepScore;
     let now = new Date(appToday); let dayOfWeek = now.getDay() || 7; let weekStart = new Date(now); weekStart.setDate(now.getDate() - dayOfWeek + 1); weekStart.setHours(0,0,0,0); let weekSum = expenses.reduce((sum, e) => { let d = new Date(e.date); return (d >= weekStart) ? sum + e.amount : sum; }, 0); let remaining = weeklyBudgetTarget - weekSum; document.getElementById('ceoBudget').innerText = '₹' + (remaining > 0 ? remaining : 0);
-    let scores = []; const glowCbs = document.querySelectorAll('#dayCard input[type="checkbox"]'); if(glowCbs.length > 0) { let gDone = 0; glowCbs.forEach(cb => { if(cb.checked) gDone++; }); scores.push((gDone/glowCbs.length)*100); } let bioDone = 0; ['bio-1','bio-2','bio-3'].forEach(id => { if(localStorage.getItem(id) === 'true') bioDone++; }); scores.push((bioDone/3)*100); scores.push((currentWater/4000)*100); let dietDone = 0; for(let i=1;i<=8;i++) { if(localStorage.getItem(`diet_${todayStr}_${i}`) === 'true') dietDone++; } scores.push((dietDone/8)*100); const activeCard = document.getElementById(`workout-${todayName}`); if(activeCard && todayName !== 'Sunday') { const gymCbs = activeCard.querySelectorAll('input[type="checkbox"]'); if(gymCbs.length > 0) { let gDone = 0; gymCbs.forEach(cb => { if(cb.checked) gDone++; }); scores.push((gDone/gymCbs.length)*100); } }  if(sleepLogs.length > 0 && sleepLogs[0].date === todayStr) scores.push(sleepLogs[0].score);
+    let scores = []; const glowCbs = document.querySelectorAll('#dayCard input[type="checkbox"]'); if(glowCbs.length > 0) { let gDone = 0; glowCbs.forEach(cb => { if(cb.checked) gDone++; }); scores.push((gDone/glowCbs.length)*100); } let bioDone = 0; ['bio-1','bio-2','bio-3'].forEach(id => { if(localStorage.getItem(id) === 'true') bioDone++; }); scores.push((bioDone/3)*100); scores.push((currentWater/4000)*100); let dietDone = 0; for(let i=1;i<=8;i++) { if(localStorage.getItem(`diet_${todayStr}_${i}`) === 'true') dietDone++; } scores.push((dietDone/8)*100); const activeCard = document.getElementById(`workout-${todayName}`); if(activeCard && todayName !== 'Sunday') { const gymCbs = activeCard.querySelectorAll('input[type="checkbox"]'); if(gymCbs.length > 0) { let gDone = 0; gymCbs.forEach(cb => { if(cb.checked) gDone++; }); scores.push((gDone/gymCbs.length)*100); } }  if(effSleep !== null) scores.push(effSleep);
     let overall = scores.length > 0 ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0; if(overall > 100) overall = 100;
     document.getElementById('ceoOverallText').innerText = overall + '%'; document.getElementById('ceoOverallText').style.color = overall >= 80 ? 'var(--neon-green)' : (overall >= 50 ? 'var(--neon-gold)' : 'var(--neon-red)'); document.getElementById('ceoOverallLabel').innerText = overall >= 80 ? '🔥 Beast Mode Activated' : (overall >= 50 ? '⚡ Keep Pushing' : '⚠️ System Needs Attention');
     // FIX: ring circumference updated for r=30 → 2*π*30 ≈ 188
@@ -3347,7 +3476,7 @@ async function updatePredictiveAnalytics() {
     let moodEntries = Object.entries(recentMoods).slice(0, 7);
     let tiredCount = moodEntries.filter(([d,m]) => m.includes('Tired') || m.includes('Sore')).length;
     
-    let recentSleep = sleepLogs.slice(0, 3);
+    let recentSleep = sleepLogs.slice(0, 3).map(l => ({ ...l, score: getEffectiveSleepScore(l.date) ?? l.score }));
     let sleepAvg = recentSleep.length > 0 ? recentSleep.reduce((s,l)=>s+l.score,0)/recentSleep.length : 70;
     
     let now = new Date(appToday);
@@ -3465,7 +3594,7 @@ function runLocalPredictiveAnalytics() {
     let moodData = JSON.parse(localStorage.getItem('gym_moods')) || {};
     let tiredCount = 0, totalMoodDays = 0;
     for(let i=0;i<7;i++) { let d = new Date(appToday); d.setDate(d.getDate()-i); let m = moodData[d.toDateString()]; if(m) { totalMoodDays++; if(m.includes('Tired') || m.includes('Sore')) tiredCount++; } }
-    let sleepAvg = sleepLogs.length > 0 ? sleepLogs.slice(0,3).reduce((s,l)=>s+l.score,0)/Math.min(3,sleepLogs.length) : 70;
+    let sleepAvg = sleepLogs.length > 0 ? sleepLogs.slice(0,3).map(l => getEffectiveSleepScore(l.date) ?? l.score).reduce((s,v)=>s+v,0)/Math.min(3,sleepLogs.length) : 70;
     let overtrainRisk = Math.round(((tiredCount / Math.max(1,totalMoodDays)) * 50) + ((100 - sleepAvg) / 100) * 50);
     document.getElementById('predictOvertrainVal').innerText = overtrainRisk + '%';
     document.getElementById('predictOvertrainBar').style.width = overtrainRisk + '%';
@@ -3474,30 +3603,6 @@ function runLocalPredictiveAnalytics() {
     document.getElementById('predictMuscleVal').innerText = muscleGrowth + '%';
     document.getElementById('predictMuscleBar').style.width = Math.min(100, muscleGrowth) + '%';
 }
-// 3. UV / Sun Exposure Tracker
-function startSunExposure() {
-    if(sunExposureTimer) clearInterval(sunExposureTimer);
-    sunSeconds = parseInt(localStorage.getItem('sun_seconds_today') || '0');
-    document.getElementById('sunTimerActive').style.display = 'block';
-    document.getElementById('uvIntensityBadge').innerText = 'UV Index: Moderate';
-    document.getElementById('uvIntensityBadge').className = 'uv-badge uv-mid';
-    document.getElementById('uvTrackerBadge').style.display = 'inline-block';
-    sunExposureTimer = setInterval(() => {
-        sunSeconds++;
-        let mins = Math.floor(sunSeconds / 60); let secs = sunSeconds % 60;
-        document.getElementById('sunLiveTimer').innerText = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-        document.getElementById('sunMinutesDisplay').innerText = Math.floor(sunSeconds / 60);
-        localStorage.setItem('sun_seconds_today', sunSeconds);
-        if(sunSeconds >= 900) { // 15 mins
-            stopSunExposure();
-            displayPremiumToastNotification("☀️ 15 Min Sunlight Goal Complete! Vitamin D boost achieved.", "☀️");
-            document.getElementById('uvIntensityBadge').innerText = 'UV Index: Goal Met ✅';
-            document.getElementById('uvIntensityBadge').className = 'uv-badge uv-low';
-        }
-    }, 1000);
-}
-function stopSunExposure() { if(sunExposureTimer) { clearInterval(sunExposureTimer); sunExposureTimer = null; } document.getElementById('sunTimerActive').style.display = 'none'; }
-
 // 4. 4-4-4 Box Breathing Timer with Audio Cues
 function startWimHof() {
     if(wimHofInterval) return;
@@ -3591,7 +3696,7 @@ function stopWimHof() {
 // 7. Adaptive Workout AI
 function generateAdaptiveWorkout() {
     let appToday = getAppToday(); let todayStr = appToday.toDateString(); let todayName = daysOfWeek[appToday.getDay()];
-    let sleepScore = (sleepLogs.length > 0 && sleepLogs[0].date === todayStr) ? sleepLogs[0].score : 50;
+    let sleepScore = getEffectiveSleepScore(todayStr) ?? 50;
     let waterScore = (currentWater / 4000) * 100;
     let recoveryPct = Math.round((sleepScore * 0.6) + (waterScore * 0.4));
     let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; let todayMood = moods[todayStr] || 'Normal';
@@ -3715,7 +3820,6 @@ async function processChatCommand(msg) {
     tomorrow.setDate(tomorrow.getDate() + 1);
     let tomorrowName = daysOfWeek[tomorrow.getDay()];
     
-    let tPlan = localStorage.getItem('tomorrow_plan') || 'இன்னும் எதுவும் பிளான் பண்ணல';
     let wt = weights.length > 0 ? weights[0].val + ' kg' : 'பதிவு செய்யவில்லை';
     let waterLiters = (currentWater/1000).toFixed(1);
     let streak = localStorage.getItem('gym_streak') || 0;
@@ -3728,7 +3832,6 @@ async function processChatCommand(msg) {
     Here is the live data from Muthubalan's app right now:
     - Today's Date: ${appToday.toDateString()}
     - Tomorrow is: ${tomorrowName}
-    - Tomorrow's Plan (நாளைக்கான பிளான்): ${tPlan}
     - Current Weight: ${wt}
     - Water Drank Today: ${waterLiters} Liters out of 4 Liters
     - Protein Eaten Today: ${currentLoggedProtein}g
@@ -3821,7 +3924,7 @@ window.addEventListener('DOMContentLoaded', () => {
     renderCurrentDay(); loadBioStates(); renderWakeupLogs();
     renderMealLogsAndMacros(); renderWater(); renderSavings(); renderExpenses();
     renderMonthlyCalendar(); checkRemindersPopup(); checkSundayAudit(); checkDailyWisdom();
-    renderReminders(); renderTodayNaturalCare(); showTomorrowPlan();
+    renderReminders();
     loadBodyMetrics();
     updateRecoveryRing(); updateCalorieTargets(); updateCEODashboard(); updatePredictiveAnalytics();
     verifyGymLocation();
@@ -3870,7 +3973,11 @@ function runBootSequence() {
         overlay.classList.add('boot-complete');
         playSuccessSound();
         triggerConfetti();
-        setTimeout(() => { overlay.style.display = 'none'; }, 1200);
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          initTiltCards();
+          initMagneticButtons();
+        }, 1200);
       }, 600);
     }
   }
