@@ -1087,7 +1087,16 @@ body.theme-sharingan .toast-notification-hub {
 <div style="background:rgba(0,0,0,0.3); border:1px dashed var(--glass-border); padding:16px; border-radius:18px; margin-bottom:20px; text-align:center;"><label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:8px;">Select Backup JSON File</label><input type="file" id="importDatabaseFileInput" accept=".json" style="font-size:0.8rem; color:var(--text-secondary);"></div>
 <button class="btn-universal" style="background:#2563eb; margin-bottom:12px;" onclick="importSystemDatabaseFile()">📤 Import Database File & Restore</button>
 <div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:15px;"><h4 style="font-size:0.9rem; color:var(--neon-gold); margin-bottom:10px;">🔑 Gemini AI API Key</h4><p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">🔐 Your personal Gemini API key (secure in browser only)</p><div class="form-group"><label style="font-size:0.75rem;">Get your free key from: https://aistudio.google.com/app/apikey</label><input type="password" id="geminiApiKeyInput" placeholder="Paste your Gemini API key here..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); color:white; font-size:0.85rem; margin-bottom:8px;"></div><button class="btn-universal" style="background:var(--neon-cyan); color:black; margin-bottom:10px; font-size:0.85rem;" onclick="saveGeminiApiKey()">💾 Save API Key</button><p id="geminiKeyStatus" style="font-size:0.7rem; color:var(--neon-green); text-align:center;"></p></div>
-
+<!-- Google Drive Client ID இன்புட் -->
+<div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:15px;">
+    <h4 style="font-size:0.9rem; color:var(--neon-gold); margin-bottom:10px;">☁️ Google Drive Client ID</h4>
+    <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">🔐 Cloud Backup எடுக்க உங்கள் Drive Client ID-ஐ பதிவு செய்யவும்</p>
+    <div class="form-group">
+        <input type="text" id="driveClientIdInput" placeholder="Paste your Google Drive Client ID here..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); color:white; font-size:0.85rem; margin-bottom:8px;">
+    </div>
+    <button class="btn-universal" style="background:var(--neon-cyan); color:black; margin-bottom:10px; font-size:0.85rem;" onclick="saveDriveClientId()">💾 Save Client ID</button>
+    <p id="driveClientIdStatus" style="font-size:0.7rem; color:var(--neon-green); text-align:center;"></p>
+</div>
 <div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:15px;"><h4 style="font-size:0.9rem; color:var(--neon-gold); margin-bottom:10px;">🔔 Smart Notifications</h4><button class="notif-permission-btn" id="notifPermissionBtn" onclick="requestNotificationPermission()"><span>🔔</span> Enable Push Alerts</button><p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Get reminded for water, meals, gym time, and sleep.</p></div>
 <button class="btn-universal" style="background:rgba(255,255,255,0.04); color:white; border:1px solid var(--glass-border); margin-top:15px;" onclick="closeModalAction('systemSettingsModal')">Close Panel</button></div></div>
 
@@ -3734,35 +3743,94 @@ function generateSmartGrocery() {
     document.getElementById('groceryCostEstimate').innerText = '₹' + cost;
 }
 
-// 11. Local Backup (Honest - No fake cloud)
+// ====== GOOGLE DRIVE BACKUP & RESTORE (With Settings-based Client ID) ======
+
+// 1. Drive-ல் பேக்கப் எடுக்கும் பங்க்ஷன்
 function syncToCloud() {
+    // Settings-ல் இருந்து Client ID-ஐ எடுக்கிறோம்
+    let savedClientId = localStorage.getItem('drive_client_id');
+
+    if (!savedClientId) {
+        displayPremiumToastNotification("⚠️ Settings-ல் Client ID-ஐ பதிவு செய்யவும்!", "❌");
+        openModalWithHistory('systemSettingsModal', 'flex');
+        return;
+    }
+
+    // Google Drive API லோட் ஆகிவிட்டதா என்று செக் செய்கிறோம்
+    if (!gapiInited) {
+        displayPremiumToastNotification("Cloud Services Loading... Wait", "⏳");
+        return;
+    }
+
+    // API தயாராக இல்லை என்றால் இப்போது initialize செய்கிறோம்
+    if (!tokenClient) {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: savedClientId,
+            scope: SCOPES,
+            callback: '',
+        });
+        gisInited = true;
+    }
+
     document.getElementById('cloudSyncStatus').className = 'cloud-sync-status pending';
     document.getElementById('cloudStatusDot').className = 'cloud-dot';
-    document.getElementById('cloudStatusText').innerText = 'Saving locally...';
-    setTimeout(() => {
-        // Export all localStorage data as JSON backup
+    document.getElementById('cloudStatusText').innerText = 'Google Drive-ல் லாகின் ஆகிறது...';
+
+    tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+            document.getElementById('cloudStatusText').innerText = 'Login Failed';
+            return;
+        }
+        
+        document.getElementById('cloudStatusText').innerText = 'Backup Uploading...';
+        
+        // LocalStorage டேட்டாவை JSON ஆக மாற்றுதல்
         let backupData = {};
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
             backupData[key] = localStorage.getItem(key);
         }
-        let blob = new Blob([JSON.stringify(backupData, null, 2)], {type: 'application/json'});
-        let url = URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = 'TOBI_Backup.json';
-        a.click();
-        URL.revokeObjectURL(url);
+        const fileContent = JSON.stringify(backupData, null, 2);
+        const file = new Blob([fileContent], {type: 'application/json'});
+        const metadata = {
+            'name': 'TOBI_Backup_' + getIsoDateStr(new Date()) + '.json',
+            'mimeType': 'application/json'
+        };
 
-        document.getElementById('cloudSyncStatus').className = 'cloud-sync-status synced';
-        document.getElementById('cloudStatusText').innerText = 'Local Backup: Just Now';
-        document.getElementById('cloudSyncLog').style.display = 'block';
-        document.getElementById('cloudSyncLog').innerText = '✅ ' + localStorage.length + ' records exported as JSON file. உங்கள் phone-ல் சேமிக்கப்பட்டது!';
-        displayPremiumToastNotification("Local Backup Downloaded! 📁", "✅");
-    }, 1000);
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+        form.append('file', file);
+
+        try {
+            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                method: 'POST',
+                headers: new Headers({ 'Authorization': 'Bearer ' + gapi.client.getToken().access_token }),
+                body: form
+            });
+            
+            document.getElementById('cloudSyncStatus').className = 'cloud-sync-status synced';
+            document.getElementById('cloudStatusText').innerText = 'Drive Backup Success!';
+            document.getElementById('cloudStatusDot').className = 'cloud-dot';
+            document.getElementById('cloudSyncLog').style.display = 'block';
+            document.getElementById('cloudSyncLog').innerText = '✅ உங்கள் Google Drive-ல் பாதுகாப்பாக சேமிக்கப்பட்டுவிட்டது!';
+            displayPremiumToastNotification("Secured in Google Drive!", "☁️");
+        } catch (err) {
+            console.error(err);
+            document.getElementById('cloudStatusText').innerText = 'Upload Failed!';
+            displayPremiumToastNotification("Upload Failed!", "❌");
+        }
+    };
+
+    if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({prompt: 'consent'});
+    } else {
+        tokenClient.requestAccessToken({prompt: ''});
+    }
 }
+
+// 2. Drive-ல் இருந்து பேக்கப்பை Restore செய்யும் பங்க்ஷன்
 function restoreFromCloud() {
-    // File picker மூலம் backup restore பண்ணு
+    // இது அப்படியே பழையபடி ஃபைல் பிக்கர் மூலம் வேலை செய்யும் (Local backup-க்கும் இது உதவும்)
     let input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
@@ -3786,7 +3854,6 @@ function restoreFromCloud() {
     };
     input.click();
 }
-
 // 12. TOBI Chatbot
 function toggleChatPanel() { const panel = document.getElementById('TOBIChatPanel'); panel.classList.toggle('active'); document.getElementById('TOBIChatBadge').style.display = 'none'; }
 function sendChatMessage() { const input = document.getElementById('TOBIChatInput'); const msg = input.value.trim(); if(!msg) return; addChatMessage(msg, 'user'); input.value = ''; processChatCommand(msg); }
