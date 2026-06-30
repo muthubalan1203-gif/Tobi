@@ -3776,7 +3776,9 @@ function saveDriveClientId() {
 }
 
 function gapiLoaded() { gapi.load('client', initializeGapiClient); }
-async function initializeGapiClient() { await gapi.client.init({ discoveryDocs: DISCOVERY_DOCS }); gapiInited = true; }
+// Drive calls எல்லாம் fetch() + Bearer token மூலமாகவே நடக்கும் (gapi.client.drive பயன்படுத்தவில்லை),
+// அதனால் discoveryDocs/API key தேவையில்லை — gapi.client module மட்டும் தயார் என்று உறுதி செய்தால் போதும்.
+function initializeGapiClient() { gapiInited = true; }
 function gisLoaded() { if (!DRIVE_CLIENT_ID) return; tokenClient = google.accounts.oauth2.initTokenClient({ client_id: DRIVE_CLIENT_ID, scope: SCOPES, callback: '' }); gisInited = true; }
 // ====== GOOGLE DRIVE BACKUP & RESTORE (With Settings-based Client ID) ======
 
