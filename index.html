@@ -3784,25 +3784,15 @@ function gisLoaded() { if (!DRIVE_CLIENT_ID) return; tokenClient = google.accoun
 
 // 1. Drive-ல் பேக்கப் எடுக்கும் பங்க்ஷன்
 function syncToCloud() {
-    // மறுமுறை செக் செய்தல்
-    DRIVE_CLIENT_ID = localStorage.getItem('drive_client_id'); 
-
+    DRIVE_CLIENT_ID = localStorage.getItem('drive_client_id');
     if (!DRIVE_CLIENT_ID) {
         displayPremiumToastNotification("⚠️ முதலில் Settings-ல் Client ID-ஐ சேமிக்கவும்!", "❌");
         openModalWithHistory('systemSettingsModal', 'flex');
         return;
     }
 
-    // gisLoaded() சரியாக நடக்கவில்லை என்றால் அதை மீண்டும் அழைக்கவும்
-    if (!gisInited) gisLoaded();
-
-    if (!gapiInited) {
-        displayPremiumToastNotification("API லோட் ஆகிறது, ஒரு வினாடி பொறுங்கள்...", "⏳");
-        return;
-    }
-
-    // API தயாராக இல்லை என்றால் இப்போது initialize செய்கிறோம்
-    if (!tokenClient) {
+    // gapiInited செக்கிங் நீக்கப்பட்டு, tokenClient நேரடியாக உருவாக்கப்படுகிறது
+    if (!gisInited || !tokenClient) {
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: DRIVE_CLIENT_ID,
             scope: SCOPES,
@@ -3823,7 +3813,6 @@ function syncToCloud() {
         
         document.getElementById('cloudStatusText').innerText = 'Backup Uploading...';
         
-        // LocalStorage டேட்டாவை JSON ஆக மாற்றுதல்
         let backupData = {};
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
@@ -3841,9 +3830,10 @@ function syncToCloud() {
         form.append('file', file);
 
         try {
+            // resp.access_token நேரடியாகப் பயன்படுத்தப்படுகிறது
             await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST',
-                headers: new Headers({ 'Authorization': 'Bearer ' + gapi.client.getToken().access_token }),
+                headers: new Headers({ 'Authorization': 'Bearer ' + resp.access_token }),
                 body: form
             });
             
@@ -3860,32 +3850,22 @@ function syncToCloud() {
         }
     };
 
-    if (gapi.client.getToken() === null) {
-        tokenClient.requestAccessToken({prompt: 'consent'});
-    } else {
-        tokenClient.requestAccessToken({prompt: ''});
-    }
+    // எப்போது கிளிக் செய்தாலும் Token Request செய்யும்
+    tokenClient.requestAccessToken({prompt: ''});
 }
+
 
 // 2. Drive-ல் இருந்து பேக்கப்பை Restore செய்யும் பங்க்ஷன்
 // 2. Drive-ல் இருந்து சமீபத்திய Backup-ஐ தானாக கண்டுபிடித்து Restore செய்யும் பங்க்ஷன்
 function restoreFromCloud() {
     DRIVE_CLIENT_ID = localStorage.getItem('drive_client_id');
-
     if (!DRIVE_CLIENT_ID) {
         displayPremiumToastNotification("⚠️ முதலில் Settings-ல் Client ID-ஐ சேமிக்கவும்!", "❌");
         openModalWithHistory('systemSettingsModal', 'flex');
         return;
     }
 
-    if (!gisInited) gisLoaded();
-
-    if (!gapiInited) {
-        displayPremiumToastNotification("API லோட் ஆகிறது, ஒரு வினாடி பொறுங்கள்...", "⏳");
-        return;
-    }
-
-    if (!tokenClient) {
+    if (!gisInited || !tokenClient) {
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: DRIVE_CLIENT_ID,
             scope: SCOPES,
@@ -3907,9 +3887,8 @@ function restoreFromCloud() {
         document.getElementById('cloudStatusText').innerText = 'உங்கள் Backup-ஐ தேடுகிறது...';
 
         try {
-            const token = gapi.client.getToken().access_token;
+            const token = resp.access_token;
 
-            // Drive-ல் TOBI_Backup_ என்ற பெயரில் உள்ள ஃபைல்களை, சமீபத்தியதை முதலில் வரும்படி பட்டியலிடுதல்
             const listRes = await fetch(
                 "https://www.googleapis.com/drive/v3/files?q=" +
                 encodeURIComponent("name contains 'TOBI_Backup_' and trashed = false") +
@@ -3927,7 +3906,6 @@ function restoreFromCloud() {
             const latestFile = listData.files[0];
             document.getElementById('cloudStatusText').innerText = 'Backup பதிவிறக்கம் ஆகிறது...';
 
-            // அந்த ஃபைலின் உள்ளடக்கத்தை பதிவிறக்கம் செய்தல்
             const fileRes = await fetch(
                 `https://www.googleapis.com/drive/v3/files/${latestFile.id}?alt=media`,
                 { headers: new Headers({ 'Authorization': 'Bearer ' + token }) }
@@ -3950,12 +3928,9 @@ function restoreFromCloud() {
         }
     };
 
-    if (gapi.client.getToken() === null) {
-        tokenClient.requestAccessToken({prompt: 'consent'});
-    } else {
-        tokenClient.requestAccessToken({prompt: ''});
-    }
+    tokenClient.requestAccessToken({prompt: ''});
 }
+
 
 // Local JSON backup file-ஐ manual-ஆ select பண்ணி restore பண்ண (offline fallback)
 function restoreFromLocalFile() {
