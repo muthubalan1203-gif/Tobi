@@ -1048,7 +1048,7 @@ body.theme-sharingan .toast-notification-hub {
 <h3 class="card-title" style="color:var(--neon-cyan);">☁️ Cloud Backup Sync</h3>
 <div class="cloud-sync-status" id="cloudSyncStatus"><div class="cloud-dot offline" id="cloudStatusDot"></div><div><div style="font-size:0.85rem; font-weight:800; color:var(--text-primary);">Sync Status</div><div style="font-size:0.75rem; color:var(--text-secondary);" id="cloudStatusText">Local Mode (Offline)</div></div></div>
 <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:12px;">Securely backup your data to cloud. Access from any device.</p>
-<div style="display:flex; flex-direction:column; gap:10px;"><button class="btn-universal" style="background:var(--neon-cyan); color:black; font-size:0.9rem;" onclick="syncToCloud()">☁️ Sync to Cloud Now</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-purple); color:var(--neon-purple); font-size:0.9rem;" onclick="restoreFromCloud()">📥 Restore from Cloud</button></div>
+<div style="display:flex; flex-direction:column; gap:10px;"><button class="btn-universal" style="background:var(--neon-cyan); color:black; font-size:0.9rem;" onclick="syncToCloud()">☁️ Sync to Cloud Now</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-purple); color:var(--neon-purple); font-size:0.9rem;" onclick="restoreFromCloud()">📥 Restore from Cloud</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-cyan); color:var(--neon-cyan); font-size:0.8rem;" onclick="restoreFromLocalFile()">📂 Restore from Local File</button></div>
 <div id="cloudSyncLog" style="margin-top:12px; font-size:0.75rem; color:var(--text-secondary); display:none;"></div></div></div>
 </div>
 
@@ -3866,8 +3866,97 @@ function syncToCloud() {
 }
 
 // 2. Drive-ல் இருந்து பேக்கப்பை Restore செய்யும் பங்க்ஷன்
+// 2. Drive-ல் இருந்து சமீபத்திய Backup-ஐ தானாக கண்டுபிடித்து Restore செய்யும் பங்க்ஷன்
 function restoreFromCloud() {
-    // இது அப்படியே பழையபடி ஃபைல் பிக்கர் மூலம் வேலை செய்யும் (Local backup-க்கும் இது உதவும்)
+    DRIVE_CLIENT_ID = localStorage.getItem('drive_client_id');
+
+    if (!DRIVE_CLIENT_ID) {
+        displayPremiumToastNotification("⚠️ முதலில் Settings-ல் Client ID-ஐ சேமிக்கவும்!", "❌");
+        openModalWithHistory('systemSettingsModal', 'flex');
+        return;
+    }
+
+    if (!gisInited) gisLoaded();
+
+    if (!gapiInited) {
+        displayPremiumToastNotification("API லோட் ஆகிறது, ஒரு வினாடி பொறுங்கள்...", "⏳");
+        return;
+    }
+
+    if (!tokenClient) {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: DRIVE_CLIENT_ID,
+            scope: SCOPES,
+            callback: '',
+        });
+        gisInited = true;
+    }
+
+    document.getElementById('cloudSyncStatus').className = 'cloud-sync-status pending';
+    document.getElementById('cloudStatusDot').className = 'cloud-dot';
+    document.getElementById('cloudStatusText').innerText = 'Google Drive-ல் லாகின் ஆகிறது...';
+
+    tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+            document.getElementById('cloudStatusText').innerText = 'Login Failed';
+            return;
+        }
+
+        document.getElementById('cloudStatusText').innerText = 'உங்கள் Backup-ஐ தேடுகிறது...';
+
+        try {
+            const token = gapi.client.getToken().access_token;
+
+            // Drive-ல் TOBI_Backup_ என்ற பெயரில் உள்ள ஃபைல்களை, சமீபத்தியதை முதலில் வரும்படி பட்டியலிடுதல்
+            const listRes = await fetch(
+                "https://www.googleapis.com/drive/v3/files?q=" +
+                encodeURIComponent("name contains 'TOBI_Backup_' and trashed = false") +
+                "&orderBy=createdTime desc&pageSize=1&fields=files(id,name,createdTime)",
+                { headers: new Headers({ 'Authorization': 'Bearer ' + token }) }
+            );
+            const listData = await listRes.json();
+
+            if (!listData.files || listData.files.length === 0) {
+                document.getElementById('cloudStatusText').innerText = 'Backup கிடைக்கவில்லை';
+                displayPremiumToastNotification("உங்கள் Drive-ல் backup file எதுவும் இல்லை!", "❌");
+                return;
+            }
+
+            const latestFile = listData.files[0];
+            document.getElementById('cloudStatusText').innerText = 'Backup பதிவிறக்கம் ஆகிறது...';
+
+            // அந்த ஃபைலின் உள்ளடக்கத்தை பதிவிறக்கம் செய்தல்
+            const fileRes = await fetch(
+                `https://www.googleapis.com/drive/v3/files/${latestFile.id}?alt=media`,
+                { headers: new Headers({ 'Authorization': 'Bearer ' + token }) }
+            );
+            const data = await fileRes.json();
+
+            Object.keys(data).forEach(key => localStorage.setItem(key, data[key]));
+
+            document.getElementById('cloudSyncStatus').className = 'cloud-sync-status synced';
+            document.getElementById('cloudStatusText').innerText = 'Restored from Drive!';
+            document.getElementById('cloudStatusDot').className = 'cloud-dot';
+            document.getElementById('cloudSyncLog').style.display = 'block';
+            document.getElementById('cloudSyncLog').innerText = `✅ "${latestFile.name}" இலிருந்து மீட்டெடுக்கப்பட்டது!`;
+            displayPremiumToastNotification("Drive-ல் இருந்து Restore ஆனது! App reload பண்ணுங்க.", "📥");
+            setTimeout(() => location.reload(), 2000);
+        } catch (err) {
+            console.error(err);
+            document.getElementById('cloudStatusText').innerText = 'Restore Failed!';
+            displayPremiumToastNotification("Restore Failed!", "❌");
+        }
+    };
+
+    if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({prompt: 'consent'});
+    } else {
+        tokenClient.requestAccessToken({prompt: ''});
+    }
+}
+
+// Local JSON backup file-ஐ manual-ஆ select பண்ணி restore பண்ண (offline fallback)
+function restoreFromLocalFile() {
     let input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
