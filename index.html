@@ -3804,7 +3804,7 @@ function syncToCloud() {
     // API தயாராக இல்லை என்றால் இப்போது initialize செய்கிறோம்
     if (!tokenClient) {
         tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: savedClientId,
+            client_id: DRIVE_CLIENT_ID,
             scope: SCOPES,
             callback: '',
         });
