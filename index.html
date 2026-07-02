@@ -633,6 +633,7 @@ body.theme-sharingan .toast-notification-hub {
 
 <div class="app-card" style="border-top:5px solid var(--neon-orange); margin-bottom:16px;">
 <h3 class="card-title" style="color:var(--neon-orange);">🌅 காலை எழுந்திருக்கும் நேரம்</h3>
+<p id="sunriseWakeupSuggestion" style="font-size:0.78rem; color:var(--neon-gold); font-weight:700; margin-bottom:10px;">🌄 Calculating optimal wake-up time...</p>
 <div class="form-row" style="margin-bottom:12px;">
 <div class="form-group"><label>எழுந்த நேரம்:</label><input type="time" id="wakeupTimeInput" class="form-control" value="06:00" style="background:#000; border-color:rgba(255,255,255,0.05); text-align:center; font-weight:700; color:white;"></div>
 <div class="form-group"><label>தூக்கத்தின் தரம்:</label><select id="sleepQualityInput" class="form-control" style="background:#000; border-color:rgba(255,255,255,0.05); font-weight:700; color:white;"><option value="Good 😊">நன்று 😊</option><option value="Average 😐">சுமாராக 😐</option><option value="Bad 🥱">மோசம் 🥱</option></select></div></div>
@@ -1318,6 +1319,8 @@ let injuryLogs = safeGetItem('person_injury_logs', []);
 
 let weeklyBudgetTarget = parseFloat(localStorage.getItem('weekly_budget_target')) || 0;
 let currentWater = parseInt(localStorage.getItem('TOBI_water_intake_v6')) || 0;
+// FEATURE: Weather-based Smart Water Target (default 4000ml, auto-increases on hot days)
+let waterTargetML = parseInt(localStorage.getItem('water_target_dynamic_ml')) || 4000;
 let dailyTargetCals = parseInt(localStorage.getItem('daily_tdee')) || 0;
 let targetP = parseInt(localStorage.getItem('daily_p')) || 0;
 let targetC = parseInt(localStorage.getItem('daily_c')) || 0;
@@ -1465,7 +1468,7 @@ ${expenseList}
 
 🏋️‍♂️ *GYM STATUS:* ${gymLine}
 
-💧 *Water:* ${(currentWater / 1000).toFixed(1)}L / 4L
+💧 *Water:* ${(currentWater / 1000).toFixed(1)}L / ${(waterTargetML/1000).toFixed(1)}L
 🍗 *Protein:* ${currentLoggedProtein}g / ${targetP}g
 ⚡ *Calories:* ${currentLoggedCal} / ${dailyTargetCals} Kcal
 😴 *Sleep:* ${sleepText}
@@ -1651,7 +1654,7 @@ function loadBioStates() { ['bio-1','bio-2','bio-3'].forEach(id => { if(document
 function updateRecoveryRing() {
     let appToday = getAppToday(); let todayStr = appToday.toDateString();
     let sleepScore = getEffectiveSleepScore(todayStr) ?? 50;
-    let waterScore = (currentWater / 4000) * 100; if(waterScore > 100) waterScore = 100;
+    let waterScore = (currentWater / waterTargetML) * 100; if(waterScore > 100) waterScore = 100;
     let recoveryPct = Math.round((sleepScore * 0.6) + (waterScore * 0.4)); if(recoveryPct > 100) recoveryPct = 100;
     const circle = document.getElementById('recoveryRingCircle');
     if(circle) { let circumference = 263.89; circle.style.strokeDashoffset = circumference - (recoveryPct / 100) * circumference; }
@@ -1825,7 +1828,7 @@ async function calculateLifeEnergyMatrix() {
         gymExercises: gymTotal > 0 ? `${gymCompleted}/${gymTotal}` : "N/A",
         steps: stepsLine,
         sleep: sleepLine,
-        waterIntake: (currentWater / 1000).toFixed(1) + "L / 4L",
+        waterIntake: (currentWater / 1000).toFixed(1) + "L / " + (waterTargetML/1000).toFixed(1) + "L",
         dietMacros: { protein: `${currentLoggedProtein}g/${targetP}g`, carbs: `${currentLoggedCarbs}g/${targetC}g`, cal: currentLoggedCal },
         mood: JSON.parse(localStorage.getItem('gym_moods') || '{}')[todayStr] || "Normal"
     };
@@ -1895,9 +1898,102 @@ function logGymMood(mood, elem) {
 }
 function reviewWeeklyMoods() { let appToday = getAppToday(); let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; let counts = {"Energetic":0,"Normal":0,"Tired":0,"Sore":0}; let total = 0; for(let i=0;i<7;i++) { let d = new Date(appToday); d.setDate(d.getDate()-i); let m = moods[d.toDateString()]; if(m) { if(m.includes('Energetic')) counts["Energetic"]++; if(m.includes('Normal')) counts["Normal"]++; if(m.includes('Tired')) counts["Tired"]++; if(m.includes('Sore')) counts["Sore"]++; total++; } } let aiReport = `📊 Weekly Mood Analysis (${total} Days)\n======================\n🤩 Energetic: ${counts["Energetic"]}\n🥱 Tired: ${counts["Tired"]}\n🤕 Sore: ${counts["Sore"]}\n\n`; if(counts["Tired"]+counts["Sore"] > 3) aiReport += "⚠️ Overtraining detected!"; else aiReport += "✅ Optimal training state!"; openModalWithHistory('aiEngineModal'); document.getElementById('aiHeaderTitle').innerText = "TOBI RECOVERY AI"; document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`; playAiTyping(aiReport, document.getElementById('aiTypingText')); }
 
-function addWater(ml) { let appToday = getAppToday(); triggerDeviceHapticPulse(); currentWater += ml; if(currentWater > 4000) currentWater = 4000; localStorage.setItem('TOBI_water_intake_v6', currentWater); renderWater(); updateRecoveryRing(); updateCEODashboard(); if(currentWater === 4000 && !localStorage.getItem('water_goal_met_' + appToday.toDateString())) { displayPremiumToastNotification("Daily Water Goal Completed!", "🌊"); localStorage.setItem('water_goal_met_' + appToday.toDateString(), 'true'); } }
-function renderWater() { let pct = (currentWater / 4000) * 100; const flask = document.getElementById('flaskWaterFill'); const lbl = document.getElementById('waterLabel'); if(flask) flask.style.height = `${pct}%`; if(lbl) lbl.innerText = `${(currentWater/1000).toFixed(1)} L`; }
+function addWater(ml) { let appToday = getAppToday(); triggerDeviceHapticPulse(); currentWater += ml; if(currentWater > waterTargetML) currentWater = waterTargetML; localStorage.setItem('TOBI_water_intake_v6', currentWater); renderWater(); updateRecoveryRing(); updateCEODashboard(); if(currentWater === waterTargetML && !localStorage.getItem('water_goal_met_' + appToday.toDateString())) { displayPremiumToastNotification("Daily Water Goal Completed!", "🌊"); localStorage.setItem('water_goal_met_' + appToday.toDateString(), 'true'); } }
+function renderWater() { let pct = (currentWater / waterTargetML) * 100; const flask = document.getElementById('flaskWaterFill'); const lbl = document.getElementById('waterLabel'); if(flask) flask.style.height = `${pct}%`; if(lbl) lbl.innerText = `${(currentWater/1000).toFixed(1)} / ${(waterTargetML/1000).toFixed(1)} L`; }
 
+// FEATURE: Weather-based Smart Water Nudge — வெயில் அதிகமா இருந்தா water target automatic-ஆ அதிகரிக்கும்
+async function updateWaterTargetFromWeather() {
+    const todayKey = getIsoDateStr(getAppToday());
+    // ஒரு நாளைக்கு ஒரு தடவை மட்டும் weather check பண்ணா போதும்
+    if (localStorage.getItem('water_weather_check_date') === todayKey) {
+        renderWater();
+        return;
+    }
+    const BASE_TARGET_ML = 4000;
+    // Default: Madurai coordinates (fallback if location permission கிடைக்கலைனா)
+    let lat = 9.9252, lon = 78.1198;
+
+    const applyTarget = async (latitude, longitude) => {
+        try {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&timezone=auto`);
+            if (!res.ok) throw new Error('Weather fetch failed');
+            const data = await res.json();
+            const tempC = data?.current?.temperature_2m;
+            let newTarget = BASE_TARGET_ML;
+            let heatMsg = null;
+            if (typeof tempC === 'number') {
+                if (tempC >= 40) { newTarget = BASE_TARGET_ML + 1500; heatMsg = `🔥 கடும் வெயில் (${tempC}°C)! Water target 5.5L ஆக அதிகரிக்கப்பட்டது.`; }
+                else if (tempC >= 37) { newTarget = BASE_TARGET_ML + 1000; heatMsg = `☀️ அதிக வெயில் (${tempC}°C)! Water target 5L ஆக அதிகரிக்கப்பட்டது.`; }
+                else if (tempC >= 34) { newTarget = BASE_TARGET_ML + 500; heatMsg = `🌤️ வெயில் அதிகம் (${tempC}°C). Water target 4.5L ஆக அதிகரிக்கப்பட்டது.`; }
+            }
+            waterTargetML = newTarget;
+            localStorage.setItem('water_target_dynamic_ml', String(newTarget));
+            localStorage.setItem('water_weather_check_date', todayKey);
+            if (heatMsg) displayPremiumToastNotification(heatMsg, "💧");
+        } catch (err) {
+            console.log("Weather API skipped:", err.message);
+            waterTargetML = parseInt(localStorage.getItem('water_target_dynamic_ml')) || BASE_TARGET_ML;
+        }
+        renderWater(); updateRecoveryRing(); updateCEODashboard();
+    };
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => applyTarget(pos.coords.latitude, pos.coords.longitude),
+            () => applyTarget(lat, lon), // permission இல்லைனா Madurai default
+            { timeout: 5000 }
+        );
+    } else {
+        applyTarget(lat, lon);
+    }
+}
+
+// FEATURE: Sunrise/Sunset Based Wake-up Suggestion
+async function updateSunriseWakeupSuggestion() {
+    const el = document.getElementById('sunriseWakeupSuggestion');
+    if (!el) return;
+    const todayKey = getIsoDateStr(getAppToday());
+
+    const cached = localStorage.getItem('sunrise_suggestion_cache_' + todayKey);
+    if (cached) { el.innerText = cached; return; }
+
+    let lat = 9.9252, lon = 78.1198; // Madurai default
+
+    const applySunrise = async (latitude, longitude) => {
+        try {
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=sunrise,sunset&timezone=auto`);
+            if (!res.ok) throw new Error('Sunrise fetch failed');
+            const data = await res.json();
+            const sunriseISO = data?.daily?.sunrise?.[0];
+            const sunsetISO = data?.daily?.sunset?.[0];
+            if (!sunriseISO) throw new Error('No sunrise data');
+
+            const sunrise = new Date(sunriseISO);
+            const idealStart = new Date(sunrise.getTime() - 15 * 60000);
+            const idealEnd = new Date(sunrise.getTime() + 30 * 60000);
+            const fmt = (d) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            const msg = `🌄 இன்று Sunrise: ${fmt(sunrise)} → Ideal Wake-up: ${fmt(idealStart)} - ${fmt(idealEnd)} (Natural light-ல எழுந்தா circadian rhythm சிறப்பா set ஆகும்)`;
+            localStorage.setItem('sunrise_suggestion_cache_' + todayKey, msg);
+            el.innerText = msg;
+
+            if (sunsetISO) localStorage.setItem('todays_sunset_time', sunsetISO);
+        } catch (err) {
+            console.log("Sunrise API skipped:", err.message);
+            el.innerText = "🌄 Ideal Wake-up: 5:30 - 6:00 AM (default — location access கொடுத்தா exact சூரிய உதயம் காட்டும்)";
+        }
+    };
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => applySunrise(pos.coords.latitude, pos.coords.longitude),
+            () => applySunrise(lat, lon),
+            { timeout: 5000 }
+        );
+    } else {
+        applySunrise(lat, lon);
+    }
+}
 
 // YouTube லிங்க் உருவாக்கும் குறியீடுகள் நீக்கப்பட்ட புதிய Function
 function toggleDropdownTips(id) { 
@@ -2999,7 +3095,7 @@ function triggerNightlyStrictReview() {
     else aiReport += `\n`;
     aiReport += `🚶 STEPS:\n${stepsLine}\n`;
     if(weightGainAdviceLine) aiReport += `${weightGainAdviceLine}\n`;
-    aiReport += `\n📊 SUMMARY:\n- தண்ணீர்: ${waterLiters}L / 4L\n- டாஸ்க்குகள்: ${completedTasks} / ${totalTasks}\n- Protein: ${p}g / ${targetP}g\n\n`;
+    aiReport += `\n📊 SUMMARY:\n- தண்ணீர்: ${waterLiters}L / ${(waterTargetML/1000).toFixed(1)}L\n- டாஸ்க்குகள்: ${completedTasks} / ${totalTasks}\n- Protein: ${p}g / ${targetP}g\n\n`;
     
     if(missedTasks.length > 0 || waterLiters < 4 || (gymTotal > 0 && gymCompleted < gymTotal) || p < targetP) { 
         aiReport += "⚠️ STRICT REVIEW: முத்துபாலன், இன்று சில விஷயங்களை கோட்டை விட்டுள்ளீர்கள்!\n"; 
@@ -3089,7 +3185,7 @@ ${expenseList}
 
 🏋️‍♂️ *GYM STATUS:* ${gymLine}
 
-💧 *Water:* ${(currentWater / 1000).toFixed(1)}L / 4L
+💧 *Water:* ${(currentWater / 1000).toFixed(1)}L / ${(waterTargetML/1000).toFixed(1)}L
 🍗 *Protein:* ${currentLoggedProtein}g / ${targetP}g
 ⚡ *Calories:* ${currentLoggedCal} / ${dailyTargetCals} Kcal
 😴 *Sleep:* ${sleepText}
@@ -3139,7 +3235,7 @@ function generateTomorrowProtocol() {
     if(tomorrowName === 'Monday' || tomorrowName === 'Tuesday') {
         report += `\n💧 காலை ஸ்பெஷல்: வெறும் வயிற்றில் சீரகத் தண்ணீர்`;
     } else if(tomorrowName === 'Wednesday' || tomorrowName === 'Thursday') {
-        report += `\n💧 காலை ஸ்பெஷல்: வெறும் வயிற்றில் சாதாரண நீர்`;
+        report += `\n💧 காலை ஸ்பெஷல்: வெறும் வயிற்றில் சியா விதை தண்ணீர்`;
     } else {
         report += `\n💧 காலை ஸ்பெஷல்: வெறும் வயிற்றில் சாதாரண சுடுநீர்`;
     }
@@ -3231,7 +3327,7 @@ function renderCurrentDay() {
     </li>`;
     
     // 7. Water & FaceWash
-    let waterTaskHTML = (dayName === 'Monday' || dayName === 'Tuesday') ? `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>செரிமானத்திற்கு:</b> காலை சீரகத் தண்ணீர்.</span></label></li>` : (dayName === 'Wednesday' || dayName === 'Thursday') ? `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>குளிர்ச்சிக்கு:</b> காலை சாதாரண நீர்.</span></label></li>` : `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>டீடாக்ஸ்:</b> காலை சாதாரண சுடுநீர்.</span></label></li>`; 
+    let waterTaskHTML = (dayName === 'Monday' || dayName === 'Tuesday') ? `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>செரிமானத்திற்கு:</b> காலை சீரகத் தண்ணீர்.</span></label></li>` : (dayName === 'Wednesday' || dayName === 'Thursday') ? `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>குளிர்ச்சிக்கு:</b> காலை சியா விதை தண்ணீர்.</span></label></li>` : `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>டீடாக்ஸ்:</b> காலை சாதாரண சுடுநீர்.</span></label></li>`; 
     
     let faceWashTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-w" onchange="handleTaskChange('${todayDateKey}', 't-w')"><span><b>Daily Face Wash:</b> மைல்டான ஃபேஸ் வாஷ்.</span></label></li>`; 
     
@@ -3372,7 +3468,7 @@ function updateCEODashboard() {
     let currentWt = weights.length > 0 ? weights[0].val.toFixed(1) : '--'; document.getElementById('ceoWeight').innerText = currentWt + 'kg';
     let effSleep = getEffectiveSleepScore(todayStr); let sleepScore = effSleep !== null ? effSleep + '%' : '--'; document.getElementById('ceoSleep').innerText = sleepScore;
     let now = new Date(appToday); let dayOfWeek = now.getDay() || 7; let weekStart = new Date(now); weekStart.setDate(now.getDate() - dayOfWeek + 1); weekStart.setHours(0,0,0,0); let weekSum = expenses.reduce((sum, e) => { let d = new Date(e.date); return (d >= weekStart) ? sum + e.amount : sum; }, 0); let remaining = weeklyBudgetTarget - weekSum; document.getElementById('ceoBudget').innerText = '₹' + (remaining > 0 ? remaining : 0);
-    let scores = []; const glowCbs = document.querySelectorAll('#dayCard input[type="checkbox"]'); if(glowCbs.length > 0) { let gDone = 0; glowCbs.forEach(cb => { if(cb.checked) gDone++; }); scores.push((gDone/glowCbs.length)*100); } let bioDone = 0; ['bio-1','bio-2','bio-3'].forEach(id => { if(localStorage.getItem(id) === 'true') bioDone++; }); scores.push((bioDone/3)*100); scores.push((currentWater/4000)*100); let dietDone = 0; for(let i=1;i<=8;i++) { if(localStorage.getItem(`diet_${todayStr}_${i}`) === 'true') dietDone++; } scores.push((dietDone/8)*100); const activeCard = document.getElementById(`workout-${todayName}`); if(activeCard && todayName !== 'Sunday') { const gymCbs = activeCard.querySelectorAll('input[type="checkbox"]'); if(gymCbs.length > 0) { let gDone = 0; gymCbs.forEach(cb => { if(cb.checked) gDone++; }); scores.push((gDone/gymCbs.length)*100); } }  if(effSleep !== null) scores.push(effSleep);
+    let scores = []; const glowCbs = document.querySelectorAll('#dayCard input[type="checkbox"]'); if(glowCbs.length > 0) { let gDone = 0; glowCbs.forEach(cb => { if(cb.checked) gDone++; }); scores.push((gDone/glowCbs.length)*100); } let bioDone = 0; ['bio-1','bio-2','bio-3'].forEach(id => { if(localStorage.getItem(id) === 'true') bioDone++; }); scores.push((bioDone/3)*100); scores.push((currentWater/waterTargetML)*100); let dietDone = 0; for(let i=1;i<=8;i++) { if(localStorage.getItem(`diet_${todayStr}_${i}`) === 'true') dietDone++; } scores.push((dietDone/8)*100); const activeCard = document.getElementById(`workout-${todayName}`); if(activeCard && todayName !== 'Sunday') { const gymCbs = activeCard.querySelectorAll('input[type="checkbox"]'); if(gymCbs.length > 0) { let gDone = 0; gymCbs.forEach(cb => { if(cb.checked) gDone++; }); scores.push((gDone/gymCbs.length)*100); } }  if(effSleep !== null) scores.push(effSleep);
     let overall = scores.length > 0 ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0; if(overall > 100) overall = 100;
     document.getElementById('ceoOverallText').innerText = overall + '%'; document.getElementById('ceoOverallText').style.color = overall >= 80 ? 'var(--neon-green)' : (overall >= 50 ? 'var(--neon-gold)' : 'var(--neon-red)'); document.getElementById('ceoOverallLabel').innerText = overall >= 80 ? '🔥 Beast Mode Activated' : (overall >= 50 ? '⚡ Keep Pushing' : '⚠️ System Needs Attention');
     // FIX: ring circumference updated for r=30 → 2*π*30 ≈ 188
@@ -3541,7 +3637,7 @@ TAMIL_INSIGHT: [2-3 sentences in Tamil motivating him or warning him]
 • Current Weight: ${currentWt} kg (Day ${daysSinceStart})
 • Weight Trend: ${(currentWt - 62.0).toFixed(1)} kg gained so far
 • Daily Protein: ${currentLoggedProtein}g / Target: ${targetP}g
-• Water Intake: ${(currentWater/1000).toFixed(1)}L / 4L Goal
+• Water Intake: ${(currentWater/1000).toFixed(1)}L / ${(waterTargetML/1000).toFixed(1)}L Goal
 • Sleep Score (3-day avg): ${sleepAvg.toFixed(0)}%
 • Tired/Sore Mood Days (last 7): ${tiredCount} days
 • Weekly Expenses: ₹${weekSum} / Budget: ₹${weeklyBudgetTarget}
@@ -3565,7 +3661,7 @@ Analyze like a professional coach. Be honest but motivating.`;
         let wVal = wMatch ? parseFloat(wMatch[1]) : (currentWt + ((currentWt-62)/daysSinceStart)*30);
         let bVal = bMatch ? parseFloat(bMatch[1]) : (weeklyBudgetTarget>0?(weekSum/weeklyBudgetTarget)*100:0);
         let oVal = oMatch ? parseFloat(oMatch[1]) : Math.round(((tiredCount/7)*50)+((100-sleepAvg)/100)*50);
-        let mVal = mMatch ? parseFloat(mMatch[1]) : Math.round((currentLoggedProtein/Math.max(1,targetP))*40+(currentWater/4000)*30+(sleepAvg/100)*30);
+        let mVal = mMatch ? parseFloat(mMatch[1]) : Math.round((currentLoggedProtein/Math.max(1,targetP))*40+(currentWater/waterTargetML)*30+(sleepAvg/100)*30);
         
         let tamilInsight = insightMatch ? insightMatch[1].trim() : '';
 
@@ -3633,7 +3729,7 @@ function runLocalPredictiveAnalytics() {
     document.getElementById('predictOvertrainVal').innerText = overtrainRisk + '%';
     document.getElementById('predictOvertrainBar').style.width = overtrainRisk + '%';
 
-    let muscleGrowth = Math.round((currentLoggedProtein / Math.max(1,targetP)) * 40 + (currentWater/4000)*30 + (sleepAvg/100)*30);
+    let muscleGrowth = Math.round((currentLoggedProtein / Math.max(1,targetP)) * 40 + (currentWater/waterTargetML)*30 + (sleepAvg/100)*30);
     document.getElementById('predictMuscleVal').innerText = muscleGrowth + '%';
     document.getElementById('predictMuscleBar').style.width = Math.min(100, muscleGrowth) + '%';
 }
@@ -3731,7 +3827,7 @@ function stopWimHof() {
 function generateAdaptiveWorkout() {
     let appToday = getAppToday(); let todayStr = appToday.toDateString(); let todayName = daysOfWeek[appToday.getDay()];
     let sleepScore = getEffectiveSleepScore(todayStr) ?? 50;
-    let waterScore = (currentWater / 4000) * 100;
+    let waterScore = (currentWater / waterTargetML) * 100;
     let recoveryPct = Math.round((sleepScore * 0.6) + (waterScore * 0.4));
     let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; let todayMood = moods[todayStr] || 'Normal';
     document.getElementById('adaptiveRecoveryFill').style.width = recoveryPct + '%';
@@ -4200,6 +4296,8 @@ window.addEventListener('DOMContentLoaded', () => {
         else if(Notification.permission === 'granted') { scheduleSmartNotifications(); } // FIX: restart schedule on every app load for returning users, not just first grant
     }
     initAutoDailyBackupUI(); // FEATURE: restore auto-backup toggle state + last sync time on load
+    updateWaterTargetFromWeather(); // FEATURE: adjust water goal based on today's weather
+    updateSunriseWakeupSuggestion(); // FEATURE: sunrise-based ideal wake-up time suggestion
     initNeural(); drawNeural(); resizeConfetti();
     setTimeout(runBootSequence, 300);
     setTimeout(checkAchievements, 2500);
@@ -4382,7 +4480,7 @@ function unlockAchievement(key) {
 
 function checkAchievements() {
   if(unlockedAchievements.length === 0) unlockAchievement('first_login');
-  if(currentWater >= 4000) unlockAchievement('water_4l');
+  if(currentWater >= waterTargetML) unlockAchievement('water_4l');
   let streak = parseInt(localStorage.getItem('gym_streak') || 0);
   if(streak >= 7) unlockAchievement('gym_7days');
   let dPct = document.getElementById('dailyProgressText')?.innerText;
@@ -4528,7 +4626,7 @@ completeCurrentDay = async function() {
 const originalAddWater = addWater;
 addWater = function(ml) {
   originalAddWater(ml);
-  if(currentWater >= 4000) setTimeout(() => unlockAchievement('water_4l'), 500);
+  if(currentWater >= waterTargetML) setTimeout(() => unlockAchievement('water_4l'), 500);
 };
 
 // Override addWeight to check weight gain
