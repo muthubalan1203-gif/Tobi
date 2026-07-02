@@ -1387,30 +1387,6 @@ const dietScheduleMacros = [
     {p:18, c:50, f:8, cal:400},{p:8, c:12, f:8, cal:150}
 ];
 
-const dailyNaturalProtocols = {
-    0: { title: "🧖 முகப் பராமரிப்பு + 💊 உடல்நலம்", items: [
-        {id:'nat_sun_1', text:'🌿 கற்றாழை + குங்குமப்பூ + வெள்ளரிக்காய் முகப் பேக் (30 நிமிடம்)'},{id:'nat_sun_2', text:'🥛 வெறும் பாலில் பஞ்சு துடைத்தல் (Cleansing)'},
-        {id:'nat_sun_3', text:'🍃 மூக்கடைப்பு-க்கு: மஞ்சள் பால் + உப்பு நீர்'},{id:'nat_sun_4', text:'💊 வயிறு-க்கு: இளநீர் + வாழைப்பழம்'}]},
-    1: { title: "🧴 முகப் பராமரிப்பு + 🧔 தாடி", items: [
-        {id:'nat_mon_1', text:'🌾 கடலை மாவு + பச்சைப் பயறு மாவு Cleansing'},{id:'nat_mon_2', text:'🌿 கற்றாழை ஜெல் (20 நிமிடம்)'},
-        {id:'nat_mon_3', text:'🌹 ரோஸ் வாட்டர் Toner'},{id:'nat_mon_4', text:'🧔 தாடிக்கு: ஆலிவ் எண்ணெய் + தேன் + வெங்காயம் ஜூஸ் (20 நிமிடம்)'}]},
-    2: { title: "🌿 தலைமுடி பராமரிப்பு + 💊 Bloating", items: [
-        {id:'nat_tue_1', text:'🥥 தேங்காய் எண்ணெய் + ஆம்லா (இரவு தலைக்கு)'},{id:'nat_tue_2', text:'🫘 வெந்தயம் தண்ணீர் (காலை வெறும் வயிற்றில்)'},
-        {id:'nat_tue_3', text:'💊 Bloating-க்கு: சீரகம் தண்ணீர் + இஞ்சி டீ'},{id:'nat_tue_4', text:'🌿 சோம்பு சாப்பிடுதல் (உணவுக்கு பிறகு)'}]},
-    3: { title: "🌿 தலைமுடி Wash Day + 🧖 Face Scrub", items: [
-        {id:'nat_wed_1', text:'🌿 சிகைக்காய் + ரீத்தா + கடுக்காய் குளியல்'},{id:'nat_wed_2', text:'🍃 கறிவேப்பிலை நீர் தெளிக்கவும் (முடி)'},
-        {id:'nat_wed_3', text:'🌿 ஆலோ + நீம் இலை (Dandruff Pack)'},{id:'nat_wed_4', text:'🍚 அரிசி மாவு + தேன் + எலுமிச்சை Face Scrub'}]},
-    4: { title: "🧔 தாடி Softening + 💊 Ulcer Care", items: [
-        {id:'nat_thu_1', text:'🥣 தயிர் + மஞ்சள் (தாடி Softener 15 நிமிடம்)'},{id:'nat_thu_2', text:'🥚 முட்டை வெள்ளை + ஆலிவ் எண்ணெய் (தாடி)'},
-        {id:'nat_thu_3', text:'💊 வயிறு-க்கு: குளிர்ந்த பால் + கற்றாழை ஜூஸ்'},{id:'nat_thu_4', text:'🍌 வாழைப்பழம் (காலை + இரவு)'}]},
-    5: { title: "✨ Face Glow Pack + 🤧 Cold Care", items: [
-        {id:'nat_fri_1', text:'🟡 மஞ்சள் + தயிர் + தேன் (Brightening Pack 20 நிமிடம்)'},{id:'nat_fri_2', text:'🥒 வெள்ளரிக்காய் + எலுமிச்சை (Cooling Pack)'},
-        {id:'nat_fri_3', text:'🤧 மூக்கடைப்பு-க்கு: நீராவி (துளசி/வேப்பிலை)'},{id:'nat_fri_4', text:'🫚 இஞ்சி + தேன் (காலை + இரவு)'}]},
-    6: { title: "🌿 Deep Hair Conditioning + 🧔 Beard Growth", items: [
-        {id:'nat_sat_1', text:'🥣 தயிர் + முட்டை + தேன் (Deep Conditioning 30 நிமிடம்)'},{id:'nat_sat_2', text:'🧅 வெங்காயம் ஜூஸ் + தேங்காய் எண்ணெய் (முடி)'},
-        {id:'nat_sat_3', text:'🧔 வெந்தயம் + பாதாம் எண்ணெய் (தாடி Overnight)'},{id:'nat_sat_4', text:'🌺 செம்பருத்தி + ஆலிவ் எண்ணெய் (முடி)'}]}
-};
-
 function playAiTyping(text, containerElement) { if(aiTypingTimeout) clearTimeout(aiTypingTimeout); containerElement.innerHTML = ''; let i = 0; function step() { if(i < text.length) { containerElement.innerHTML += text.charAt(i); i++; aiTypingTimeout = setTimeout(step, 12); } } step(); }
 function shareDailyReportToWhatsApp() {
     let appToday = getAppToday();
