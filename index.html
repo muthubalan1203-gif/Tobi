@@ -923,6 +923,13 @@ body.theme-sharingan .toast-notification-hub {
     <h3 class="card-title" style="color:var(--neon-cyan);">🤖 AI Meal Log</h3>
     <div class="form-group"><input type="text" id="mealFoodInput" class="form-control" placeholder="Type food (Ex: 4 idli, 2 egg, 1 milk)"></div>
     <div style="display:flex; gap:10px;"><button class="btn-universal" style="background:var(--neon-cyan); color:black;" onclick="analyzeMealInputWithAI()">🤖 AI Analyze & Log</button><button class="btn-universal" style="background:var(--neon-purple); color:white; width:60px; font-size:1.2rem;" onclick="initVoiceCommand()">🎙️</button></div>
+    <div style="display:flex; align-items:center; gap:10px; margin:12px 0 4px 0;"><div style="flex:1; height:1px; background:var(--glass-border);"></div><span style="font-size:0.65rem; color:var(--text-secondary);">OR</span><div style="flex:1; height:1px; background:var(--glass-border);"></div></div>
+    <input type="file" id="mealPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handleMealPhotoSelected(event)">
+    <button class="btn-universal" id="mealPhotoBtn" style="background:var(--neon-gold); color:black; width:100%; margin-top:4px;" onclick="document.getElementById('mealPhotoInput').click()">📸 Photo-Analyze Meal</button>
+    <div id="mealPhotoPreviewWrap" style="display:none; margin-top:10px; text-align:center; position:relative;">
+        <img id="mealPhotoPreviewImg" style="max-width:100%; max-height:180px; border-radius:14px; border:2px solid var(--neon-gold);">
+        <button onclick="clearMealPhotoPreview()" style="position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.7); color:white; border:none; border-radius:50%; width:26px; height:26px; font-size:0.8rem;">✖</button>
+    </div>
 </div>
 
 <!-- Water Matrix -->
@@ -2068,7 +2075,10 @@ async function updateSunriseWakeupSuggestion() {
 
     const applySunrise = async (latitude, longitude) => {
         try {
-            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=sunrise,sunset&timezone=auto`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6000);
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=sunrise,sunset&timezone=auto`, { signal: controller.signal });
+            clearTimeout(timeoutId);
             if (!res.ok) throw new Error('Sunrise fetch failed');
             const data = await res.json();
             const sunriseISO = data?.daily?.sunrise?.[0];
@@ -2086,8 +2096,11 @@ async function updateSunriseWakeupSuggestion() {
 
             if (sunsetISO) localStorage.setItem('todays_sunset_time', sunsetISO);
         } catch (err) {
+            // Sandboxed preview environments (like Claude's artifact iframe) block cross-origin
+            // fetches to arbitrary domains — this will work normally once hosted (GitHub Pages,
+            // Netlify, Vercel, or your own domain), since open-meteo.com allows CORS from any origin.
             console.log("Sunrise API skipped:", err.message);
-            el.innerText = "🌄 Ideal Wake-up: 5:30 - 6:00 AM (default — location access கொடுத்தா exact சூரிய உதயம் காட்டும்)";
+            el.innerText = "🌄 Ideal Wake-up: 5:30 - 6:00 AM (default — hosted site-ல location access கொடுத்தா exact சூரிய உதயம் காட்டும்)";
         }
     };
 
@@ -2739,6 +2752,163 @@ function parseAINutritionResponse(response) {
     } catch(e) {
         console.error("Parse error:", e);
         return { success: false };
+    }
+}
+
+// ===== FEATURE: Photo-Based Calorie Estimation (Gemini Vision) =====
+let selectedMealPhotoBase64 = null;
+let selectedMealPhotoMime = 'image/jpeg';
+
+function handleMealPhotoSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    triggerDeviceHapticPulse();
+    selectedMealPhotoMime = file.type || 'image/jpeg';
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        selectedMealPhotoBase64 = e.target.result;
+        document.getElementById('mealPhotoPreviewImg').src = selectedMealPhotoBase64;
+        document.getElementById('mealPhotoPreviewWrap').style.display = 'block';
+        analyzeMealPhotoWithAI();
+    };
+    reader.onerror = function() {
+        displayPremiumToastNotification("Photo read failed!", "❌");
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearMealPhotoPreview() {
+    selectedMealPhotoBase64 = null;
+    document.getElementById('mealPhotoPreviewWrap').style.display = 'none';
+    document.getElementById('mealPhotoInput').value = '';
+}
+
+async function analyzeMealPhotoWithAI() {
+    if (!selectedMealPhotoBase64) {
+        return displayPremiumToastNotification("Photo eduthu upload pannunga!", "❌");
+    }
+
+    if (!GEMINI_API_KEY) {
+        displayPremiumToastNotification("⚠️ API Key Missing!", "❌");
+        openModalWithHistory('aiEngineModal');
+        document.getElementById('aiHeaderTitle').innerText = "🔑 SETUP REQUIRED";
+        document.getElementById('aiTypingText').innerHTML = "Gemini API Key set panni settings-ல paste pannunga!\n\n1. https://aistudio.google.com/app/apikey போய் key generate pannunga\n2. Copy panni Settings-ல paste pannunga\n3. Retry pannunga";
+        document.getElementById('aiActionButtons').innerHTML = '<button class="ai-btn-close" onclick="closeModalAction(\'aiEngineModal\')">OK</button>';
+        return;
+    }
+
+    const btn = document.getElementById('mealPhotoBtn');
+    if (btn) { btn.disabled = true; btn.innerText = "🔄 TOBI analyzing photo..."; }
+    displayPremiumToastNotification("📸 TOBI photo analyze pandrean...", "🔄");
+
+    try {
+        const visionPrompt = `You are a nutrition expert AI with food image recognition. Look at this food photo carefully and identify ALL food items visible, estimating realistic portion sizes.
+
+Respond in EXACTLY this format (no other text):
+FOOD_NAME: [comma separated list of identified food items with approx quantity]
+QUANTITY: [overall serving description]
+PROTEIN_G: [total grams]
+CARBS_G: [total grams]
+FATS_G: [total grams]
+CALORIES: [total kcal]
+
+Example response:
+FOOD_NAME: Rice (1 cup), Sambar (1 bowl), Boiled Egg (1)
+QUANTITY: 1 plate
+PROTEIN_G: 18
+CARBS_G: 65
+FATS_G: 10
+CALORIES: 420
+
+Rules:
+- Be accurate for Indian foods (idli, dosa, sambar, rice, curries, etc.)
+- If multiple items visible, sum the total macros across all items
+- Estimate portion size visually (plate size, bowl size etc.) — be realistic, not overly generous
+- If the image doesn't clearly show food, make your best reasonable guess and note it in FOOD_NAME`;
+
+        const aiResponse = await askGemini(visionPrompt, selectedMealPhotoBase64, selectedMealPhotoMime);
+        const nutritionData = parseAINutritionResponse(aiResponse);
+
+        if (!nutritionData.success) {
+            displayPremiumToastNotification("Photo-ல food identify agala, retry pannunga!", "⚠️");
+            if (btn) { btn.disabled = false; btn.innerText = "📸 Photo-Analyze Meal"; }
+            return;
+        }
+
+        let p = nutritionData.protein, c = nutritionData.carbs, f = nutritionData.fats, cal = nutritionData.calories;
+        let foodName = nutritionData.foodName;
+
+        if (targetP === 0) {
+            let aiRep = "⚠️ TOBI WARNING:\nGym page-ல Height/Weight set pannunga first!";
+            openModalWithHistory('aiEngineModal');
+            document.getElementById('aiHeaderTitle').innerText = "TOBI NUTRITION AI";
+            document.getElementById('aiActionButtons').innerHTML = '<button class="ai-btn-close" onclick="closeModalAction(\'aiEngineModal\')">OK</button>';
+            playAiTyping(aiRep, document.getElementById('aiTypingText'));
+            if (btn) { btn.disabled = false; btn.innerText = "📸 Photo-Analyze Meal"; }
+            return;
+        }
+
+        let actualNow = new Date();
+        pendingMealData = {
+            id: Date.now(),
+            date: getAppToday().toDateString(),
+            time: actualNow.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+            foodText: foodName,
+            p: p, c: c, f: f, cal: cal,
+            rawInput: "📷 Photo Analysis",
+            aiPowered: true,
+            photoBased: true
+        };
+
+        let pDeficit = targetP - (currentLoggedProtein + p);
+        let cDeficit = targetC - (currentLoggedCarbs + c);
+        let fDeficit = targetF - (currentLoggedFats + f);
+
+        let aiReport = "📸 TOBI AI PHOTO MEAL ANALYSIS\n=========================================\n\n";
+        aiReport += `📍 Detected: ${foodName}\n`;
+        aiReport += `📊 Macros: P:${p}g | C:${c}g | F:${f}g | ${cal} Kcal\n\n`;
+
+        if (pDeficit > 0 || cDeficit > 0 || fDeficit > 0) {
+            aiReport += "🎯 ADDITIONAL FOODS RECOMMENDED:\n";
+            if (pDeficit > 0) {
+                aiReport += `\n⚠️ Protein deficit: ${pDeficit}g still needed\n`;
+                aiReport += `   → ${Math.ceil(pDeficit/6)} Eggs OR\n`;
+                aiReport += `   → ${Math.ceil(pDeficit/25)} cups Soya OR\n`;
+                aiReport += `   → ${Math.ceil(pDeficit/25)} servings Chicken\n`;
+            }
+            if (cDeficit > 0) {
+                aiReport += `\n⚠️ Carbs deficit: ${cDeficit}g still needed\n`;
+                aiReport += `   → ${Math.ceil(cDeficit/27)} Bananas OR\n`;
+                aiReport += `   → ${Math.ceil(cDeficit/45)} cups Rice OR\n`;
+                aiReport += `   → ${Math.ceil(cDeficit/27)} Oats servings\n`;
+            }
+            if (fDeficit > 0) {
+                aiReport += `\n⚠️ Fats deficit: ${fDeficit}g still needed\n`;
+                aiReport += `   → ${Math.ceil(fDeficit/14)} Almonds OR\n`;
+                aiReport += `   → ${fDeficit} ml Olive Oil\n`;
+            }
+        } else {
+            aiReport += "✅ MACROS ON TRACK!\n";
+            if (pDeficit <= 0) aiReport += "✅ Protein: EXCEEDED\n";
+            if (cDeficit <= 0) aiReport += "✅ Carbs: EXCEEDED\n";
+            if (fDeficit <= 0) aiReport += "✅ Fats: EXCEEDED\n";
+        }
+
+        openModalWithHistory('aiEngineModal');
+        document.getElementById('aiHeaderTitle').innerText = "📸 AI PHOTO MEAL ANALYSIS";
+        document.getElementById('aiActionButtons').innerHTML = `
+            <button class="ai-btn-close" style="background:var(--neon-green); color:black;" onclick="confirmMealLog(); closeModalAction('aiEngineModal'); clearMealPhotoPreview(); displayPremiumToastNotification('Meal logged! 🎉', '✅');">✅ Log Meal</button>
+            <button class="ai-btn-close" style="background:var(--neon-red); margin-top:8px;" onclick="closeModalAction('aiEngineModal'); clearMealPhotoPreview();">❌ Cancel</button>
+        `;
+
+        playAiTyping(aiReport, document.getElementById('aiTypingText'));
+        displayPremiumToastNotification("Photo analysis complete!", "✅");
+
+    } catch (error) {
+        console.error("AI Photo Analysis Error:", error);
+        displayPremiumToastNotification("Photo AI error, try again!", "❌");
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerText = "📸 Photo-Analyze Meal"; }
     }
 }
 
