@@ -3139,7 +3139,7 @@ function generateTomorrowProtocol() {
     if(tomorrowName === 'Monday' || tomorrowName === 'Tuesday') {
         report += `\n💧 காலை ஸ்பெஷல்: வெறும் வயிற்றில் சீரகத் தண்ணீர்`;
     } else if(tomorrowName === 'Wednesday' || tomorrowName === 'Thursday') {
-        report += `\n💧 காலை ஸ்பெஷல்: வெறும் வயிற்றில் சியா விதை தண்ணீர்`;
+        report += `\n💧 காலை ஸ்பெஷல்: வெறும் வயிற்றில் சாதாரண நீர்`;
     } else {
         report += `\n💧 காலை ஸ்பெஷல்: வெறும் வயிற்றில் சாதாரண சுடுநீர்`;
     }
@@ -3231,7 +3231,7 @@ function renderCurrentDay() {
     </li>`;
     
     // 7. Water & FaceWash
-    let waterTaskHTML = (dayName === 'Monday' || dayName === 'Tuesday') ? `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>செரிமானத்திற்கு:</b> காலை சீரகத் தண்ணீர்.</span></label></li>` : (dayName === 'Wednesday' || dayName === 'Thursday') ? `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>குளிர்ச்சிக்கு:</b> காலை சியா விதை தண்ணீர்.</span></label></li>` : `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>டீடாக்ஸ்:</b> காலை சாதாரண சுடுநீர்.</span></label></li>`; 
+    let waterTaskHTML = (dayName === 'Monday' || dayName === 'Tuesday') ? `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>செரிமானத்திற்கு:</b> காலை சீரகத் தண்ணீர்.</span></label></li>` : (dayName === 'Wednesday' || dayName === 'Thursday') ? `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>குளிர்ச்சிக்கு:</b> காலை சாதாரண நீர்.</span></label></li>` : `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-d" onchange="handleTaskChange('${todayDateKey}', 't-d')"><span><b>டீடாக்ஸ்:</b> காலை சாதாரண சுடுநீர்.</span></label></li>`; 
     
     let faceWashTaskHTML = `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-w" onchange="handleTaskChange('${todayDateKey}', 't-w')"><span><b>Daily Face Wash:</b> மைல்டான ஃபேஸ் வாஷ்.</span></label></li>`; 
     
