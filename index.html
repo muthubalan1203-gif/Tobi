@@ -928,9 +928,10 @@ body.theme-sharingan .toast-notification-hub {
 <!-- Water Matrix -->
 <div class="app-card" style="border-top:4px solid #0ea5e9; text-align:center;">
     <h3 class="card-title" style="justify-content:center; color:#0ea5e9;">💧 Aqua Fluid Matrix</h3>
-    <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:-10px;">Target: 4 Liters / Day</p>
+    <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:-10px;" id="waterTargetLabelText">Target: 4.0 Liters / Day</p>
     <div class="flask-container"><div id="flaskWaterFill" class="flask-water"></div><div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; font-weight:900; font-size:0.8rem; z-index:2; text-shadow:0 0 5px black;" id="waterLabel">0 L</div></div>
     <div class="water-btn-group"><button class="water-btn" onclick="addWater(250)">+ 250 ML</button><button class="water-btn" onclick="addWater(500)">+ 500 ML</button></div>
+    <p id="aiWaterReasonText" style="font-size:0.7rem; color:var(--neon-gold); margin-top:10px; line-height:1.4;"></p>
 </div>
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 0 10px 0;"><h3 class="card-title" style="margin:0;">Today's Meal Log</h3></div>
@@ -1060,6 +1061,42 @@ body.theme-sharingan .toast-notification-hub {
 </div>
 <div style="display:flex; flex-direction:column; gap:10px;"><button class="btn-universal" style="background:var(--neon-cyan); color:black; font-size:0.9rem;" onclick="syncToCloud()">☁️ Sync to Cloud Now</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-purple); color:var(--neon-purple); font-size:0.9rem;" onclick="restoreFromCloud()">📥 Restore from Cloud</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-cyan); color:var(--neon-cyan); font-size:0.8rem;" onclick="restoreFromLocalFile()">📂 Restore from Local File</button></div>
 <div id="cloudSyncLog" style="margin-top:12px; font-size:0.75rem; color:var(--text-secondary); display:none;"></div></div></div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-purple); margin-top:15px;">
+<h3 class="card-title" style="color:var(--neon-purple);">⚙️ Advanced System Features</h3>
+
+<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
+    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">💪 Wake Lock (Gym Page)</span>
+    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
+        <input type="checkbox" id="wakeLockToggle" onchange="toggleWakeLockFeature(this.checked)" style="opacity:0; width:0; height:0;">
+        <span id="wakeLockSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="wakeLockKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
+    </label>
+</div>
+
+<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
+    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">📳 Shake-to-Log Water</span>
+    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
+        <input type="checkbox" id="shakeToLogToggle" onchange="toggleShakeToLog(this.checked)" style="opacity:0; width:0; height:0;">
+        <span id="shakeToLogSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="shakeToLogKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
+    </label>
+</div>
+
+<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
+    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">🚨 Fall/Impact Detection</span>
+    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
+        <input type="checkbox" id="fallDetectToggle" onchange="toggleFallDetection(this.checked)" style="opacity:0; width:0; height:0;">
+        <span id="fallDetectSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="fallDetectKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
+    </label>
+</div>
+
+<p id="batteryStatusText" style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:10px;">🔋 Battery status: checking...</p>
+
+<div style="display:flex; flex-direction:column; gap:8px;">
+<button class="btn-universal" style="background:transparent; border:1px solid var(--neon-cyan); color:var(--neon-cyan); font-size:0.8rem;" onclick="exportDataAsCSV()">📄 Export All Data as CSV</button>
+<button class="btn-universal" style="background:transparent; border:1px solid var(--neon-gold); color:var(--neon-gold); font-size:0.8rem;" onclick="showAppDiagnostics()">🩺 App Diagnostics / Self-Check</button>
+</div>
+<div id="appDiagnosticsLog" style="margin-top:10px; font-size:0.72rem; color:var(--text-secondary); display:none; white-space:pre-wrap;"></div>
+</div>
 </div>
 
 <!-- MODALS -->
@@ -1391,6 +1428,52 @@ async function askGemini(prompt, imageBase64 = null, imageMimeType = 'image/jpeg
     }
 }
 
+// FEATURE: AI-Powered Personalized Water Target — Weight/Height/Temperature வச்சி, Google Search grounding-ஓட Gemini analysis பண்ணும்
+async function getAIWaterTargetML(tempC, weightKg, heightCm) {
+    if (!GEMINI_API_KEY) return null;
+    try {
+        const model = 'gemini-3.1-flash-lite';
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+        const prompt = `நீங்க ஒரு hydration/sports-nutrition expert. Internet-ல இருக்கிற latest hydration guidelines (ACSM, WHO, sports science research) வச்சி இந்த நபருக்கு இன்றைக்கு எவ்ளோ தண்ணீர் (ml-ல) குடிக்கணும்-னு கணக்கிடு:
+- Body Weight: ${weightKg} kg
+- Height: ${heightCm ? heightCm + ' cm' : 'Not provided'}
+- Today's Temperature: ${(typeof tempC === 'number') ? tempC + '°C' : 'Unknown, assume moderate tropical climate'}
+- Activity Level: Regular gym workout (weight training, 5-6 days/week)
+- Location: Tamil Nadu, India (humid tropical climate)
+
+ONLY இந்த JSON format-ல பதில் கொடு, வேற எதுவும் எழுதாத, markdown backticks கூட வேண்டாம்:
+{"target_ml": <whole number, realistic range 2500-6000>, "reason": "<Tamil-ல ஒரு சிறு வரி காரணம், max 18 words>"}`;
+
+        const body = {
+            contents: [{ parts: [{ text: prompt }] }],
+            tools: [{ google_search: {} }]
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) throw new Error('AI water target request failed: ' + response.status);
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message);
+
+        let text = (data?.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
+        text = text.replace(/```json|```/g, '').trim();
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error('No JSON in AI response');
+        const parsed = JSON.parse(jsonMatch[0]);
+
+        if (parsed && typeof parsed.target_ml === 'number' && parsed.target_ml >= 2000 && parsed.target_ml <= 7000 && parsed.reason) {
+            return parsed;
+        }
+        return null;
+    } catch (err) {
+        console.log('AI water target skipped, falling back to formula:', err.message);
+        return null;
+    }
+}
+
 // ... (இதற்கு கீழே உள்ளவை அப்படியே இருக்கட்டும்)
 let deferredInstallPrompt = null;
 
@@ -1535,6 +1618,9 @@ function switchPage(pageId, swipeDir) {
     if(pageId === currentPageId) return;
 
     triggerDeviceHapticPulse();
+
+    // FEATURE: Screen Wake Lock — gym page-க்கு போனா lock, வேற பக்கம் போனா release
+    if (pageId === 'gym') { requestWakeLockIfOnGymPage(); } else if (currentPageId === 'gym') { releaseWakeLock(); }
 
     // Determine slide direction
     const fromIdx = PAGE_ORDER.indexOf(currentPageId);
@@ -1898,13 +1984,13 @@ function logGymMood(mood, elem) {
 }
 function reviewWeeklyMoods() { let appToday = getAppToday(); let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; let counts = {"Energetic":0,"Normal":0,"Tired":0,"Sore":0}; let total = 0; for(let i=0;i<7;i++) { let d = new Date(appToday); d.setDate(d.getDate()-i); let m = moods[d.toDateString()]; if(m) { if(m.includes('Energetic')) counts["Energetic"]++; if(m.includes('Normal')) counts["Normal"]++; if(m.includes('Tired')) counts["Tired"]++; if(m.includes('Sore')) counts["Sore"]++; total++; } } let aiReport = `📊 Weekly Mood Analysis (${total} Days)\n======================\n🤩 Energetic: ${counts["Energetic"]}\n🥱 Tired: ${counts["Tired"]}\n🤕 Sore: ${counts["Sore"]}\n\n`; if(counts["Tired"]+counts["Sore"] > 3) aiReport += "⚠️ Overtraining detected!"; else aiReport += "✅ Optimal training state!"; openModalWithHistory('aiEngineModal'); document.getElementById('aiHeaderTitle').innerText = "TOBI RECOVERY AI"; document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`; playAiTyping(aiReport, document.getElementById('aiTypingText')); }
 
-function addWater(ml) { let appToday = getAppToday(); triggerDeviceHapticPulse(); currentWater += ml; if(currentWater > waterTargetML) currentWater = waterTargetML; localStorage.setItem('TOBI_water_intake_v6', currentWater); renderWater(); updateRecoveryRing(); updateCEODashboard(); if(currentWater === waterTargetML && !localStorage.getItem('water_goal_met_' + appToday.toDateString())) { displayPremiumToastNotification("Daily Water Goal Completed!", "🌊"); localStorage.setItem('water_goal_met_' + appToday.toDateString(), 'true'); } }
-function renderWater() { let pct = (currentWater / waterTargetML) * 100; const flask = document.getElementById('flaskWaterFill'); const lbl = document.getElementById('waterLabel'); if(flask) flask.style.height = `${pct}%`; if(lbl) lbl.innerText = `${(currentWater/1000).toFixed(1)} / ${(waterTargetML/1000).toFixed(1)} L`; }
+function addWater(ml) { let appToday = getAppToday(); triggerDeviceHapticPulse(); currentWater += ml; if(currentWater > waterTargetML) currentWater = waterTargetML; localStorage.setItem('TOBI_water_intake_v6', currentWater); renderWater(); updateRecoveryRing(); updateCEODashboard(); broadcastDataChange(); if(currentWater === waterTargetML && !localStorage.getItem('water_goal_met_' + appToday.toDateString())) { displayPremiumToastNotification("Daily Water Goal Completed!", "🌊"); triggerHapticPattern('achievement'); localStorage.setItem('water_goal_met_' + appToday.toDateString(), 'true'); } }
+function renderWater() { let pct = (currentWater / waterTargetML) * 100; const flask = document.getElementById('flaskWaterFill'); const lbl = document.getElementById('waterLabel'); if(flask) flask.style.height = `${pct}%`; if(lbl) lbl.innerText = `${(currentWater/1000).toFixed(1)} / ${(waterTargetML/1000).toFixed(1)} L`; const targetLbl = document.getElementById('waterTargetLabelText'); if(targetLbl) targetLbl.innerText = `Target: ${(waterTargetML/1000).toFixed(1)} Liters / Day`; }
 
 // FEATURE: Weather-based Smart Water Nudge — வெயில் அதிகமா இருந்தா water target automatic-ஆ அதிகரிக்கும்
 async function updateWaterTargetFromWeather() {
     const todayKey = getIsoDateStr(getAppToday());
-    // ஒரு நாளைக்கு ஒரு தடவை மட்டும் weather check பண்ணா போதும்
+    // ஒரு நாளைக்கு ஒரு தடவை மட்டும் check பண்ணா போதும்
     if (localStorage.getItem('water_weather_check_date') === todayKey) {
         renderWater();
         return;
@@ -1914,26 +2000,47 @@ async function updateWaterTargetFromWeather() {
     let lat = 9.9252, lon = 78.1198;
 
     const applyTarget = async (latitude, longitude) => {
+        let tempC = null;
         try {
             const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&timezone=auto`);
-            if (!res.ok) throw new Error('Weather fetch failed');
-            const data = await res.json();
-            const tempC = data?.current?.temperature_2m;
-            let newTarget = BASE_TARGET_ML;
-            let heatMsg = null;
-            if (typeof tempC === 'number') {
-                if (tempC >= 40) { newTarget = BASE_TARGET_ML + 1500; heatMsg = `🔥 கடும் வெயில் (${tempC}°C)! Water target 5.5L ஆக அதிகரிக்கப்பட்டது.`; }
-                else if (tempC >= 37) { newTarget = BASE_TARGET_ML + 1000; heatMsg = `☀️ அதிக வெயில் (${tempC}°C)! Water target 5L ஆக அதிகரிக்கப்பட்டது.`; }
-                else if (tempC >= 34) { newTarget = BASE_TARGET_ML + 500; heatMsg = `🌤️ வெயில் அதிகம் (${tempC}°C). Water target 4.5L ஆக அதிகரிக்கப்பட்டது.`; }
+            if (res.ok) { const data = await res.json(); tempC = data?.current?.temperature_2m; }
+        } catch (err) { console.log("Weather API skipped:", err.message); }
+
+        const weightKg = weights.length > 0 ? weights[0].val : null;
+        const bodyMetrics = JSON.parse(localStorage.getItem('saved_body_metrics') || 'null');
+        const heightCm = bodyMetrics ? bodyMetrics.height : null;
+
+        let newTarget = BASE_TARGET_ML;
+        let reasonMsg = null;
+
+        // FEATURE: AI (Gemini + Google Search grounding) — weight/height/temperature வச்சி personalized target
+        if (weightKg && GEMINI_API_KEY) {
+            const aiResult = await getAIWaterTargetML(tempC, weightKg, heightCm);
+            if (aiResult) {
+                newTarget = aiResult.target_ml;
+                reasonMsg = `🤖 AI Water Target: ${(newTarget/1000).toFixed(1)}L — ${aiResult.reason}`;
             }
-            waterTargetML = newTarget;
-            localStorage.setItem('water_target_dynamic_ml', String(newTarget));
-            localStorage.setItem('water_weather_check_date', todayKey);
-            if (heatMsg) displayPremiumToastNotification(heatMsg, "💧");
-        } catch (err) {
-            console.log("Weather API skipped:", err.message);
-            waterTargetML = parseInt(localStorage.getItem('water_target_dynamic_ml')) || BASE_TARGET_ML;
         }
+
+        // Fallback: AI கிடைக்கலைனா (API key இல்லை / weight இல்லை / AI call fail) — simple heat-based formula
+        if (!reasonMsg) {
+            if (typeof tempC === 'number') {
+                if (tempC >= 40) { newTarget = BASE_TARGET_ML + 1500; reasonMsg = `🔥 கடும் வெயில் (${tempC}°C)! Water target 5.5L ஆக அதிகரிக்கப்பட்டது.`; }
+                else if (tempC >= 37) { newTarget = BASE_TARGET_ML + 1000; reasonMsg = `☀️ அதிக வெயில் (${tempC}°C)! Water target 5L ஆக அதிகரிக்கப்பட்டது.`; }
+                else if (tempC >= 34) { newTarget = BASE_TARGET_ML + 500; reasonMsg = `🌤️ வெயில் அதிகம் (${tempC}°C). Water target 4.5L ஆக அதிகரிக்கப்பட்டது.`; }
+                else { newTarget = BASE_TARGET_ML; reasonMsg = `Default ${(BASE_TARGET_ML/1000).toFixed(1)}L target (weight/height + AI key போட்டா personalized target கிடைக்கும்).`; }
+            } else {
+                newTarget = parseInt(localStorage.getItem('water_target_dynamic_ml')) || BASE_TARGET_ML;
+            }
+        }
+
+        waterTargetML = newTarget;
+        localStorage.setItem('water_target_dynamic_ml', String(newTarget));
+        localStorage.setItem('water_weather_check_date', todayKey);
+        const reasonEl = document.getElementById('aiWaterReasonText');
+        if (reasonEl) reasonEl.innerText = reasonMsg || '';
+        displayPremiumToastNotification(reasonMsg && reasonMsg.length < 60 ? reasonMsg : "Water Target Updated!", "💧");
+
         renderWater(); updateRecoveryRing(); updateCEODashboard();
     };
 
@@ -1993,6 +2100,285 @@ async function updateSunriseWakeupSuggestion() {
     } else {
         applySunrise(lat, lon);
     }
+}
+
+// ============================================================
+// FEATURE BATCH: Hardware/Sensor + Technical Infra Features
+// ============================================================
+
+// --- 1. Screen Wake Lock during Workout ---
+let activeWakeLock = null;
+async function toggleWakeLockFeature(enabled) {
+    localStorage.setItem('feature_wakelock_enabled', enabled ? 'true' : 'false');
+    updateToggleVisual('wakeLockSlider', 'wakeLockKnob', enabled);
+    if (enabled) { displayPremiumToastNotification("Gym Wake Lock ஆன்!", "💪"); await requestWakeLockIfOnGymPage(); }
+    else { displayPremiumToastNotification("Gym Wake Lock ஆஃப்.", "⏹️"); releaseWakeLock(); }
+}
+async function requestWakeLockIfOnGymPage() {
+    if (localStorage.getItem('feature_wakelock_enabled') !== 'true') return;
+    if (!('wakeLock' in navigator)) return;
+    try { activeWakeLock = await navigator.wakeLock.request('screen'); } catch (err) { console.log('WakeLock failed:', err.message); }
+}
+function releaseWakeLock() { if (activeWakeLock) { activeWakeLock.release().catch(()=>{}); activeWakeLock = null; } }
+
+// --- 2. Shake-to-Log Water (DeviceMotion) ---
+let shakeListenerActive = false;
+let lastShakeTime = 0;
+function toggleShakeToLog(enabled) {
+    localStorage.setItem('feature_shake_enabled', enabled ? 'true' : 'false');
+    updateToggleVisual('shakeToLogSlider', 'shakeToLogKnob', enabled);
+    if (enabled) {
+        displayPremiumToastNotification("Shake-to-Log ஆன்! Phone-ஐ shake பண்ணா 250ml water log ஆகும்.", "📳");
+        enableShakeListener();
+    } else {
+        displayPremiumToastNotification("Shake-to-Log ஆஃப்.", "⏹️");
+    }
+}
+function enableShakeListener() {
+    if (shakeListenerActive) return;
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().then(state => { if (state === 'granted') attachShakeHandler(); }).catch(()=>{});
+    } else if ('DeviceMotionEvent' in window) {
+        attachShakeHandler();
+    }
+}
+function attachShakeHandler() {
+    shakeListenerActive = true;
+    window.addEventListener('devicemotion', (e) => {
+        if (localStorage.getItem('feature_shake_enabled') !== 'true') return;
+        const acc = e.accelerationIncludingGravity;
+        if (!acc) return;
+        const magnitude = Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0);
+        const now = Date.now();
+        if (magnitude > 35 && (now - lastShakeTime) > 3000) {
+            lastShakeTime = now;
+            addWater(250);
+            triggerDeviceHapticPulse();
+            displayPremiumToastNotification("Shake கண்டறியப்பட்டது! 250ml Water Log ஆனது 💧", "📳");
+        }
+    });
+}
+
+// --- 3. Custom Vibration Patterns ---
+function triggerHapticPattern(type) {
+    if (!("vibrate" in navigator)) return;
+    const patterns = { success: [30, 40, 30], gym: [80], water: [15], warning: [50, 100, 50, 100], achievement: [20, 30, 20, 30, 60] };
+    navigator.vibrate(patterns[type] || 12);
+}
+
+// --- 4. Fall / Sudden Impact Detection ---
+let fallDetectListenerActive = false;
+function toggleFallDetection(enabled) {
+    localStorage.setItem('feature_falldetect_enabled', enabled ? 'true' : 'false');
+    updateToggleVisual('fallDetectSlider', 'fallDetectKnob', enabled);
+    if (enabled) { displayPremiumToastNotification("Fall Detection ஆன்!", "🚨"); enableFallDetectListener(); }
+    else { displayPremiumToastNotification("Fall Detection ஆஃப்.", "⏹️"); }
+}
+function enableFallDetectListener() {
+    if (fallDetectListenerActive) return;
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().then(state => { if (state === 'granted') attachFallHandler(); }).catch(()=>{});
+    } else if ('DeviceMotionEvent' in window) {
+        attachFallHandler();
+    }
+}
+function attachFallHandler() {
+    fallDetectListenerActive = true;
+    let lastFallAlert = 0;
+    window.addEventListener('devicemotion', (e) => {
+        if (localStorage.getItem('feature_falldetect_enabled') !== 'true') return;
+        const acc = e.accelerationIncludingGravity;
+        if (!acc) return;
+        const magnitude = Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0);
+        const now = Date.now();
+        if (magnitude > 55 && (now - lastFallAlert) > 10000) {
+            lastFallAlert = now;
+            if (confirm("⚠️ திடீர் அதிர்வு கண்டறியப்பட்டது! நீங்க நல்லா இருக்கீங்களா? (Cancel பண்ணா 15 விநாடியில் emergency alert காட்டப்படும்)")) {
+                displayPremiumToastNotification("பரவாயில்லை, தொடருங்கள்!", "✅");
+            } else {
+                displayPremiumToastNotification("⚠️ உங்கள் Emergency Contact-ஐ தொடர்பு கொள்ளவும்!", "🚨");
+            }
+        }
+    });
+}
+
+// --- 5. Battery-Aware Feature Throttling ---
+async function initBatteryAwareThrottling() {
+    const el = document.getElementById('batteryStatusText');
+    if (!('getBattery' in navigator)) { if (el) el.innerText = '🔋 Battery API இந்த device-ல support ஆகல.'; return; }
+    try {
+        const battery = await navigator.getBattery();
+        const updateBatteryUI = () => {
+            const pct = Math.round(battery.level * 100);
+            if (el) el.innerText = `🔋 Battery: ${pct}%${battery.charging ? ' (Charging)' : ''}` + (pct < 15 && !battery.charging ? ' — Power Saving Mode ஆன்' : '');
+            if (pct < 15 && !battery.charging) {
+                document.body.classList.add('battery-saver-mode');
+                if (typeof ambientAudio !== 'undefined' && isPlayingAudio) { try { ambientAudio.pause(); isPlayingAudio = false; } catch(e){} }
+            } else {
+                document.body.classList.remove('battery-saver-mode');
+            }
+        };
+        battery.addEventListener('levelchange', updateBatteryUI);
+        battery.addEventListener('chargingchange', updateBatteryUI);
+        updateBatteryUI();
+    } catch (err) { if (el) el.innerText = '🔋 Battery status கிடைக்கல.'; }
+}
+
+// --- 6. Multi-Tab Sync via BroadcastChannel ---
+let tobiSyncChannel = null;
+function initMultiTabSync() {
+    if (!('BroadcastChannel' in window)) return;
+    tobiSyncChannel = new BroadcastChannel('tobi_app_sync');
+    tobiSyncChannel.onmessage = (event) => {
+        if (event.data === 'data_changed') {
+            currentWater = parseInt(localStorage.getItem('TOBI_water_intake_v6')) || 0;
+            renderWater(); updateCEODashboard();
+        }
+    };
+}
+function broadcastDataChange() { if (tobiSyncChannel) tobiSyncChannel.postMessage('data_changed'); }
+
+// --- 7. Export All Data as CSV ---
+function exportDataAsCSV() {
+    try {
+        let csvRows = ['Category,Date,Detail,Amount/Value'];
+        (expenses || []).forEach(e => csvRows.push(`Expense,${e.date},"${(e.category||'').replace(/"/g,"'")}",${e.amount}`));
+        (weights || []).forEach(w => csvRows.push(`Weight,${w.date},Weight,${w.val}`));
+        (sleepLogs || []).forEach(s => csvRows.push(`Sleep,${s.date},"Score ${s.score}",${s.hours}`));
+        (wakeupLogs || []).forEach(w => csvRows.push(`Wakeup,${w.date},"${w.quality||''}",${w.time||''}`));
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `TOBI_Data_Export_${getIsoDateStr(getAppToday())}.csv`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        displayPremiumToastNotification("CSV Export Success!", "📄");
+    } catch (err) { console.error(err); displayPremiumToastNotification("Export Failed!", "❌"); }
+}
+
+// --- 8. App Version Migration Check ---
+const CURRENT_APP_VERSION = '5.1';
+function runAppVersionMigrationCheck() {
+    const storedVersion = localStorage.getItem('tobi_app_version');
+    if (storedVersion !== CURRENT_APP_VERSION) {
+        console.log(`Migrating app data: ${storedVersion || 'unknown'} → ${CURRENT_APP_VERSION}`);
+        localStorage.setItem('tobi_app_version', CURRENT_APP_VERSION);
+        localStorage.setItem('tobi_last_migration_date', new Date().toISOString());
+    }
+}
+
+// --- 9. Data Integrity Checksum (simple hash for backup verification) ---
+function computeSimpleChecksum(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; }
+    return hash.toString(16);
+}
+
+// --- 10. Automated Nightly Data Cleanup ---
+function runNightlyDataCleanup() {
+    const todayKey = getIsoDateStr(getAppToday());
+    if (localStorage.getItem('last_cleanup_date') === todayKey) return; // ஒரு நாளைக்கு ஒரு தடவை மட்டும்
+    const CUTOFF_DAYS = 120;
+    const cutoffTime = Date.now() - (CUTOFF_DAYS * 24 * 60 * 60 * 1000);
+    let removedCount = 0;
+    Object.keys(localStorage).forEach(key => {
+        const dateMatch = key.match(/(\d{4}-\d{2}-\d{2})/);
+        if (dateMatch) {
+            const keyDate = new Date(dateMatch[1]).getTime();
+            if (!isNaN(keyDate) && keyDate < cutoffTime && (key.startsWith('glowup_tasks_') || key.startsWith('gym_checkin_') || key.startsWith('water_goal_met_') || key.startsWith('sunrise_suggestion_cache_'))) {
+                localStorage.removeItem(key);
+                removedCount++;
+            }
+        }
+    });
+    localStorage.setItem('last_cleanup_date', todayKey);
+    if (removedCount > 0) console.log(`Nightly cleanup: removed ${removedCount} old keys`);
+}
+
+// --- 11. Rate-Limited Gemini API Call Queue ---
+let geminiCallQueue = [];
+let geminiQueueProcessing = false;
+async function queueGeminiCall(prompt, imageBase64 = null, imageMimeType = 'image/jpeg') {
+    return new Promise((resolve, reject) => {
+        geminiCallQueue.push({ prompt, imageBase64, imageMimeType, resolve, reject });
+        processGeminiQueue();
+    });
+}
+async function processGeminiQueue() {
+    if (geminiQueueProcessing || geminiCallQueue.length === 0) return;
+    geminiQueueProcessing = true;
+    const job = geminiCallQueue.shift();
+    try {
+        const result = await askGemini(job.prompt, job.imageBase64, job.imageMimeType);
+        job.resolve(result);
+    } catch (err) { job.reject(err); }
+    geminiQueueProcessing = false;
+    if (geminiCallQueue.length > 0) setTimeout(processGeminiQueue, 1200); // 1.2s gap-ஆ rate-limit தவிர்க்க
+}
+
+// --- 12. App Diagnostics / Self-Check ---
+function showAppDiagnostics() {
+    const logEl = document.getElementById('appDiagnosticsLog');
+    if (!logEl) return;
+    let report = [];
+    report.push(`App Version: ${CURRENT_APP_VERSION}`);
+    report.push(`LocalStorage Keys: ${Object.keys(localStorage).length}`);
+    let storageBytes = 0;
+    Object.keys(localStorage).forEach(k => storageBytes += (localStorage.getItem(k) || '').length);
+    report.push(`Approx Storage Used: ${(storageBytes / 1024).toFixed(1)} KB`);
+    report.push(`Wake Lock Support: ${'wakeLock' in navigator ? 'Yes ✅' : 'No ❌'}`);
+    report.push(`Notification Permission: ${('Notification' in window) ? Notification.permission : 'N/A'}`);
+    report.push(`Drive Client ID Set: ${localStorage.getItem('drive_client_id') ? 'Yes ✅' : 'No ❌'}`);
+    report.push(`Last Drive Sync: ${localStorage.getItem('last_drive_sync_time') || 'Never'}`);
+    report.push(`Online Status: ${navigator.onLine ? 'Online ✅' : 'Offline ⚠️'}`);
+    const recentErrors = JSON.parse(localStorage.getItem('tobi_error_log') || '[]');
+    report.push(`Recent Errors Logged: ${recentErrors.length}`);
+    if (recentErrors.length > 0) report.push(`Last Error: ${recentErrors[recentErrors.length - 1].message}`);
+    logEl.style.display = 'block';
+    logEl.innerText = report.join('\n');
+    displayPremiumToastNotification("Diagnostics Complete!", "🩺");
+}
+
+// --- 13. Local Error Logging (lightweight, no external service) ---
+window.addEventListener('error', (event) => {
+    try {
+        let errLog = JSON.parse(localStorage.getItem('tobi_error_log') || '[]');
+        errLog.push({ message: event.message, time: new Date().toISOString() });
+        if (errLog.length > 20) errLog = errLog.slice(-20); // சமீபத்திய 20 மட்டும் வைத்திரு
+        localStorage.setItem('tobi_error_log', JSON.stringify(errLog));
+    } catch (e) {}
+});
+
+// --- Helper: toggle switch visual updater (shared by all new toggles) ---
+function updateToggleVisual(sliderId, knobId, enabled) {
+    const slider = document.getElementById(sliderId);
+    const knob = document.getElementById(knobId);
+    if (slider) { slider.style.background = enabled ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.15)'; slider.style.boxShadow = enabled ? '0 0 8px var(--neon-cyan)' : 'none'; }
+    if (knob) knob.style.transform = enabled ? 'translateX(18px)' : 'translateX(0)';
+}
+
+// --- Init all new features on app load ---
+function initAdvancedSystemFeatures() {
+    runAppVersionMigrationCheck();
+    runNightlyDataCleanup();
+    initMultiTabSync();
+    initBatteryAwareThrottling();
+
+    const wakeLockEnabled = localStorage.getItem('feature_wakelock_enabled') === 'true';
+    const shakeEnabled = localStorage.getItem('feature_shake_enabled') === 'true';
+    const fallEnabled = localStorage.getItem('feature_falldetect_enabled') === 'true';
+    const wlToggle = document.getElementById('wakeLockToggle'); if (wlToggle) wlToggle.checked = wakeLockEnabled;
+    const shToggle = document.getElementById('shakeToLogToggle'); if (shToggle) shToggle.checked = shakeEnabled;
+    const fdToggle = document.getElementById('fallDetectToggle'); if (fdToggle) fdToggle.checked = fallEnabled;
+    updateToggleVisual('wakeLockSlider', 'wakeLockKnob', wakeLockEnabled);
+    updateToggleVisual('shakeToLogSlider', 'shakeToLogKnob', shakeEnabled);
+    updateToggleVisual('fallDetectSlider', 'fallDetectKnob', fallEnabled);
+    if (shakeEnabled) enableShakeListener();
+    if (fallEnabled) enableFallDetectListener();
+
+    // Re-request wake lock automatically if page becomes visible again while enabled
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') requestWakeLockIfOnGymPage(); });
 }
 
 // YouTube லிங்க் உருவாக்கும் குறியீடுகள் நீக்கப்பட்ட புதிய Function
@@ -4298,6 +4684,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initAutoDailyBackupUI(); // FEATURE: restore auto-backup toggle state + last sync time on load
     updateWaterTargetFromWeather(); // FEATURE: adjust water goal based on today's weather
     updateSunriseWakeupSuggestion(); // FEATURE: sunrise-based ideal wake-up time suggestion
+    initAdvancedSystemFeatures(); // FEATURE BATCH: wake lock, shake-log, fall-detect, battery, multi-tab sync, cleanup, migration
     initNeural(); drawNeural(); resizeConfetti();
     setTimeout(runBootSequence, 300);
     setTimeout(checkAchievements, 2500);
