@@ -1042,12 +1042,21 @@ body.theme-sharingan .toast-notification-hub {
         
         <!-- புதிய பட்டன் இங்கே சேர்க்கப்படுகிறது -->
         <button class="btn-universal" style="background:var(--neon-purple); color:white; margin-top:10px;" onclick="runMonthlyAudit()">📊 Monthly AI Meeting</button>
+        <button class="btn-universal" style="background:var(--neon-gold); color:black; margin-top:10px;" onclick="runWeeklyAIReview()">🗓️ Weekly AI Review Chat</button>
     </div>
 
 <div class="app-card" style="border-top:4px solid var(--neon-cyan); margin-top:15px;">
 <h3 class="card-title" style="color:var(--neon-cyan);">☁️ Cloud Backup Sync</h3>
 <div class="cloud-sync-status" id="cloudSyncStatus"><div class="cloud-dot offline" id="cloudStatusDot"></div><div><div style="font-size:0.85rem; font-weight:800; color:var(--text-primary);">Sync Status</div><div style="font-size:0.75rem; color:var(--text-secondary);" id="cloudStatusText">Local Mode (Offline)</div></div></div>
-<p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:12px;">Securely backup your data to cloud. Access from any device.</p>
+<p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">Securely backup your data to cloud. Access from any device.</p>
+<p id="lastSyncTimeDisplay" style="font-size:0.72rem; color:var(--neon-gold); margin-bottom:12px; font-weight:700;">🕒 Last Synced: Never</p>
+<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); border-radius:12px; padding:10px 14px; margin-bottom:12px;">
+    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">🔁 Auto Daily Backup</span>
+    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
+        <input type="checkbox" id="autoDailyBackupToggle" onchange="toggleAutoDailyBackup(this.checked)" style="opacity:0; width:0; height:0;">
+        <span id="autoDailyBackupSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="autoDailyBackupKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
+    </label>
+</div>
 <div style="display:flex; flex-direction:column; gap:10px;"><button class="btn-universal" style="background:var(--neon-cyan); color:black; font-size:0.9rem;" onclick="syncToCloud()">☁️ Sync to Cloud Now</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-purple); color:var(--neon-purple); font-size:0.9rem;" onclick="restoreFromCloud()">📥 Restore from Cloud</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-cyan); color:var(--neon-cyan); font-size:0.8rem;" onclick="restoreFromLocalFile()">📂 Restore from Local File</button></div>
 <div id="cloudSyncLog" style="margin-top:12px; font-size:0.75rem; color:var(--text-secondary); display:none;"></div></div></div>
 </div>
@@ -1111,6 +1120,7 @@ body.theme-sharingan .toast-notification-hub {
 
 <button class="TOBI-chat-fab" id="TOBIChatFab" onclick="toggleChatPanel()">🤖<div class="TOBI-badge" id="TOBIChatBadge" style="display:none;">1</div></button>
 </div>
+</div><!-- closes .app-container (FIX: was previously unclosed) -->
 <script>
 async function checkDailyWisdom() {
     let appToday = getAppToday();
@@ -1651,7 +1661,7 @@ function updateRecoveryRing() {
     if(textLabel) { if(recoveryPct >= 80) { textLabel.innerText = "சரியான ரெக்கவரி (Optimal)"; textLabel.style.color = "var(--neon-green)"; } else if(recoveryPct >= 50) { textLabel.innerText = "சுமாரான ரெக்கவரி (Average)"; textLabel.style.color = "var(--neon-gold)"; } else { textLabel.innerText = "மோசமான ரெக்கவரி (Poor)"; textLabel.style.color = "var(--neon-red)"; } }
 }
 
-function handleTaskChange(dateKey, taskId) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(taskId).checked; localStorage.setItem(taskId, isChecked); saveCheckboxState(dateKey, taskId, isChecked); calculateGlowupCardPercentage(); updateCEODashboard(); }
+function handleTaskChange(dateKey, taskId) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(taskId).checked; saveCheckboxState(dateKey, taskId, isChecked); calculateGlowupCardPercentage(); updateCEODashboard(); }
 function saveCheckboxState(dateKey, taskId, isChecked) { let taskStates = JSON.parse(localStorage.getItem(`glowup_tasks_${dateKey}`)) || {}; taskStates[taskId] = isChecked; localStorage.setItem(`glowup_tasks_${dateKey}`, JSON.stringify(taskStates)); }
 function getSavedCheckboxStates(dateKey) { return JSON.parse(localStorage.getItem(`glowup_tasks_${dateKey}`)) || {}; }
 
@@ -3407,6 +3417,43 @@ let monthlyData = {
     document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`;
 }
 
+// FEATURE: AI Weekly Performance Review Chat
+async function runWeeklyAIReview() {
+    let appToday = getAppToday();
+    let weekAgo = new Date(appToday);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    let weeklyExpenses = expenses.filter(e => { let d = new Date(e.date); return d >= weekAgo && d <= appToday; });
+    let weeklySleep = sleepLogs.filter(s => { let d = new Date(s.date); return d >= weekAgo && d <= appToday; });
+    let weeklyWeights = weights.filter(w => { let d = new Date(w.date); return d >= weekAgo && d <= appToday; });
+    let weeklyMeals = mealLogs.filter(m => { let d = new Date(m.date); return d >= weekAgo && d <= appToday; });
+    let avgSleepScore = weeklySleep.length ? Math.round(weeklySleep.reduce((s,l) => s + (l.score||0), 0) / weeklySleep.length) : 0;
+
+    let weeklyData = {
+        period: `${weekAgo.toLocaleDateString()} to ${appToday.toLocaleDateString()}`,
+        totalExpenses: weeklyExpenses.reduce((s, e) => s + e.amount, 0),
+        expenseCount: weeklyExpenses.length,
+        gymStreak: localStorage.getItem('gym_streak') || 0,
+        completedDays: countDaysCompletedInPeriod(weekAgo, appToday),
+        missedGymDays: getMissedGymDays(7),
+        avgSleepScore: avgSleepScore,
+        sleepDaysLogged: weeklySleep.length,
+        latestWeight: weeklyWeights.length ? weeklyWeights[0].val : (weights.length ? weights[0].val : 'N/A'),
+        mealsLogged: weeklyMeals.length,
+        tobiInstruction: "இது வாராந்திர (Weekly) Performance Review. கடந்த 7 நாட்களின் Gym consistency, Diet/Meal logging, Sleep quality, Expense pattern ஆகியவற்றை பகுப்பாய்வு செய். TOBI (கண்டிப்பான ஆனால் அக்கறையுள்ள CEO/Coach) போல தமிழில்: 1. இந்த வாரம் எது நல்லா நடந்தது 2. எது Miss ஆனது 3. அடுத்த வாரத்திற்கு 2-3 குறிப்பிட்ட Goals கொடு. சுருக்கமாக, ஊக்கமூட்டும் தொனியில் இரு."
+    };
+
+    openModalWithHistory('aiEngineModal');
+    document.getElementById('aiHeaderTitle').innerText = "📊 TOBI WEEKLY REVIEW";
+    document.getElementById('aiTypingText').innerHTML = "உங்க இந்த வார performance-ஐ analyze பண்றேன்...";
+    document.getElementById('aiActionButtons').innerHTML = '';
+
+    const insights = await getGeminiInsights("Weekly Performance", weeklyData);
+    playAiTyping(insights, document.getElementById('aiTypingText'));
+
+    document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-gold); color:black;" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`;
+}
+
 // 11-ஆம் தேதி முதல் 10-ஆம் தேதி வரை உள்ள நாட்களைக் கணக்கிட
 function countDaysCompletedInPeriod(startDate, endDate) {
     let count = 0;
@@ -3758,6 +3805,70 @@ function initializeGapiClient() { gapiInited = true; }
 function gisLoaded() { if (!DRIVE_CLIENT_ID) return; tokenClient = google.accounts.oauth2.initTokenClient({ client_id: DRIVE_CLIENT_ID, scope: SCOPES, callback: '' }); gisInited = true; }
 // ====== GOOGLE DRIVE BACKUP & RESTORE (With Settings-based Client ID) ======
 
+// FEATURE: Last Synced Time display
+function updateLastSyncTimeDisplay() {
+    const el = document.getElementById('lastSyncTimeDisplay');
+    if (!el) return;
+    const iso = localStorage.getItem('last_drive_sync_time');
+    if (!iso) { el.innerText = '🕒 Last Synced: Never'; return; }
+    const d = new Date(iso);
+    const diffMs = Date.now() - d.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    let rel;
+    if (diffMin < 1) rel = 'Just now';
+    else if (diffMin < 60) rel = diffMin + ' min ago';
+    else if (diffMin < 1440) rel = Math.floor(diffMin / 60) + ' hr ago';
+    else rel = Math.floor(diffMin / 1440) + ' days ago';
+    el.innerText = `🕒 Last Synced: ${d.toLocaleDateString('en-IN')} ${d.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})} (${rel})`;
+}
+
+// FEATURE: Auto Daily Backup toggle
+let autoDailyBackupInterval = null;
+function toggleAutoDailyBackup(enabled) {
+    localStorage.setItem('auto_daily_backup_enabled', enabled ? 'true' : 'false');
+    const slider = document.getElementById('autoDailyBackupSlider');
+    const knob = document.getElementById('autoDailyBackupKnob');
+    if (slider) {
+        slider.style.background = enabled ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.15)';
+        slider.style.boxShadow = enabled ? '0 0 8px var(--neon-cyan)' : 'none';
+    }
+    if (knob) knob.style.transform = enabled ? 'translateX(18px)' : 'translateX(0)';
+    if (enabled) {
+        displayPremiumToastNotification("Auto Daily Backup ஆன் ஆனது! 🔁", "☁️");
+        startAutoDailyBackupWatcher();
+    } else {
+        displayPremiumToastNotification("Auto Daily Backup ஆஃப் ஆனது.", "⏹️");
+        if (autoDailyBackupInterval) { clearInterval(autoDailyBackupInterval); autoDailyBackupInterval = null; }
+    }
+}
+function startAutoDailyBackupWatcher() {
+    if (autoDailyBackupInterval) return; // already running
+    const checkAndBackup = () => {
+        if (localStorage.getItem('auto_daily_backup_enabled') !== 'true') return;
+        if (!localStorage.getItem('drive_client_id')) return; // Client ID இல்லாம backup முடியாது
+        const lastSync = localStorage.getItem('last_drive_sync_time');
+        const lastSyncMs = lastSync ? new Date(lastSync).getTime() : 0;
+        const hoursSinceSync = (Date.now() - lastSyncMs) / (1000 * 60 * 60);
+        if (hoursSinceSync >= 24) { syncToCloud(); }
+    };
+    checkAndBackup(); // load ஆனவுடன் ஒரு தடவை check பண்ணும்
+    autoDailyBackupInterval = setInterval(checkAndBackup, 60 * 60 * 1000); // ஒவ்வொரு மணி நேரமும் check
+}
+function initAutoDailyBackupUI() {
+    const toggle = document.getElementById('autoDailyBackupToggle');
+    const enabled = localStorage.getItem('auto_daily_backup_enabled') === 'true';
+    if (toggle) toggle.checked = enabled;
+    const slider = document.getElementById('autoDailyBackupSlider');
+    const knob = document.getElementById('autoDailyBackupKnob');
+    if (slider) {
+        slider.style.background = enabled ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.15)';
+        slider.style.boxShadow = enabled ? '0 0 8px var(--neon-cyan)' : 'none';
+    }
+    if (knob) knob.style.transform = enabled ? 'translateX(18px)' : 'translateX(0)';
+    if (enabled) startAutoDailyBackupWatcher();
+    updateLastSyncTimeDisplay();
+}
+
 // 1. Drive-ல் பேக்கப் எடுக்கும் பங்க்ஷன்
 function syncToCloud() {
     DRIVE_CLIENT_ID = localStorage.getItem('drive_client_id');
@@ -3807,12 +3918,20 @@ function syncToCloud() {
 
         try {
             // resp.access_token நேரடியாகப் பயன்படுத்தப்படுகிறது
-            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST',
                 headers: new Headers({ 'Authorization': 'Bearer ' + resp.access_token }),
                 body: form
             });
-            
+
+            if (!uploadRes.ok) { // FIX: check actual HTTP status instead of assuming success
+                throw new Error('Drive upload failed with status ' + uploadRes.status);
+            }
+
+            const nowTime = new Date();
+            localStorage.setItem('last_drive_sync_time', nowTime.toISOString()); // FEATURE: track last sync time
+            updateLastSyncTimeDisplay();
+
             document.getElementById('cloudSyncStatus').className = 'cloud-sync-status synced';
             document.getElementById('cloudStatusText').innerText = 'Drive Backup Success!';
             document.getElementById('cloudStatusDot').className = 'cloud-dot';
@@ -4076,7 +4195,11 @@ window.addEventListener('DOMContentLoaded', () => {
     verifyGymLocation();
     batteryIntervalNightly = setInterval(checkNightlyPlanningTimer, 60000);
     checkNightlyPlanningTimer();
-    if('Notification' in window && Notification.permission === 'default') { setTimeout(requestNotificationPermission, 3000); }
+    if('Notification' in window) {
+        if(Notification.permission === 'default') { setTimeout(requestNotificationPermission, 3000); }
+        else if(Notification.permission === 'granted') { scheduleSmartNotifications(); } // FIX: restart schedule on every app load for returning users, not just first grant
+    }
+    initAutoDailyBackupUI(); // FEATURE: restore auto-backup toggle state + last sync time on load
     initNeural(); drawNeural(); resizeConfetti();
     setTimeout(runBootSequence, 300);
     setTimeout(checkAchievements, 2500);
