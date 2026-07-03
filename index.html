@@ -1090,8 +1090,11 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 
 <div class="savings-card">
 <div class="app-card" style="border-top:4px solid var(--neon-red); background:rgba(239,68,68,0.05);">
-<h3 class="card-title" style="color:var(--neon-red);">🔮 TOBI Expense Predictor</h3>
-<div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">Weekly budget-a eppo mudiyum nu predict pannrom:</div>
+<div style="display:flex; justify-content:space-between; align-items:center;">
+    <h3 class="card-title" style="color:var(--neon-red); margin:0;">🔮 TOBI Expense Predictor</h3>
+    <button class="btn-universal" style="width:auto; padding:6px 12px; font-size:0.75rem; background:var(--neon-gold); color:black; box-shadow: 0 0 10px rgba(245,158,11,0.4);" onclick="generateWeeklyExpenseForecast()">🤖 AI Forecast</button>
+</div>
+<div style="font-size:0.85rem; color:var(--text-secondary); margin:10px 0;">Weekly budget-a eppo mudiyum nu predict pannrom:</div>
 <div style="background:rgba(0,0,0,0.2); border-radius:12px; padding:12px; border:1px solid var(--glass-border);">
 <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:700;">SPENDING VELOCITY</div>
 <div style="font-size:1.2rem; font-weight:900; color:var(--neon-cyan); margin:4px 0;" id="expenseVelocity">₹0 / day</div>
@@ -1291,7 +1294,61 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <script>
 // ===== MADURAI HEAT WAVE & ELECTROLYTE ENGINE =====
 let currentElectrolyteLevel = 100;
+// ===== 1. WEEKLY EXPENSE FORECAST (BUDGET AI) =====
+async function generateWeeklyExpenseForecast() {
+    triggerDeviceHapticPulse();
+    let appToday = getAppToday();
+    
+    // முந்தைய வாரத்தின் தேதிகளைக் கணக்கிடுதல் (கடந்த வாரம் எவ்வளவு செலவு செய்தீர்கள் எனப் பார்க்க)
+    let dayOfWeek = appToday.getDay() || 7; 
+    let currentWeekStart = new Date(appToday);
+    currentWeekStart.setDate(appToday.getDate() - dayOfWeek + 1);
+    currentWeekStart.setHours(0,0,0,0);
+    
+    let lastWeekStart = new Date(currentWeekStart);
+    lastWeekStart.setDate(currentWeekStart.getDate() - 7);
+    let lastWeekEnd = new Date(currentWeekStart);
+    lastWeekEnd.setDate(currentWeekStart.getDate() - 1);
+    lastWeekEnd.setHours(23,59,59,999);
+    
+    let lastWeekExp = expenses.filter(e => {
+        let d = new Date(e.date);
+        return d >= lastWeekStart && d <= lastWeekEnd;
+    });
+    
+    // கடந்த வார மொத்த செலவு மற்றும் எந்தந்த கேட்டகிரியில் செலவானது எனப் பிரித்தல்
+    let lastWeekTotal = lastWeekExp.reduce((s, e) => s + e.amount, 0);
+    let catSpend = {};
+    lastWeekExp.forEach(e => { catSpend[e.category] = (catSpend[e.category] || 0) + e.amount; });
+    let catString = Object.entries(catSpend).map(([k,v]) => `${k}: ₹${v}`).join(', ');
 
+    openModalWithHistory('aiEngineModal');
+    document.getElementById('aiHeaderTitle').innerText = "💰 AI BUDGET FORECAST";
+    document.getElementById('aiTypingText').innerHTML = "கடந்த வார செலவுகளை அனாலிசிஸ் செய்கிறேன்...";
+    document.getElementById('aiActionButtons').innerHTML = ''; // லோட் ஆகும்போது பட்டனை மறைக்க
+
+    // AI-க்கான Prompt (கட்டளை)
+    let prompt = `You are JARVIS/TOBI, Muthubalan's strict financial AI coach.
+    Muthubalan's expense data for LAST WEEK:
+    - Total Spent: ₹${lastWeekTotal}
+    - Category Breakdown: ${catString || 'No expenses logged'}
+    - His Current Weekly Budget Target is: ₹${weeklyBudgetTarget}
+    
+    Provide a financial forecast and advice strictly in TAMIL.
+    1. Rate last week's performance (Good/Bad).
+    2. Identify which exact category he wasted money on or should reduce.
+    3. Suggest a strict, specific new budget target for THIS WEEK to save money for his long-term goals.
+    Be crisp, professional, and act like Tony Stark's AI. Give bullet points.`;
+
+    try {
+        let response = await askGemini(prompt);
+        playAiTyping(response, document.getElementById('aiTypingText'));
+        document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-green); color:black;" onclick="closeModalAction('aiEngineModal')">Understood, JARVIS</button>`;
+    } catch(err) {
+        document.getElementById('aiTypingText').innerHTML = "⚠️ Network/API Error. Internet connection-ஐ செக் பண்ணுங்க.";
+        document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-red);" onclick="closeModalAction('aiEngineModal')">Close</button>`;
+    }
+}
 async function triggerHeatWaveProtocol() {
     try {
         // மதுரை தட்பவெப்ப நிலையை Live ஆக செக் செய்தல்
