@@ -3452,12 +3452,18 @@ async function suggestRecipeForRemainingMacros() {
     const cRem = Math.max(0, targetC - currentLoggedCarbs);
     const fRem = Math.max(0, targetF - currentLoggedFats);
     const calRem = Math.max(0, dailyTargetCals - currentLoggedCal);
-    box.style.display = 'block'; box.innerText = 'TOBI recipe thinking...';
+    box.style.display = 'block'; box.innerText = 'TOBI ரெசிபி யோசிக்குது...';
     try {
-        const prompt = `Suggest ONE simple Indian home-cook recipe (Tamil Nadu style) that roughly fits these remaining daily macro needs: Protein ${pRem}g, Carbs ${cRem}g, Fats ${fRem}g, Calories ${calRem} kcal. Keep it short (max 6 lines): dish name, key ingredients, and approx macros. Respond in simple Tanglish.`;
+        const prompt = `நீ ஒரு தமிழ்நாடு உணவு நிபுணர். கீழே கொடுக்கப்பட்ட மீதமுள்ள daily macro தேவைகளுக்கு ஏற்ற ஒரே ஒரு தூய தமிழ்நாடு பாணி (Tamil Nadu style) வீட்டு சமையல் உணவை பரிந்துரைக்கவும்: புரதம் (Protein) ${pRem}g, மாவுச்சத்து (Carbs) ${cRem}g, கொழுப்பு (Fats) ${fRem}g, கலோரி (Calories) ${calRem} kcal.
+
+கண்டிப்பான விதிமுறைகள்:
+- பதிலை முழுவதும் தமிழ் எழுத்துக்களில் மட்டுமே எழுதவும் (Tanglish/English வேண்டாம்)
+- எளிதில் கிடைக்கும் தமிழ்நாடு உணவுகளில் இருந்தே தேர்வு செய்யவும்
+- 10 வரிகளுக்குள் சுருக்கமாக இருக்கட்டும்: உணவின் பெயர், முக்கிய பொருட்கள்,செய்முறை தோராயமான Macros
+- வேறு எந்த மொழியிலும் பதில் தர வேண்டாம்`;
         const aiResponse = await askGemini(prompt);
         box.innerText = aiResponse;
-    } catch(e) { box.innerText = 'Recipe suggestion failed. Try again.'; }
+    } catch(e) { box.innerText = 'ரெசிபி பரிந்துரை தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.'; }
 }
 
 // FEATURE: Cheat Meal Tracker
