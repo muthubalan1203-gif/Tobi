@@ -943,10 +943,10 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <h3 class="card-title" style="color:var(--neon-cyan);">⏱️ Rest Timer</h3>
 <div id="restTimerDisplay" style="font-size:2.4rem; font-weight:900; margin:8px 0; color:#fff;">00:00</div>
 <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
-<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(6,182,212,2.15); border:1px solid var(--neon-cyan); color:var(--neon-cyan);" onclick="startRestTimer(60)">60s</button>
-<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(6,182,212,2.15); border:1px solid var(--neon-cyan); color:var(--neon-cyan);" onclick="startRestTimer(90)">90s</button>
-<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(6,182,212,2.15); border:1px solid var(--neon-cyan); color:var(--neon-cyan);" onclick="startRestTimer(120)">120s</button>
-<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(239,68,68,2.15); border:1px solid var(--neon-red); color:var(--neon-red);" onclick="cancelRestTimer()">⏹ Stop</button>
+<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(6,182,212,0.15); border:1px solid var(--neon-cyan); color:var(--neon-cyan);" onclick="startRestTimer(60)">60s</button>
+<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(6,182,212,0.15); border:1px solid var(--neon-cyan); color:var(--neon-cyan);" onclick="startRestTimer(90)">90s</button>
+<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(6,182,212,0.15); border:1px solid var(--neon-cyan); color:var(--neon-cyan);" onclick="startRestTimer(120)">120s</button>
+<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(239,68,68,0.15); border:1px solid var(--neon-red); color:var(--neon-red);" onclick="cancelRestTimer()">⏹ Stop</button>
 </div>
 </div>
 
@@ -6420,21 +6420,21 @@ function playTone(freq, type, duration, vol=2.5) { // vol=0.05 லிருந�
   osc.stop(audioCtx.currentTime + duration);
 }
 function playBootSound(step) {
-  playTone(200 + step*50, 'sine', 0.15, 2.3);
+  playTone(200 + step*50, 'sine', 0.15, 0.03);
 }
 function playSuccessSound() {
   playTone(523, 'sine', 0.1, 0.05);
-  setTimeout(() => playTone(659, 'sine', 0.1, 2.5), 100);
-  setTimeout(() => playTone(784, 'sine', 0.2, 2.05), 200);
+  setTimeout(() => playTone(659, 'sine', 0.1, 0.05), 100);
+  setTimeout(() => playTone(784, 'sine', 0.2, 0.05), 200);
 }
 function playAchievementSound() {
-  [523,659,784,1047].forEach((f,i) => setTimeout(() => playTone(f,'square',0.15,2.04), i*80));
+  [523,659,784,1047].forEach((f,i) => setTimeout(() => playTone(f,'square',0.15,0.04), i*80));
 }
 function playClickSound() {
-  playTone(800, 'sine', 0.05, 2.02);
+  playTone(800, 'sine', 0.05, 0.02);
 }
 function playHapticSound() {
-  playTone(1200, 'triangle', 0.03, 2.015);
+  playTone(1200, 'triangle', 0.03, 0.015);
 }
 
 // FIX 2: Haptic override — try/catch guard சேர்க்கப்பட்டது, original call fail ஆனாலும் sound play ஆகும்
