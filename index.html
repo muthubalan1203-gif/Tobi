@@ -613,7 +613,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
   <div class="scanner-box"><span style="font-size:4rem;">🔒</span></div>
   <div class="lock-title">RESTRICTED ACCESS</div>
   <div class="lock-subtitle" id="lockMessage">Enter PIN to Unlock</div>
-  <input type="password" id="pinInput" placeholder="Enter Secret PIN" style="padding:10px; border-radius:10px; border:1px solid var(--neon-cyan); background:#000; color:white; text-align:center;">
+  <input type="number" id="pinInput" pattern="\d*" inputmode="numeric" placeholder="Enter Secret PIN" style="padding:10px; border-radius:10px; border:1px solid var(--neon-cyan); background:#000; color:white; text-align:center;">
 <button class="btn-universal" style="background:var(--neon-cyan); color:black; width:auto; padding:10px 25px; margin-top:10px; font-size:0.8rem;" onclick="checkPin()">Enter PIN / Unlock</button>
 </div>
 
