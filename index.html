@@ -586,7 +586,8 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
   <div class="scanner-box"><span style="font-size:4rem;">👤</span></div>
   <div class="lock-title">RESTRICTED ACCESS</div>
   <div class="lock-subtitle" id="lockMessage">Awaiting Face/Fingerprint Scan...</div>
-  <button class="btn-universal" style="background:var(--neon-cyan); color:black; width:auto; padding:10px 25px; margin-top:30px; font-size:0.8rem;" onclick="triggerBiometricUnlock()">Scan Face / Authenticate</button>
+  <input type="password" id="pinInput" placeholder="Enter Secret PIN" style="padding:10px; border-radius:10px; border:1px solid var(--neon-cyan); background:#000; color:white; text-align:center;">
+<button class="btn-universal" style="background:var(--neon-cyan); color:black; width:auto; padding:10px 25px; margin-top:10px; font-size:0.8rem;" onclick="checkPin()">Enter PIN / Unlock</button>
 </div>
 <!-- PREMIUM CINEMATIC OVERLAYS -->
 <canvas id="neuralCanvas"></canvas>
@@ -1596,17 +1597,79 @@ function checkGymAttendanceStatus() {
     }
 }
 // ===== FACE ID / BIOMETRIC AUTHENTICATION =====
+// ===== 🔐 ULTIMATE BIOMETRIC + PIN LOCK ENGINE =====
+let secretPin = "1234"; // உங்கள் ரகசிய PIN இங்கே செட் செய்யவும்
+
+// 1. PIN-ஐ சரிபார்க்கும் வசதி
+// ===== DUAL PIN SYSTEM =====
+function checkPin() {
+    let userInput = document.getElementById('pinInput').value;
+    
+    // 1207 Potta Original App Open Aagum
+    if (userInput === "1207") {
+        document.getElementById('biometricLockScreen').classList.add('unlocked');
+        displayPremiumToastNotification("Welcome back, Boss.", "✅");
+    } 
+    // 1212 Potta Calculator Open Aagum
+    else if (userInput === "1212") {
+        document.getElementById('biometricLockScreen').style.display = 'none'; // Lock screen-a marachidum
+        document.getElementById('stealthCalculator').style.display = 'flex'; // Calculator-a kattidum
+        displayPremiumToastNotification("Calculator Mode Activated.", "🕶️");
+    } 
+    // Thappa PIN potta
+    else {
+        displayPremiumToastNotification("Invalid PIN!", "❌");
+        triggerHapticPattern('warning');
+    }
+}
+
+// 2. பயோமெட்ரிக் (Face ID / Fingerprint) வசதி
 async function triggerBiometricUnlock() {
     const lockScreen = document.getElementById('biometricLockScreen');
     const msg = document.getElementById('lockMessage');
     
-    // 1. செக்யூரிட்டி API உங்கள் பிரௌசரில் சப்போர்ட் ஆகிறதா என செக் செய்ய
     if (!window.PublicKeyCredential) {
-        msg.innerText = "⚠️ Biometrics Not Supported. Unlocking fallback...";
-        msg.style.color = "var(--neon-gold)";
-        setTimeout(() => lockScreen.classList.add('unlocked'), 1500);
+        msg.innerText = "⚠️ Biometrics Not Supported.";
         return;
     }
+
+    try {
+        const challenge = new Uint8Array(32);
+        window.crypto.getRandomValues(challenge);
+        
+        let credId = localStorage.getItem('tobi_bio_cred_id');
+        
+        if (!credId) {
+            const credential = await navigator.credentials.create({
+                publicKey: {
+                    challenge: challenge,
+                    rp: { name: "Muthubalan OS" },
+                    user: { id: new Uint8Array(16), name: "muthubalan", displayName: "Muthubalan" },
+                    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                    authenticatorSelection: { userVerification: "required" },
+                    timeout: 60000
+                }
+            });
+            const idString = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
+            localStorage.setItem('tobi_bio_cred_id', idString);
+        } else {
+            const idArray = Uint8Array.from(atob(credId), c => c.charCodeAt(0));
+            await navigator.credentials.get({
+                publicKey: {
+                    challenge: challenge,
+                    allowCredentials: [{ type: "public-key", id: idArray }],
+                    userVerification: "required",
+                    timeout: 60000
+                }
+            });
+        }
+        lockScreen.classList.add('unlocked');
+        displayPremiumToastNotification("Biometric Verified, Boss.", "✅");
+    } catch (err) {
+        msg.innerText = "Biometric Failed. Use PIN below.";
+        displayPremiumToastNotification("Scan Failed!", "❌");
+    }
+}
 
     try {
         msg.innerText = "Scanning Biometrics...";
