@@ -162,6 +162,7 @@ body.theme-sharingan .toast-notification-hub {
   border-color: var(--neon-red); 
   background: linear-gradient(135deg, rgba(255,0,0,0.2), rgba(255,68,68,0.2)); 
 }
+
 .bottom-console-bar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; height:85px; background:rgba(10,14,28,0.82); backdrop-filter:blur(25px); border-top:1px solid var(--glass-border); display:flex; align-items:center; justify-content:space-between; padding:0 22px; z-index:4000; }
 .console-gear-btn { background:none; border:none; color:var(--text-secondary); font-size:1.35rem; cursor:pointer; padding:8px; }
 .universal-modal { display:none; position:fixed; top:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; height:100%; background:rgba(0,0,0,0.82); z-index:6000; padding:24px; justify-content:center; align-items:center; backdrop-filter:blur(6px); }
@@ -381,6 +382,14 @@ body.theme-sharingan .toast-notification-hub {
   --bg-ultra: #0a0000; 
   --surface-ultra: #120000; 
 }
+/* ===== NEW CINEMATIC THEMES ===== */
+.theme-matrix { --neon-cyan: #22c55e; --neon-gold: #16a34a; --neon-red: #059669; --neon-green: #4ade80; --neon-purple: #10b981; --neon-indigo: #047857; --bg-ultra: #000000; --surface-ultra: #021c13; }
+
+.theme-gotham { --neon-cyan: #eab308; --neon-gold: #ca8a04; --neon-red: #facc15; --neon-green: #a16207; --neon-purple: #1e3a8a; --neon-indigo: #1d4ed8; --bg-ultra: #050505; --surface-ultra: #121212; }
+
+.theme-challenger { --neon-cyan: #ef4444; --neon-gold: #fbbf24; --neon-red: #dc2626; --neon-green: #f59e0b; --neon-purple: #b91c1c; --neon-indigo: #fcd34d; --bg-ultra: #050000; --surface-ultra: #140505; }
+
+.theme-karuppu { --neon-cyan: #9ca3af; --neon-gold: #ea580c; --neon-red: #b91c1c; --neon-green: #6b7280; --neon-purple: #4b5563; --neon-indigo: #374151; --bg-ultra: #000000; --surface-ultra: #0f0f0f; }
 /* 3D Holographic Cards */
 .app-card, .savings-card, .ceo-dashboard, .dash-box {
   position: relative; overflow: hidden;
@@ -549,6 +558,10 @@ body.theme-sharingan .toast-notification-hub {
   <button onclick="setTheme('arc'); closeThemePicker()" style="background:rgba(6,182,212,0.08); border:1px solid rgba(6,182,212,0.25); border-radius:8px; color:var(--neon-cyan); font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🔵 ARC</button>
   <button onclick="setTheme('vibranium'); closeThemePicker()" style="background:rgba(168,85,247,0.08); border:1px solid rgba(168,85,247,0.25); border-radius:8px; color:#c084fc; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🟣 VIBRANIUM</button>
   <button onclick="setTheme('sharingan'); closeThemePicker()" style="background:rgba(255,0,0,0.08); border:1px solid rgba(255,0,0,0.25); border-radius:8px; color:#ff4444; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🔴 SHARINGAN</button>
+  <button onclick="setTheme('matrix'); closeThemePicker()" style="background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.25); border-radius:8px; color:#22c55e; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🟢 MATRIX</button>
+  <button onclick="setTheme('gotham'); closeThemePicker()" style="background:rgba(234,179,8,0.08); border:1px solid rgba(234,179,8,0.25); border-radius:8px; color:#eab308; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🦇 GOTHAM</button>
+  <button onclick="setTheme('challenger'); closeThemePicker()" style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:8px; color:#ef4444; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🦁 CHALLENGER</button>
+  <button onclick="setTheme('karuppu'); closeThemePicker()" style="background:rgba(156,163,175,0.08); border:1px solid rgba(156,163,175,0.25); border-radius:8px; color:#9ca3af; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🎬 KARUPPU</button>
 </div>
 
 <div id="pwaInstallBanner" class="pwa-install-banner"><span>📲 Install Muthubalan Personal App to Home Screen</span><button onclick="installPWA()">Install</button></div>
@@ -5391,7 +5404,12 @@ document.addEventListener('click', (e) => {
 
 // 6. Theme Engine
 function setTheme(themeName) {
-  document.body.classList.remove('theme-stark','theme-arc','theme-vibranium','theme-sharingan');
+  // ஏற்கனவே உள்ள Themes மற்றும் புதிய Themes அனைத்தையும் Remove செய்கிறோம்
+  document.body.classList.remove(
+    'theme-stark', 'theme-arc', 'theme-vibranium', 'theme-sharingan', 
+    'theme-matrix', 'theme-gotham', 'theme-challenger', 'theme-karuppu'
+  );
+  
   document.body.classList.add('theme-' + themeName);
   localStorage.setItem('premium_theme', themeName);
   displayPremiumToastNotification('Theme: ' + themeName.toUpperCase() + ' ACTIVATED', '🎨');
