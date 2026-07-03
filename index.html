@@ -924,7 +924,10 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <div id="bodyMetricsNextDueMsg" style="display:none; font-size:0.68rem; color:var(--text-secondary); font-weight:600; padding:2px 0 6px 2px;"></div>
 <div style="display:flex; justify-content:space-between; margin-top:15px; border-top:1px dashed var(--glass-border); padding-top:10px;">
 <div style="text-align:center;"><span style="font-size:0.75rem; color:var(--text-secondary);">Your BMI</span><br><b style="color:white; font-size:1.3rem;" id="bmiDisplay">--</b></div>
-<div style="text-align:center;"><span style="font-size:0.75rem; color:var(--text-secondary);">Daily TDEE</span><br><b style="color:var(--neon-green); font-size:1.3rem;" id="tdeeDisplay">-- Kcal</b></div></div></div>
+<div style="text-align:center;"><span style="font-size:0.75rem; color:var(--text-secondary);">Daily TDEE</span><br><b style="color:var(--neon-green); font-size:1.3rem;" id="tdeeDisplay">-- Kcal</b></div></div>
+<!-- FEATURE: Body Measurement Trend -->
+<div id="bodyMetricTrendBox" style="border-top:1px dashed var(--glass-border); margin-top:12px; padding-top:10px;"><p style="font-size:0.72rem; color:var(--text-secondary);">Measurement log pannunga trend paakka.</p></div>
+</div>
 
 <div class="app-card" style="border-top:4px solid var(--neon-orange);">
 <h3 class="card-title" style="color:var(--neon-orange);">🧠 Pre-Workout Mood</h3>
@@ -935,7 +938,24 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <button class="btn-universal" style="background:transparent; border:1px solid var(--neon-orange); color:var(--neon-orange); padding:8px; margin-top:15px;" onclick="reviewWeeklyMoods()">Analyze Weekly Moods</button>
 </div>
 
+<!-- FEATURE: Rest Timer between sets -->
+<div class="app-card" style="border-top:4px solid var(--neon-cyan); text-align:center;">
+<h3 class="card-title" style="color:var(--neon-cyan);">⏱️ Rest Timer</h3>
+<div id="restTimerDisplay" style="font-size:2.4rem; font-weight:900; margin:8px 0; color:#fff;">00:00</div>
+<div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(6,182,212,2.15); border:1px solid var(--neon-cyan); color:var(--neon-cyan);" onclick="startRestTimer(60)">60s</button>
+<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(6,182,212,2.15); border:1px solid var(--neon-cyan); color:var(--neon-cyan);" onclick="startRestTimer(90)">90s</button>
+<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(6,182,212,2.15); border:1px solid var(--neon-cyan); color:var(--neon-cyan);" onclick="startRestTimer(120)">120s</button>
+<button class="btn-universal" style="width:auto; padding:8px 14px; background:rgba(239,68,68,2.15); border:1px solid var(--neon-red); color:var(--neon-red);" onclick="cancelRestTimer()">⏹ Stop</button>
+</div>
+</div>
 
+<!-- FEATURE: Personal Record (PR) Tracker -->
+<div class="app-card" style="border-top:4px solid var(--neon-gold);">
+<h3 class="card-title" style="color:var(--neon-gold);">🏆 Personal Records</h3>
+<p style="font-size:0.72rem; color:var(--text-secondary); margin-top:-8px;">Dynamic Builder-la weight log panna, automatic-a PR track aagum.</p>
+<ul class="list-container" id="prTrackerListContainer" style="max-height:180px;"><li class="list-item" style="justify-content:center; color:var(--text-secondary); font-size:0.78rem;">No PRs yet. Log weighted exercises below.</li></ul>
+</div>
 
 <div class="page-banner" style="background:linear-gradient(135deg,#ef4444,#7f1d1d); margin-bottom:15px; padding:15px; border-radius:16px; font-weight:900; text-align:center; text-shadow:0 1px 4px #000;">🏋️‍♂️ ANABOLIC BULKING ENGINE</div>
 <!-- ஜிம் YES/NO பட்டன்கள் ஆரம்பம் -->
@@ -1098,6 +1118,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
     <div style="display:flex; gap:10px;"><button class="btn-universal" style="background:var(--neon-cyan); color:black;" onclick="analyzeMealInputWithAI()">🤖 AI Analyze & Log</button><button class="btn-universal" style="background:var(--neon-purple); color:white; width:60px; font-size:1.2rem;" onclick="initVoiceCommand()">🎙️</button></div>
     <div style="display:flex; align-items:center; gap:10px; margin:12px 0 4px 0;"><div style="flex:1; height:1px; background:var(--glass-border);"></div><span style="font-size:0.65rem; color:var(--text-secondary);">OR</span><div style="flex:1; height:1px; background:var(--glass-border);"></div></div>
     <input type="file" id="mealPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handleMealPhotoSelected(event)">
+    <div style="display:flex; align-items:center; gap:8px; margin:8px 0;"><input type="checkbox" id="labelScanModeToggle" style="width:18px; height:18px;"><label for="labelScanModeToggle" style="font-size:0.72rem; color:var(--text-secondary); font-weight:600;">📦 Label Scan Mode (packaged food nutrition label photo)</label></div>
     <button class="btn-universal" id="mealPhotoBtn" style="background:var(--neon-gold); color:black; width:100%; margin-top:4px;" onclick="document.getElementById('mealPhotoInput').click()">📸 Photo-Analyze Meal</button>
     <div id="mealPhotoPreviewWrap" style="display:none; margin-top:10px; text-align:center; position:relative;">
         <img id="mealPhotoPreviewImg" style="max-width:100%; max-height:180px; border-radius:14px; border:2px solid var(--neon-gold);">
@@ -1113,6 +1134,38 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
     <div class="water-btn-group"><button class="water-btn" onclick="addWater(250)">+ 250 ML</button><button class="water-btn" onclick="addWater(500)">+ 500 ML</button></div>
     <p id="aiWaterReasonText" style="font-size:0.7rem; color:var(--neon-gold); margin-top:10px; line-height:1.4;"></p>
     <div id="waterPaceText" style="margin-top:6px; font-size:0.72rem; color:var(--text-secondary); background:rgba(0,0,0,0.2); padding:8px 10px; border-radius:10px; line-height:1.4; text-align:left;"></div>
+    <!-- FEATURE: Water Reminder Schedule -->
+    <div style="border-top:1px dashed var(--glass-border); margin-top:12px; padding-top:10px; text-align:left;">
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.75rem;">
+            <label for="waterReminderToggle" style="color:var(--text-secondary); font-weight:700;">🔔 Water Reminder</label>
+            <input type="checkbox" id="waterReminderToggle" style="width:18px; height:18px;" onchange="toggleWaterReminderSchedule(this.checked)">
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+            <span style="font-size:0.7rem; color:var(--text-secondary);">Every</span>
+            <select id="waterReminderInterval" class="form-control" style="width:auto; padding:6px; font-size:0.75rem; background:#000; color:white;" onchange="toggleWaterReminderSchedule(document.getElementById('waterReminderToggle').checked)">
+                <option value="1">1 hr</option><option value="2" selected>2 hrs</option><option value="3">3 hrs</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- FEATURE: Recipe Suggestion based on remaining macros -->
+<div class="app-card" style="border-top:4px solid var(--neon-green); margin-top:16px;">
+    <h3 class="card-title" style="color:var(--neon-green);">🍳 AI Recipe Suggestion</h3>
+    <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:-8px;">Today mudiyala macro gap-ku recipe suggest pannும்:</p>
+    <button class="btn-universal" style="background:var(--neon-green); color:black;" onclick="suggestRecipeForRemainingMacros()">🔄 Suggest Recipe</button>
+    <div id="recipeSuggestionBox" style="margin-top:12px; display:none; background:rgba(0,0,0,0.25); border-radius:12px; padding:12px; font-size:0.8rem; color:var(--text-secondary); white-space:pre-line; line-height:1.5;"></div>
+</div>
+
+<!-- FEATURE: Cheat Meal Tracker -->
+<div class="app-card" style="border-top:4px solid var(--neon-red); margin-top:16px;">
+    <h3 class="card-title" style="color:var(--neon-red);">🍕 Cheat Meal Tracker</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><span style="font-size:0.75rem; color:var(--text-secondary);">This Week's Allowance</span><br><b style="font-size:1.3rem;" id="cheatMealAllowanceDisplay">0 / 1</b></div>
+        <button class="btn-universal" style="width:auto; padding:8px 15px; font-size:0.8rem; background:var(--neon-red);" onclick="logCheatMeal()">Log Cheat Meal</button>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; margin-top:10px;"><span style="font-size:0.7rem; color:var(--text-secondary);">Weekly Limit:</span><input type="number" id="cheatMealWeeklyLimit" class="form-control" style="width:60px; padding:4px 8px;" value="1" min="0" onchange="setCheatMealLimit(this.value)"></div>
+    <ul class="list-container" id="cheatMealListContainer" style="max-height:120px; margin-top:10px;"></ul>
 </div>
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 0 10px 0;"><h3 class="card-title" style="margin:0;">Today's Meal Log</h3></div>
@@ -1135,7 +1188,25 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <div class="form-group"><label>Description:</label><input type="text" id="expDesc" class="form-control" placeholder="e.g. Fuel, Diet Eggs, Gym fees"></div>
 <div class="form-group"><label>Category Tag:</label><select id="expCategory" class="form-control" style="background:#000; color:white;"><option value="Food">🍔 Food</option><option value="Gym Diet">💪 Gym Diet</option><option value="Travel">🚗 Travel</option><option value="Personal Care">🧴 Personal Care</option><option value="Others">📦 Others</option></select></div>
 <div class="form-group"><label>Payment Channel:</label><select id="expPaymentMode" class="form-control" style="background:#000; color:white;"><option value="GPay / UPI">📱 GPay / UPI</option><option value="Cash">💵 Cash</option><option value="Card">💳 Card</option></select></div>
+<div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;"><input type="checkbox" id="expIsRecurring" style="width:18px; height:18px;"><label for="expIsRecurring" style="font-size:0.78rem; color:var(--text-secondary); font-weight:600;">🔁 Save as Recurring Monthly Expense</label></div>
 <button class="btn-universal" style="background:var(--neon-indigo);" onclick="addExpense()">Save Expense</button></div>
+
+<!-- FEATURE: Recurring Expenses -->
+<div class="app-card" id="recurringExpenseCard" style="border-top:4px solid var(--neon-purple); display:none;">
+<h3 class="card-title" style="color:var(--neon-purple);">🔁 Recurring Expenses</h3>
+<p style="font-size:0.72rem; color:var(--text-secondary); margin-top:-8px;">ஒரு tap-ல் இந்த மாதத்திற்கு log பண்ணுங்க:</p>
+<ul class="list-container" id="recurringExpenseListContainer" style="max-height:180px;"></ul>
+</div>
+
+<!-- FEATURE: Monthly Expense Trend -->
+<div class="app-card" style="border-top:4px solid var(--neon-cyan);">
+<h3 class="card-title" style="color:var(--neon-cyan);">📈 Monthly Trend</h3>
+<div style="display:flex; justify-content:space-around; text-align:center;">
+<div><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">LAST MONTH</div><div style="font-size:1.2rem; font-weight:900; color:#fff;" id="lastMonthSpendDisplay">₹0</div></div>
+<div><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">THIS MONTH</div><div style="font-size:1.2rem; font-weight:900; color:var(--neon-cyan);" id="thisMonthSpendDisplay">₹0</div></div>
+</div>
+<div style="text-align:center; margin-top:8px; font-size:0.8rem; font-weight:700;" id="monthlyTrendMsg"></div>
+</div>
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 0 10px 0;"><h3 class="card-title" style="margin:0;">Expense History</h3><select id="expenseTimeFilter" class="form-control" style="width:auto; padding:6px; font-size:0.75rem; background:#000; border:1px solid var(--glass-border); border-radius:8px; color:white; margin:0 10px;" onchange="renderExpenses()">
     <option value="today" selected>Today</option>
@@ -1172,6 +1243,13 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 </div></div>
 <h3 class="card-title" style="color:var(--neon-green); position:relative; z-index:2;">Savings Vault</h3>
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; position:relative; z-index:2;"><div><span style="font-size:0.75rem; color:var(--text-secondary);">Total Saved</span><br><b style="font-size:1.5rem; color:var(--neon-green);" id="totalSavingsDisplay">₹0</b></div><button class="btn-universal" style="width:auto; padding:8px 15px; font-size:0.8rem; background:var(--neon-green); color:black;" onclick="addSavings()">+ Add Money</button></div>
+
+<!-- FEATURE: Savings Goal Tracker -->
+<div style="position:relative; z-index:2; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px 12px; margin-bottom:12px;">
+<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem;"><span id="savingsGoalLabel" style="color:var(--text-secondary); font-weight:700;">🎯 No Goal Set</span><button onclick="setSavingsGoal()" style="font-size:0.68rem; background:rgba(255,255,255,0.06); border:1px solid var(--glass-border); padding:4px 10px; border-radius:8px; color:white; font-weight:700; cursor:pointer;">Set Goal</button></div>
+<div style="background:rgba(255,255,255,0.05); height:8px; border-radius:4px; margin-top:8px; overflow:hidden;"><div id="savingsGoalBar" style="height:100%; width:0%; background:var(--neon-green); transition:width 0.3s;"></div></div>
+</div>
+
 <ul class="list-container" id="savingsListContainer" style="max-height:150px; position:relative; z-index:2; border:none;"></ul></div></div>
 
 <!-- SLEEP PAGE -->
@@ -1196,6 +1274,22 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <div class="form-group"><label>Sleep Interruptions (நடுவில் விழித்த முறைகள்):</label><select id="sleepInterruptions" class="form-control" style="background:#000; color:white;"><option value="0">0 Times (Continuous Deep Sleep 🧘‍♂️)</option><option value="1">1 Time (Light Disturbance 😐)</option><option value="2">2 Times (Interrupted Sleep 🥱)</option><option value="3">3+ Times (Poor Recovery ❌)</option></select></div>
 <div class="form-group"><label>Dream Journal (கனவுப் பதிவு):</label><textarea id="dreamInput" class="form-control" rows="2" placeholder="இன்று என்ன கனவு கண்டீர்கள்?"></textarea></div>
 <button class="btn-universal" style="background:var(--neon-indigo);" onclick="addAdvancedSleepLog()">Analyze & Save Rest Metrics</button></div>
+
+<!-- FEATURE: Sleep Debt Calculator -->
+<div class="app-card" style="border-top:4px solid var(--neon-purple); background:rgba(168,85,247,0.05);">
+<h3 class="card-title" style="color:var(--neon-purple);">📉 Sleep Debt (Last 7 Days)</h3>
+<div style="font-size:1.4rem; font-weight:900; margin:8px 0;" id="sleepDebtCalcDisplay">0h Debt</div>
+<p style="font-size:0.75rem; color:var(--text-secondary);" id="sleepDebtCalcMsg">Log sleep to calculate debt vs 8h/day target.</p>
+</div>
+
+<!-- FEATURE: Nap Tracker -->
+<div class="app-card" style="border-top:4px solid var(--neon-gold);">
+<h3 class="card-title" style="color:var(--neon-gold);">🛌 Nap Tracker</h3>
+<div class="form-row"><div class="form-group" style="flex:1;"><input type="number" id="napDuration" class="form-control" placeholder="Nap duration (mins)" inputmode="numeric"></div>
+<button class="btn-universal" style="background:var(--neon-gold); color:black; width:auto; padding:12px 20px;" onclick="addNapLog()">Log Nap</button></div>
+<ul class="list-container" id="napListContainer" style="max-height:130px;"></ul>
+</div>
+
 <h3 class="card-title">Recent Sleep Metrics Logs</h3>
 <ul class="list-container" id="sleepListContainer"></ul></div>
 
@@ -1418,15 +1512,24 @@ async function generateWeeklyExpenseForecast() {
     }
 }
 async function triggerHeatWaveProtocol() {
+    const todayKey = getIsoDateStr(getAppToday());
+    const cacheKeyTemp = 'madurai_temp_cache_' + todayKey;
     try {
-        // மதுரை தட்பவெப்ப நிலையை Live ஆக செக் செய்தல்
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=9.9252&longitude=78.1198&current=temperature_2m&timezone=auto`);
+        // Network இல்லாத நேரத்தில் fetch-ஏ முயற்சி பண்ணாம cache-ஐ direct-ஆ பயன்படுத்துவோம்
+        if (navigator.onLine === false) throw new Error('offline');
+        // மதுரை தட்பவெப்ப நிலையை Live ஆக செக் செய்தல் (6s timeout — சில network-களில் fetch தொங்கிடாம)
+        const fetchPromise = fetch(`https://api.open-meteo.com/v1/forecast?latitude=9.9252&longitude=78.1198&current=temperature_2m&timezone=auto`);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Heat wave fetch timeout')), 6000));
+        const res = await Promise.race([fetchPromise, timeoutPromise]);
+        if (!res.ok) throw new Error('Heat wave fetch failed');
         const data = await res.json();
         const tempC = data?.current?.temperature_2m;
+        if (typeof tempC !== 'number') throw new Error('No temperature data');
         window.currentMaduraiTemp = tempC;
-        
+        localStorage.setItem(cacheKeyTemp, String(tempC)); // FEATURE: cache today's temp for offline fallback
+
         // 36°C-க்கு மேல் வெயில் அடித்தால் Madurai Bio-Hacking Diet தோன்றும்
-        if (tempC && tempC >= 36) {
+        if (tempC >= 36) {
             const heatAlert = document.getElementById('maduraiHeatAlertBox');
             if (heatAlert) {
                 heatAlert.style.display = 'block';
@@ -1434,9 +1537,16 @@ async function triggerHeatWaveProtocol() {
                 document.getElementById('maduraiDietSuggestion').innerText = "இன்று வெயில் உச்சம்! உங்கள் Bulking-க்கு பாதிப்பு வராமல் இருக்க: ஜிம் முடித்ததும் 1 இளநீர் அல்லது 3 நுங்கு கண்டிப்பாகச் சாப்பிடுங்கள். இது உடல் சூட்டைக் குறைத்து தசைகளை ரிலாக்ஸ் செய்யும்.";
             }
         }
-        
-        calculateElectrolytes(tempC || 32);
-    } catch(e) { console.log("Heat Wave API Error:", e); calculateElectrolytes(32); }
+
+        calculateElectrolytes(tempC);
+    } catch(e) {
+        // Network offline / API unreachable — use today's cached temp if available, else safe default.
+        // Silent fallback: இது expected behaviour (no internet or sandboxed preview), app fully functional-ஆ இருக்கும்.
+        const cachedTemp = parseFloat(localStorage.getItem(cacheKeyTemp));
+        const fallbackTemp = !isNaN(cachedTemp) ? cachedTemp : 32;
+        console.log("Heat Wave: live weather unavailable, using", !isNaN(cachedTemp) ? "cached" : "default", "temp:", fallbackTemp + "°C");
+        calculateElectrolytes(fallbackTemp);
+    }
 }
 
 function calculateElectrolytes(tempC) {
@@ -1850,6 +1960,18 @@ let customWorkouts = safeGetItem('custom_workouts', {});
 let dayRatings = safeGetItem('person_day_ratings', {});
 let savings = safeGetItem('person_savings', []);
 let injuryLogs = safeGetItem('person_injury_logs', []);
+// PHASE 1 NEW FEATURES: state
+let exercisePRs = safeGetItem('exercise_pr_tracker', {});
+let recurringExpenses = safeGetItem('recurring_expenses_list', []);
+let napLogs = safeGetItem('person_nap_logs', []);
+let bodyMetricHistory = safeGetItem('body_metric_history', []);
+let savingsGoalTarget = parseFloat(localStorage.getItem('savings_goal_target')) || 0;
+let restTimerInterval = null;
+let restTimerSecondsLeft = 0;
+// PHASE 2 NEW FEATURES: state
+let cheatMealLogs = safeGetItem('cheat_meal_logs', []);
+let cheatMealWeeklyLimit = parseInt(localStorage.getItem('cheat_meal_weekly_limit')) || 1;
+let waterReminderIntervalId = null;
 
 let weeklyBudgetTarget = parseFloat(localStorage.getItem('weekly_budget_target')) || 0;
 let currentWater = parseInt(localStorage.getItem('TOBI_water_intake_v6')) || 0;
@@ -2339,11 +2461,36 @@ function calcBodyMetrics() {
     };
     localStorage.setItem('saved_body_metrics', JSON.stringify(metricsData));
 
+    // FEATURE: Body Measurement History
+    bodyMetricHistory = bodyMetricHistory.filter(m => m.date !== metricsData.date);
+    bodyMetricHistory.unshift(metricsData);
+    if(bodyMetricHistory.length > 24) bodyMetricHistory = bodyMetricHistory.slice(0, 24);
+    localStorage.setItem('body_metric_history', JSON.stringify(bodyMetricHistory));
+    renderBodyMetricTrend();
+
     updateCalorieTargets(); 
     displayPremiumToastNotification("Body Metrics Monthly Data Synced!", "📐"); 
     renderMealLogsAndMacros(); 
     updateCEODashboard();
     updateBodyMetricsEntryVisibility();
+}
+
+// FEATURE: Body Measurement Trend
+function renderBodyMetricTrend() {
+    const container = document.getElementById('bodyMetricTrendBox');
+    if(!container) return;
+    if(bodyMetricHistory.length < 2) { container.innerHTML = '<p style="font-size:0.72rem; color:var(--text-secondary);">Innum oru measurement log pannunga trend paakka.</p>'; return; }
+    const latest = bodyMetricHistory[0], prev = bodyMetricHistory[1];
+    const fields = [['chest','Chest'],['arm','Arm'],['leg','Leg']];
+    let html = '';
+    fields.forEach(([key, label]) => {
+        if(latest[key] === '' || prev[key] === '') return;
+        const diff = (parseFloat(latest[key]) - parseFloat(prev[key])).toFixed(1);
+        const arrow = diff > 0 ? '▲' : (diff < 0 ? '▼' : '—');
+        const color = diff > 0 ? 'var(--neon-green)' : (diff < 0 ? 'var(--neon-red)' : 'var(--text-secondary)');
+        html += `<div style="display:flex; justify-content:space-between; font-size:0.78rem; padding:4px 0;"><span style="color:var(--text-secondary);">${label}</span><span style="font-weight:800; color:${color};">${latest[key]} cm (${arrow} ${Math.abs(diff)})</span></div>`;
+    });
+    container.innerHTML = html || '<p style="font-size:0.72rem; color:var(--text-secondary);">No measurement data to compare.</p>';
 }
 // --- NEW: Load Saved Body Metrics Automatically ---
 function loadBodyMetrics() {
@@ -2365,6 +2512,7 @@ function loadBodyMetrics() {
         if(savedTdee) document.getElementById('tdeeDisplay').innerText = savedTdee + " Kcal";
     }
     updateBodyMetricsEntryVisibility();
+    renderBodyMetricTrend();
 }
 async function calculateLifeEnergyMatrix() {
     triggerDeviceHapticPulse();
@@ -2568,9 +2716,12 @@ async function updateWaterTargetFromWeather() {
     const applyTarget = async (latitude, longitude) => {
         let tempC = null;
         try {
-            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&timezone=auto`);
+            if (navigator.onLine === false) throw new Error('offline');
+            const fetchPromise = fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&timezone=auto`);
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Weather fetch timeout')), 6000));
+            const res = await Promise.race([fetchPromise, timeoutPromise]);
             if (res.ok) { const data = await res.json(); tempC = data?.current?.temperature_2m; }
-        } catch (err) { console.log("Weather API skipped:", err.message); }
+        } catch (err) { console.log("Water target: live weather unavailable, using default target."); }
 
         const weightKg = weights.length > 0 ? weights[0].val : null;
         const bodyMetrics = safeGetItem('saved_body_metrics', null);
@@ -2634,6 +2785,7 @@ async function updateSunriseWakeupSuggestion() {
 
     const applySunrise = async (latitude, longitude) => {
         try {
+            if (navigator.onLine === false) throw new Error('offline');
             // FIX: AbortController.signal-ஐ fetch()-க்கு நேரடியா pass பண்ணினா, sandboxed preview
             // iframe-கள் (postMessage-மூலம் fetch proxy பண்றது) அதை clone பண்ண முடியாம "AbortSignal
             // object could not be cloned" எர்ரர் தரும். அதனால Promise.race()-வச்சு timeout பண்றோம்,
@@ -2658,11 +2810,17 @@ async function updateSunriseWakeupSuggestion() {
 
             if (sunsetISO) localStorage.setItem('todays_sunset_time', sunsetISO);
         } catch (err) {
-            // Sandboxed preview environments (like Claude's artifact iframe) block cross-origin
-            // fetches to arbitrary domains — this will work normally once hosted (GitHub Pages,
-            // Netlify, Vercel, or your own domain), since open-meteo.com allows CORS from any origin.
-            console.log("Sunrise API skipped:", err.message);
-            el.innerText = "🌄 Ideal Wake-up: 5:30 - 6:00 AM (default — hosted site-ல location access கொடுத்தா exact சூரிய உதயம் காட்டும்)";
+            // Network offline / sandboxed preview / API unreachable — this is an expected fallback path,
+            // not a crash. Reuse yesterday's sunrise estimate if we have one (sunrise shifts by only a
+            // minute or two day-to-day), else show a sensible static default. Works normally once hosted
+            // with real network access, since open-meteo.com allows CORS from any origin.
+            console.log("Sunrise: live data unavailable, using fallback estimate.");
+            let fallbackMsg = null;
+            for (let i = 1; i <= 3 && !fallbackMsg; i++) {
+                const d = new Date(getAppToday()); d.setDate(d.getDate() - i);
+                fallbackMsg = localStorage.getItem('sunrise_suggestion_cache_' + getIsoDateStr(d));
+            }
+            el.innerText = fallbackMsg || "🌄 Ideal Wake-up: 5:30 - 6:00 AM (default — internet/location கிடைச்சா exact சூரிய உதயம் காட்டும்)";
         }
     };
 
@@ -2973,9 +3131,61 @@ function toggleDropdownTips(id) {
 function rateDay(stars) { triggerDeviceHapticPulse(); dayRatings[currentlyViewingDayDateStr] = stars; localStorage.setItem('person_day_ratings', JSON.stringify(dayRatings)); drawStars(stars); displayPremiumToastNotification(`Day Rated ${stars} Stars!`, "⭐"); }
 function drawStars(rating) { const box = document.getElementById('dayStarRatingBox'); if(box) { box.innerHTML = ''; for(let i=1;i<=5;i++) { box.innerHTML += `<span class="${i <= rating ? 'active' : ''}" onclick="rateDay(${i})">★</span>`; } } }
 
-function initGymDay() { let appToday = getAppToday(); const todayName = daysOfWeek[appToday.getDay()]; const select = document.getElementById('workoutDaySelect'); if([...select.options].some(o => o.value === todayName)) { select.value = todayName; showSelectedWorkout(todayName); } else { select.value = "Monday"; showSelectedWorkout("Monday"); } renderCustomWorkouts(); updateStreakDisplay(); }
+function initGymDay() { let appToday = getAppToday(); const todayName = daysOfWeek[appToday.getDay()]; const select = document.getElementById('workoutDaySelect'); if([...select.options].some(o => o.value === todayName)) { select.value = todayName; showSelectedWorkout(todayName); } else { select.value = "Monday"; showSelectedWorkout("Monday"); } renderCustomWorkouts(); updateStreakDisplay(); renderPRTracker(); }
 function showSelectedWorkout(dayId) { document.querySelectorAll('.workout-day-card').forEach(card => card.classList.remove('visible-workout')); const activeCard = document.getElementById(`workout-${dayId}`); if(activeCard) { activeCard.classList.add('visible-workout'); activeCard.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = localStorage.getItem(cb.id) === 'true'; }); } renderCustomWorkouts(); }
-function addCustomWorkout() { const day = document.getElementById('workoutDaySelect').value; const name = document.getElementById('cwName').value; const sets = document.getElementById('cwSets').value; const reps = document.getElementById('cwReps').value; const weight = document.getElementById('cwWeight').value; if(!name || !sets || !reps) return displayPremiumToastNotification("Fill Name, Sets & Reps!", "❌"); if(!customWorkouts[day]) customWorkouts[day] = []; customWorkouts[day].push({ id: Date.now(), name, sets, reps, weight }); localStorage.setItem('custom_workouts', JSON.stringify(customWorkouts)); document.getElementById('cwName').value = ''; renderCustomWorkouts(); displayPremiumToastNotification("Exercise Added!", "💪"); }
+function addCustomWorkout() { const day = document.getElementById('workoutDaySelect').value; const name = document.getElementById('cwName').value; const sets = document.getElementById('cwSets').value; const reps = document.getElementById('cwReps').value; const weight = document.getElementById('cwWeight').value; if(!name || !sets || !reps) return displayPremiumToastNotification("Fill Name, Sets & Reps!", "❌"); if(!customWorkouts[day]) customWorkouts[day] = []; customWorkouts[day].push({ id: Date.now(), name, sets, reps, weight }); localStorage.setItem('custom_workouts', JSON.stringify(customWorkouts)); document.getElementById('cwName').value = ''; checkAndUpdatePR(name, weight); renderCustomWorkouts(); renderPRTracker(); displayPremiumToastNotification("Exercise Added!", "💪"); }
+
+// FEATURE: Personal Record (PR) Tracker
+function checkAndUpdatePR(name, weight) {
+    const w = parseFloat(weight);
+    if(!name || !w || w <= 0) return;
+    const key = name.trim().toLowerCase();
+    const existing = exercisePRs[key];
+    if(!existing || w > existing.weight) {
+        exercisePRs[key] = { name: name.trim(), weight: w, date: getAppToday().toDateString() };
+        localStorage.setItem('exercise_pr_tracker', JSON.stringify(exercisePRs));
+        if(existing) { setTimeout(() => displayPremiumToastNotification(`🏆 New PR! ${name.trim()} - ${w}kg`, "🏆"), 400); triggerHapticPattern('achievement'); }
+    }
+}
+function renderPRTracker() {
+    const container = document.getElementById('prTrackerListContainer');
+    if(!container) return;
+    const keys = Object.keys(exercisePRs);
+    if(keys.length === 0) { container.innerHTML = '<li class="list-item" style="justify-content:center; color:var(--text-secondary); font-size:0.78rem;">No PRs yet. Log weighted exercises below.</li>'; return; }
+    container.innerHTML = '';
+    keys.sort((a,b) => exercisePRs[b].weight - exercisePRs[a].weight).forEach(k => {
+        const pr = exercisePRs[k];
+        const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = 'var(--neon-gold)';
+        li.innerHTML = `<div><b>${pr.name}</b><br><small style="color:var(--text-secondary)">Set on ${pr.date}</small></div><span style="font-weight:900; color:var(--neon-gold); font-size:1.1rem;">${pr.weight} kg</span>`;
+        container.appendChild(li);
+    });
+}
+
+// FEATURE: Rest Timer
+function startRestTimer(seconds) {
+    clearInterval(restTimerInterval);
+    restTimerSecondsLeft = seconds;
+    updateRestTimerDisplay();
+    triggerDeviceHapticPulse();
+    restTimerInterval = setInterval(() => {
+        restTimerSecondsLeft--;
+        updateRestTimerDisplay();
+        if(restTimerSecondsLeft <= 0) {
+            clearInterval(restTimerInterval);
+            restTimerInterval = null;
+            if("vibrate" in navigator) navigator.vibrate([200,100,200,100,200]);
+            displayPremiumToastNotification("Rest over! Next set தொடங்குங்க 💪", "⏱️");
+        }
+    }, 1000);
+}
+function cancelRestTimer() { clearInterval(restTimerInterval); restTimerInterval = null; restTimerSecondsLeft = 0; updateRestTimerDisplay(); }
+function updateRestTimerDisplay() {
+    const el = document.getElementById('restTimerDisplay');
+    if(!el) return;
+    const m = Math.max(restTimerSecondsLeft,0); const mins = String(Math.floor(m/60)).padStart(2,'0'); const secs = String(m%60).padStart(2,'0');
+    el.innerText = `${mins}:${secs}`;
+    el.style.color = restTimerSecondsLeft > 0 && restTimerSecondsLeft <= 5 ? 'var(--neon-red)' : '#fff';
+}
 // --- UPDATED: Render Custom Workouts with YouTube Guide Button ---
 function renderCustomWorkouts() { 
     const day = document.getElementById('workoutDaySelect').value; 
@@ -3010,13 +3220,68 @@ function calculateGymStreak() { let appToday = getAppToday(); let loggedStreakDa
 function updateStreakDisplay() { let appToday = getAppToday(); let loggedStreakDays = safeGetItem('gym_streak_days_list', {}); let streakCount = 0; let checkDate = new Date(appToday); while(true) { const dateStr = checkDate.toDateString(); if(loggedStreakDays[dateStr]) { streakCount++; checkDate.setDate(checkDate.getDate()-1); } else { if(checkDate.toDateString() === appToday.toDateString()) { checkDate.setDate(checkDate.getDate()-1); if(loggedStreakDays[checkDate.toDateString()]) { checkDate.setDate(checkDate.getDate()-1); streakCount = 1; continue; } } break; } } if(document.getElementById('gymStreakDisplay')) document.getElementById('gymStreakDisplay').innerText = `🔥 ${streakCount} Days`; localStorage.setItem('gym_streak', streakCount.toString()); }
 
 function setWeeklyTarget() { const val = prompt("Set Weekly Budget Target (₹):", weeklyBudgetTarget); if(val !== null) { weeklyBudgetTarget = parseFloat(val) || 0; localStorage.setItem('weekly_budget_target', weeklyBudgetTarget); renderExpenses(); updateCEODashboard(); } }
-function addExpense() { let appToday = getAppToday(); const amt = parseFloat(document.getElementById('expAmount').value); const desc = document.getElementById('expDesc').value.trim(); const cat = document.getElementById('expCategory').value; const mode = document.getElementById('expPaymentMode').value; if(!amt || !desc) return displayPremiumToastNotification("Please enter all details!", "❌"); expenses.unshift({ id: Date.now(), amount: amt, desc: desc, category: cat, paymentMode: mode, date: appToday.toISOString() }); localStorage.setItem('person_expenses', JSON.stringify(expenses)); document.getElementById('expAmount').value = ''; document.getElementById('expDesc').value = ''; displayPremiumToastNotification("Expense saved!", "💳"); renderExpenses(); updateCEODashboard(); }
+
+// FEATURE: Savings Goal Tracker
+function setSavingsGoal() { const val = prompt("Set Savings Goal (₹):", savingsGoalTarget || ''); if(val !== null) { savingsGoalTarget = parseFloat(val) || 0; localStorage.setItem('savings_goal_target', savingsGoalTarget); renderSavingsGoalUI(); } }
+function renderSavingsGoalUI() {
+    const labelEl = document.getElementById('savingsGoalLabel'); const barEl = document.getElementById('savingsGoalBar');
+    if(!labelEl || !barEl) return;
+    const total = savings.reduce((sum,s) => sum + (s.amount || 0), 0);
+    if(!savingsGoalTarget || savingsGoalTarget <= 0) { labelEl.innerText = '🎯 No Goal Set'; barEl.style.width = '0%'; return; }
+    const pct = Math.min(100, Math.round((total / savingsGoalTarget) * 100));
+    labelEl.innerText = `🎯 ₹${total.toFixed(0)} / ₹${savingsGoalTarget.toFixed(0)} (${pct}%)`;
+    barEl.style.width = pct + '%';
+    if(pct >= 100) barEl.style.background = 'var(--neon-gold)';
+}
+function addExpense() { let appToday = getAppToday(); const amt = parseFloat(document.getElementById('expAmount').value); const desc = document.getElementById('expDesc').value.trim(); const cat = document.getElementById('expCategory').value; const mode = document.getElementById('expPaymentMode').value; if(!amt || !desc) return displayPremiumToastNotification("Please enter all details!", "❌"); expenses.unshift({ id: Date.now(), amount: amt, desc: desc, category: cat, paymentMode: mode, date: appToday.toISOString() }); localStorage.setItem('person_expenses', JSON.stringify(expenses)); const isRecurring = document.getElementById('expIsRecurring') && document.getElementById('expIsRecurring').checked; if(isRecurring) { recurringExpenses.push({ id: Date.now()+1, amount: amt, desc: desc, category: cat, paymentMode: mode }); localStorage.setItem('recurring_expenses_list', JSON.stringify(recurringExpenses)); document.getElementById('expIsRecurring').checked = false; renderRecurringExpenses(); } document.getElementById('expAmount').value = ''; document.getElementById('expDesc').value = ''; displayPremiumToastNotification("Expense saved!", "💳"); renderExpenses(); updateCEODashboard(); }
+
+// FEATURE: Recurring Expenses
+function renderRecurringExpenses() {
+    const card = document.getElementById('recurringExpenseCard');
+    const container = document.getElementById('recurringExpenseListContainer');
+    if(!container || !card) return;
+    if(recurringExpenses.length === 0) { card.style.display = 'none'; return; }
+    card.style.display = 'block'; container.innerHTML = '';
+    recurringExpenses.forEach(r => {
+        const li = document.createElement('li'); li.className = 'list-item';
+        li.innerHTML = `<div><b>${r.desc}</b><br><small style="color:var(--text-secondary)">${r.category} • ₹${r.amount}</small></div><div style="display:flex; gap:6px;"><button class="btn-universal" style="width:auto; padding:6px 10px; font-size:0.72rem; background:var(--neon-purple);" onclick="quickAddRecurring(${r.id})">+ Log</button><button class="delete-btn" onclick="deleteRecurringExpense(${r.id})">🗑️</button></div>`;
+        container.appendChild(li);
+    });
+}
+function quickAddRecurring(id) {
+    const r = recurringExpenses.find(x => x.id === id); if(!r) return;
+    let appToday = getAppToday();
+    expenses.unshift({ id: Date.now(), amount: r.amount, desc: r.desc, category: r.category, paymentMode: r.paymentMode, date: appToday.toISOString() });
+    localStorage.setItem('person_expenses', JSON.stringify(expenses));
+    displayPremiumToastNotification("Recurring expense logged!", "🔁");
+    renderExpenses(); updateCEODashboard();
+}
+function deleteRecurringExpense(id) { recurringExpenses = recurringExpenses.filter(r => r.id !== id); localStorage.setItem('recurring_expenses_list', JSON.stringify(recurringExpenses)); renderRecurringExpenses(); }
+
+// FEATURE: Monthly Expense Trend
+function renderMonthlyTrend() {
+    const lastEl = document.getElementById('lastMonthSpendDisplay'); const thisEl = document.getElementById('thisMonthSpendDisplay'); const msgEl = document.getElementById('monthlyTrendMsg');
+    if(!lastEl || !thisEl) return;
+    let appToday = getAppToday();
+    const curM = appToday.getMonth(), curY = appToday.getFullYear();
+    let lastM = curM - 1, lastY = curY; if(lastM < 0) { lastM = 11; lastY -= 1; }
+    let thisTotal = 0, lastTotal = 0;
+    expenses.forEach(e => { const d = new Date(e.date); if(d.getFullYear() === curY && d.getMonth() === curM) thisTotal += e.amount; else if(d.getFullYear() === lastY && d.getMonth() === lastM) lastTotal += e.amount; });
+    lastEl.innerText = `₹${lastTotal.toFixed(0)}`; thisEl.innerText = `₹${thisTotal.toFixed(0)}`;
+    if(!msgEl) return;
+    if(lastTotal === 0) { msgEl.innerText = ''; return; }
+    const diffPct = Math.round(((thisTotal - lastTotal) / lastTotal) * 100);
+    if(diffPct > 0) { msgEl.innerText = `⚠️ ${diffPct}% adhigama செலவு`; msgEl.style.color = 'var(--neon-red)'; }
+    else if(diffPct < 0) { msgEl.innerText = `✅ ${Math.abs(diffPct)}% குறைவா செலவு`; msgEl.style.color = 'var(--neon-green)'; }
+    else { msgEl.innerText = 'Same as last month'; msgEl.style.color = 'var(--text-secondary)'; }
+}
 function deleteExpense(id) { triggerDeviceHapticPulse(); expenses = expenses.filter(e => e.id !== id); localStorage.setItem('person_expenses', JSON.stringify(expenses)); renderExpenses(); updateCEODashboard(); }
 
 function renderExpenses() {
     const container = document.getElementById('expenseListContainer');
     if(!container) return;
     container.innerHTML = '';
+    renderRecurringExpenses(); renderMonthlyTrend(); renderSavingsGoalUI();
     
     const filterElem = document.getElementById('expenseTimeFilter');
     const filterVal = filterElem ? filterElem.value : 'today';
@@ -3146,7 +3411,7 @@ function updateExpensePrediction() {
 }
 function addSavings() { let appToday = getAppToday(); const val = prompt("Enter Savings Amount (₹):"); if(val !== null) { const amt = parseFloat(val); if(amt && amt > 0) { savings.unshift({ id: Date.now(), amount: amt, date: appToday.toDateString(), note: '' }); localStorage.setItem('person_savings', JSON.stringify(savings)); renderSavings(); displayPremiumToastNotification("Savings Added!", "🏦"); } } }
 function deleteSavings(id) { triggerDeviceHapticPulse(); savings = savings.filter(s => s.id !== id); localStorage.setItem('person_savings', JSON.stringify(savings)); renderSavings(); updateCEODashboard(); }
-function renderSavings() { const container = document.getElementById('savingsListContainer'); if(!container) return; container.innerHTML = ''; let total = 0; savings.forEach(s => { total += s.amount; const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = s.amount >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'; let displayAmt = s.amount >= 0 ? `₹${s.amount}` : `-₹${Math.abs(s.amount)} (Penalty)`; li.innerHTML = `<div><b style="color:${s.amount >= 0 ? 'white' : 'var(--neon-red)'}">${displayAmt}</b><br><small style="color:var(--text-secondary)">${s.date}</small></div><button class="delete-btn" onclick="deleteSavings(${s.id})">🗑️</button>`; container.appendChild(li); }); document.getElementById('totalSavingsDisplay').innerText = `₹${total.toLocaleString('en-IN')}`; }
+function renderSavings() { const container = document.getElementById('savingsListContainer'); if(!container) return; container.innerHTML = ''; let total = 0; savings.forEach(s => { total += s.amount; const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = s.amount >= 0 ? 'var(--neon-green)' : 'var(--neon-red)'; let displayAmt = s.amount >= 0 ? `₹${s.amount}` : `-₹${Math.abs(s.amount)} (Penalty)`; li.innerHTML = `<div><b style="color:${s.amount >= 0 ? 'white' : 'var(--neon-red)'}">${displayAmt}</b><br><small style="color:var(--text-secondary)">${s.date}</small></div><button class="delete-btn" onclick="deleteSavings(${s.id})">🗑️</button>`; container.appendChild(li); }); document.getElementById('totalSavingsDisplay').innerText = `₹${total.toLocaleString('en-IN')}`; renderSavingsGoalUI(); }
 
 function handleDietCheck(index) { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const cb = document.getElementById(`diet-${index+1}`); if(cb) { localStorage.setItem(`diet_${todayStr}_${index+1}`, cb.checked ? 'true' : 'false'); } calculateDietMacrosFromSchedule(); updateCEODashboard(); }
 function loadDietCheckboxes() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); for(let i=1;i<=8;i++) { const cb = document.getElementById(`diet-${i}`); if(cb) cb.checked = localStorage.getItem(`diet_${todayStr}_${i}`) === 'true'; } calculateDietMacrosFromSchedule(); }
@@ -3157,6 +3422,75 @@ function deleteMealLog(id) { mealLogs = mealLogs.filter(m => m.id !== id); local
 // ============================================
 // AI-Powered Food Nutrition Analyzer v2.0
 // ============================================
+// FEATURE: Water Reminder Schedule
+function toggleWaterReminderSchedule(enabled) {
+    clearInterval(waterReminderIntervalId); waterReminderIntervalId = null;
+    localStorage.setItem('water_reminder_enabled', enabled ? 'true' : 'false');
+    const hrs = parseInt(document.getElementById('waterReminderInterval').value) || 2;
+    localStorage.setItem('water_reminder_hours', hrs);
+    if(enabled) {
+        waterReminderIntervalId = setInterval(() => {
+            displayPremiumToastNotification("💧 Water குடிக்க நேரம் ஆச்சு!", "💧");
+            if(Notification && Notification.permission === 'granted') sendPushNotif("Time to drink water! Stay hydrated 💧", "glowup");
+        }, hrs * 60 * 60 * 1000);
+        displayPremiumToastNotification(`Water reminder ON — every ${hrs}hr`, "🔔");
+    }
+}
+function initWaterReminderUI() {
+    const enabled = localStorage.getItem('water_reminder_enabled') === 'true';
+    const hrs = parseInt(localStorage.getItem('water_reminder_hours')) || 2;
+    if(document.getElementById('waterReminderToggle')) document.getElementById('waterReminderToggle').checked = enabled;
+    if(document.getElementById('waterReminderInterval')) document.getElementById('waterReminderInterval').value = hrs;
+    if(enabled) toggleWaterReminderSchedule(true);
+}
+
+// FEATURE: Recipe Suggestion based on remaining macros
+async function suggestRecipeForRemainingMacros() {
+    const box = document.getElementById('recipeSuggestionBox');
+    if(!GEMINI_API_KEY) { displayPremiumToastNotification("⚠️ API Key Missing! Settings-la set pannunga", "❌"); return; }
+    const pRem = Math.max(0, targetP - currentLoggedProtein);
+    const cRem = Math.max(0, targetC - currentLoggedCarbs);
+    const fRem = Math.max(0, targetF - currentLoggedFats);
+    const calRem = Math.max(0, dailyTargetCals - currentLoggedCal);
+    box.style.display = 'block'; box.innerText = 'TOBI recipe thinking...';
+    try {
+        const prompt = `Suggest ONE simple Indian home-cook recipe (Tamil Nadu style) that roughly fits these remaining daily macro needs: Protein ${pRem}g, Carbs ${cRem}g, Fats ${fRem}g, Calories ${calRem} kcal. Keep it short (max 6 lines): dish name, key ingredients, and approx macros. Respond in simple Tanglish.`;
+        const aiResponse = await askGemini(prompt);
+        box.innerText = aiResponse;
+    } catch(e) { box.innerText = 'Recipe suggestion failed. Try again.'; }
+}
+
+// FEATURE: Cheat Meal Tracker
+function getCheatMealsThisWeek() {
+    let appToday = getAppToday();
+    const startOfWeek = new Date(appToday); startOfWeek.setDate(appToday.getDate() - appToday.getDay());
+    startOfWeek.setHours(0,0,0,0);
+    return cheatMealLogs.filter(c => new Date(c.date) >= startOfWeek);
+}
+function logCheatMeal() {
+    const thisWeek = getCheatMealsThisWeek();
+    if(thisWeek.length >= cheatMealWeeklyLimit) { displayPremiumToastNotification("Weekly cheat meal limit mudinjidichu!", "⚠️"); }
+    let appToday = getAppToday();
+    cheatMealLogs.unshift({ id: Date.now(), date: appToday.toISOString() });
+    localStorage.setItem('cheat_meal_logs', JSON.stringify(cheatMealLogs));
+    displayPremiumToastNotification("Cheat meal logged!", "🍕");
+    renderCheatMealTracker();
+}
+function deleteCheatMealLog(id) { cheatMealLogs = cheatMealLogs.filter(c => c.id !== id); localStorage.setItem('cheat_meal_logs', JSON.stringify(cheatMealLogs)); renderCheatMealTracker(); }
+function setCheatMealLimit(val) { cheatMealWeeklyLimit = parseInt(val) || 0; localStorage.setItem('cheat_meal_weekly_limit', cheatMealWeeklyLimit); renderCheatMealTracker(); }
+function renderCheatMealTracker() {
+    const displayEl = document.getElementById('cheatMealAllowanceDisplay'); const listEl = document.getElementById('cheatMealListContainer'); const limitEl = document.getElementById('cheatMealWeeklyLimit');
+    if(!displayEl) return;
+    const thisWeek = getCheatMealsThisWeek();
+    displayEl.innerText = `${thisWeek.length} / ${cheatMealWeeklyLimit}`;
+    displayEl.style.color = thisWeek.length >= cheatMealWeeklyLimit ? 'var(--neon-red)' : 'var(--neon-green)';
+    if(limitEl) limitEl.value = cheatMealWeeklyLimit;
+    if(!listEl) return;
+    if(thisWeek.length === 0) { listEl.innerHTML = '<li class="list-item" style="justify-content:center; color:var(--text-secondary); font-size:0.78rem;">No cheat meals this week.</li>'; return; }
+    listEl.innerHTML = '';
+    thisWeek.forEach(c => { const li = document.createElement('li'); li.className = 'list-item'; li.innerHTML = `<div>🍕 ${new Date(c.date).toDateString()}</div><button class="delete-btn" onclick="deleteCheatMealLog(${c.id})">🗑️</button>`; listEl.appendChild(li); });
+}
+
 async function analyzeMealInputWithAI() {
     triggerDeviceHapticPulse();
     let input = document.getElementById('mealFoodInput').value.trim();
@@ -3364,7 +3698,21 @@ async function analyzeMealPhotoWithAI() {
     displayPremiumToastNotification("📸 TOBI photo analyze pandrean...", "🔄");
 
     try {
-        const visionPrompt = `You are a nutrition expert AI with food image recognition. Look at this food photo carefully and identify ALL food items visible, estimating realistic portion sizes.
+        const isLabelScan = document.getElementById('labelScanModeToggle') && document.getElementById('labelScanModeToggle').checked;
+        const visionPrompt = isLabelScan ? `You are reading a packaged food's printed Nutrition Facts / Nutrition Information label from this photo. Read the EXACT printed numbers (per serving or per pack as shown) — do NOT estimate visually.
+
+Respond in EXACTLY this format (no other text):
+FOOD_NAME: [product name if visible, else "Packaged Food"]
+QUANTITY: [serving size as printed, e.g. "1 pack / 30g"]
+PROTEIN_G: [exact grams from label]
+CARBS_G: [exact grams from label]
+FATS_G: [exact grams from label]
+CALORIES: [exact kcal from label]
+
+Rules:
+- Use the EXACT printed numbers, not estimates
+- If per-100g and per-serving both shown, use per-serving values
+- If a value is not legible, make the closest reasonable reading and note it in FOOD_NAME` : `You are a nutrition expert AI with food image recognition. Look at this food photo carefully and identify ALL food items visible, estimating realistic portion sizes.
 
 Respond in EXACTLY this format (no other text):
 FOOD_NAME: [comma separated list of identified food items with approx quantity]
@@ -3629,7 +3977,47 @@ function renderWeightsCircleAndLists() { const container = document.getElementBy
 
 function addAdvancedSleepLog() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const bedtime = document.getElementById('sleepBedtime').value; const wakeup = document.getElementById('sleepWakeup').value; const interruptions = parseInt(document.getElementById('sleepInterruptions').value); const dreamText = document.getElementById('dreamInput').value; if(!bedtime || !wakeup) return displayPremiumToastNotification("Fill Bedtime & Wakeup!", "❌"); let bParts = bedtime.split(':'); let wParts = wakeup.split(':'); let bMin = parseInt(bParts[0]) * 60 + parseInt(bParts[1]); let wMin = parseInt(wParts[0]) * 60 + parseInt(wParts[1]); let diffMin = wMin - bMin; if(diffMin < 0) diffMin += 1440; let totalHours = diffMin / 60; let baseEfficiency = 100 - (interruptions * 12); if(totalHours < 6) baseEfficiency -= (6 - totalHours) * 15; if(totalHours > 9) baseEfficiency -= (totalHours - 9) * 5; if(baseEfficiency < 20) baseEfficiency = 20; let finalScore = Math.round(baseEfficiency); sleepLogs = sleepLogs.filter(s => s.date !== todayStr); sleepLogs.unshift({ id: Date.now(), hours: parseFloat(totalHours.toFixed(1)), bedtime: bedtime, wakeup: wakeup, score: finalScore, interruptions: interruptions, date: todayStr }); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); { let aiData = safeGetItem('ai_sleep_recovery', null); if(aiData && aiData.date === todayStr) { localStorage.removeItem('ai_sleep_recovery'); if(document.getElementById('aiSleepAnalysisBox')) document.getElementById('aiSleepAnalysisBox').style.display = 'none'; } } if(dreamText.trim() !== '') localStorage.setItem('dream_log_' + todayStr, dreamText); document.getElementById('sleepBedtime').value = ''; document.getElementById('sleepWakeup').value = ''; document.getElementById('dreamInput').value = ''; displayPremiumToastNotification("Sleep Cycle Logged!", "😴"); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
 function deleteSleepLog(id) { triggerDeviceHapticPulse(); sleepLogs = sleepLogs.filter(s => s.id !== id); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
-function renderSleepLogs() { const container = document.getElementById('sleepListContainer'); if(!container) return; container.innerHTML = ''; sleepLogs.forEach(s => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = s.score >= 80 ? 'var(--neon-green)' : (s.score >= 55 ? 'var(--neon-gold)' : 'var(--neon-red)'); li.innerHTML = `<div><b>${s.hours} Hours</b> (${s.bedtime} - ${s.wakeup})<br><small style="color:var(--text-secondary)">Efficiency: ${s.score}% • Interrupts: ${s.interruptions}</small></div><button class="delete-btn" onclick="deleteSleepLog(${s.id})">🗑️</button>`; container.appendChild(li); }); }
+function renderSleepLogs() { const container = document.getElementById('sleepListContainer'); if(!container) return; container.innerHTML = ''; sleepLogs.forEach(s => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = s.score >= 80 ? 'var(--neon-green)' : (s.score >= 55 ? 'var(--neon-gold)' : 'var(--neon-red)'); li.innerHTML = `<div><b>${s.hours} Hours</b> (${s.bedtime} - ${s.wakeup})<br><small style="color:var(--text-secondary)">Efficiency: ${s.score}% • Interrupts: ${s.interruptions}</small></div><button class="delete-btn" onclick="deleteSleepLog(${s.id})">🗑️</button>`; container.appendChild(li); }); renderSleepDebtCalculator(); renderNapLogs(); }
+
+// FEATURE: Sleep Debt Calculator
+function renderSleepDebtCalculator() {
+    const displayEl = document.getElementById('sleepDebtCalcDisplay'); const msgEl = document.getElementById('sleepDebtCalcMsg');
+    if(!displayEl) return;
+    let appToday = getAppToday();
+    const targetHours = 8;
+    let totalDebt = 0, daysLogged = 0;
+    for(let i = 0; i < 7; i++) {
+        let d = new Date(appToday); d.setDate(d.getDate() - i);
+        const log = sleepLogs.find(s => s.date === d.toDateString());
+        if(log) { totalDebt += Math.max(0, targetHours - log.hours); daysLogged++; }
+    }
+    if(daysLogged === 0) { displayEl.innerText = '-- h Debt'; msgEl.innerText = 'Log sleep to calculate debt vs 8h/day target.'; return; }
+    displayEl.innerText = `${totalDebt.toFixed(1)}h Debt`;
+    displayEl.style.color = totalDebt > 6 ? 'var(--neon-red)' : (totalDebt > 2 ? 'var(--neon-gold)' : 'var(--neon-green)');
+    if(totalDebt > 6) msgEl.innerText = `⚠️ High sleep debt (${daysLogged} days logged). Recovery-க்கு early sleep வேணும்.`;
+    else if(totalDebt > 2) msgEl.innerText = `Moderate debt (${daysLogged} days logged). Konjam adjust pannunga.`;
+    else msgEl.innerText = `✅ Well rested! (${daysLogged} days logged)`;
+}
+
+// FEATURE: Nap Tracker
+function addNapLog() {
+    const dur = parseInt(document.getElementById('napDuration').value);
+    if(!dur || dur <= 0) return displayPremiumToastNotification("Enter nap duration!", "❌");
+    let appToday = getAppToday();
+    napLogs.unshift({ id: Date.now(), duration: dur, date: appToday.toDateString(), time: appToday.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'}) });
+    localStorage.setItem('person_nap_logs', JSON.stringify(napLogs));
+    document.getElementById('napDuration').value = '';
+    displayPremiumToastNotification("Nap logged!", "🛌");
+    renderNapLogs();
+}
+function deleteNapLog(id) { napLogs = napLogs.filter(n => n.id !== id); localStorage.setItem('person_nap_logs', JSON.stringify(napLogs)); renderNapLogs(); }
+function renderNapLogs() {
+    const container = document.getElementById('napListContainer'); if(!container) return;
+    const recent = napLogs.slice(0, 10);
+    if(recent.length === 0) { container.innerHTML = '<li class="list-item" style="justify-content:center; color:var(--text-secondary); font-size:0.78rem;">No naps logged yet.</li>'; return; }
+    container.innerHTML = '';
+    recent.forEach(n => { const li = document.createElement('li'); li.className = 'list-item'; li.innerHTML = `<div><b>${n.duration} mins</b><br><small style="color:var(--text-secondary)">${n.date} • ${n.time}</small></div><button class="delete-btn" onclick="deleteNapLog(${n.id})">🗑️</button>`; container.appendChild(li); });
+}
 function calculateSleepParagraphAnalysis() { const display = document.getElementById('sleepDebtDisplay'); const advice = document.getElementById('sleepDebtAdvice'); if(!display) return; if(sleepLogs.length === 0) { display.innerText = "0% Score"; advice.innerText = "No logs recorded yet."; return; } let latest = sleepLogs[0]; let effectiveScore = getEffectiveSleepScore(latest.date); display.innerText = `${effectiveScore}% Deep Sleep Efficiency`; if(effectiveScore >= 80) { display.style.color = "var(--neon-green)"; advice.innerText = "அருமையான தூக்கம் முத்துபாலன்! தசை வளர்ச்சி (Anabolic Growth) மற்றும் நரம்பு மண்டல ரெக்கவரி 100% சிறப்பாக உள்ளது. 🧘‍♂️"; } else if(effectiveScore >= 55) { display.style.color = "var(--neon-gold)"; advice.innerText = `தூக்கம் சற்றே பாதிக்கப்பட்டுள்ளது. நடுவில் ${latest.interruptions} முறை விழித்துள்ளீர்கள். படுக்கைக்குச் செல்லும் முன் மொபைல் பார்ப்பதைத் தவிர்க்கவும்! ⚠️`; } else { display.style.color = "var(--neon-red)"; advice.innerText = "ரொம்ப மோசமான தூக்க தரம்! 🥱 உடல் அசதி மற்றும் சோர்வு அதிகம் இருக்கும். இன்று இரவு சீக்கிரம் தூங்கச் செல்ல TOBI பரிந்துரைக்கிறது."; } }
 
 // 🧠 SINGLE SOURCE OF TRUTH: AI Sleep Recovery Score (falls back to local rule-based score)
@@ -5658,6 +6046,8 @@ window.addEventListener('DOMContentLoaded', () => {
     updateWaterTargetFromWeather(); // FEATURE: adjust water goal based on today's weather
     updateSunriseWakeupSuggestion(); // FEATURE: sunrise-based ideal wake-up time suggestion
     initAdvancedSystemFeatures(); // FEATURE BATCH: wake lock, shake-log, fall-detect, battery, multi-tab sync, cleanup, migration
+    initWaterReminderUI(); // FEATURE: water reminder schedule
+    renderCheatMealTracker(); // FEATURE: cheat meal tracker
     initNeural(); drawNeural(); resizeConfetti();
     setTimeout(runBootSequence, 300);
     setTimeout(checkAchievements, 2500);
@@ -6030,21 +6420,21 @@ function playTone(freq, type, duration, vol=2.5) { // vol=0.05 லிருந�
   osc.stop(audioCtx.currentTime + duration);
 }
 function playBootSound(step) {
-  playTone(200 + step*50, 'sine', 0.15, 0.03);
+  playTone(200 + step*50, 'sine', 0.15, 2.3);
 }
 function playSuccessSound() {
   playTone(523, 'sine', 0.1, 0.05);
-  setTimeout(() => playTone(659, 'sine', 0.1, 0.05), 100);
-  setTimeout(() => playTone(784, 'sine', 0.2, 0.05), 200);
+  setTimeout(() => playTone(659, 'sine', 0.1, 2.5), 100);
+  setTimeout(() => playTone(784, 'sine', 0.2, 2.05), 200);
 }
 function playAchievementSound() {
-  [523,659,784,1047].forEach((f,i) => setTimeout(() => playTone(f,'square',0.15,0.04), i*80));
+  [523,659,784,1047].forEach((f,i) => setTimeout(() => playTone(f,'square',0.15,2.04), i*80));
 }
 function playClickSound() {
-  playTone(800, 'sine', 0.05, 0.02);
+  playTone(800, 'sine', 0.05, 2.02);
 }
 function playHapticSound() {
-  playTone(1200, 'triangle', 0.03, 0.015);
+  playTone(1200, 'triangle', 0.03, 2.015);
 }
 
 // FIX 2: Haptic override — try/catch guard சேர்க்கப்பட்டது, original call fail ஆனாலும் sound play ஆகும்
