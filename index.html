@@ -565,6 +565,15 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 
 .lock-title { font-family: var(--font-hud), sans-serif; font-size: 1.5rem; color: var(--neon-cyan); font-weight: 900; letter-spacing: 3px; margin-bottom: 5px; }
 .lock-subtitle { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+/* ===== ELECTROLYTE & MADURAI HEAT MATRIX ===== */
+.electrolyte-box { background: linear-gradient(145deg, #1a0800, #000); border: 1px dashed var(--neon-orange); border-radius: 16px; padding: 15px; margin-bottom: 16px; position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(249, 115, 22, 0.1); }
+.electro-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 900; color: var(--neon-orange); }
+.electro-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin: 10px 0; }
+.electro-bar-fill { height: 100%; width: 100%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.electro-status { font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.4; }
+.electro-btn { background: rgba(249, 115, 22, 0.1); border: 1px solid var(--neon-orange); color: var(--neon-orange); padding: 10px; border-radius: 12px; font-weight: 900; cursor: pointer; width: 100%; font-size: 0.8rem; transition: 0.3s; }
+.electro-btn:active { background: var(--neon-orange); color: #000; transform: scale(0.98); }
+.madurai-heat-alert { background: linear-gradient(135deg, rgba(220,38,38,0.1), rgba(249,115,22,0.1)); border-left: 4px solid var(--neon-red); border-radius: 12px; padding: 14px; margin-bottom: 16px; display: none; }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -690,7 +699,13 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
         <button class="btn-universal" style="background:linear-gradient(90deg, #fbbf24, #dc2626); color:white; font-size:0.9rem; padding:12px; font-weight:900; text-shadow: 1px 1px 2px black;" onclick="doThanosSnap()">🫰 THE SNAP (End Day Protocol)</button>
     </div>
 </div>
-
+<!-- 💦 SWEAT & ELECTROLYTE DRAIN METER -->
+<div class="electrolyte-box" id="electrolyteMeterBox">
+    <div class="electro-header"><span>💦 SWEAT & ELECTROLYTE DRAIN</span><span id="electroPctText">100%</span></div>
+    <div class="electro-bar-bg"><div class="electro-bar-fill" id="electroBarFill" style="width:100%; background:var(--neon-green);"></div></div>
+    <div class="electro-status" id="electroStatusText">✅ எலக்ட்ரோலைட்ஸ் சீராக உள்ளது.</div>
+    <button class="electro-btn" id="electroBtn" onclick="replenishElectrolytes()" style="display:none;">🍋 Drink Lemon+Salt+Honey (+40%)</button>
+</div>
 <!-- 2. TOBI Predictive AI Card -->
 <div class="app-card ai-predict-card" style="margin-bottom:16px;">
     <h3 class="card-title" style="color:var(--neon-purple);">🔮 TOBI Predictive AI</h3>
@@ -967,7 +982,13 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <!-- DIET PAGE -->
 <div id="page-diet" class="page">
 <div class="page-banner" style="background:linear-gradient(135deg,#f59e0b,#78350f); padding:15px; border-radius:16px; margin-bottom:15px; font-weight:900; text-align:center;">🍎 TOBI MEAL AI & DIET</div>
-
+<!-- ☀️ MADURAI BIO-HACKING HEAT ALERT -->
+<div class="madurai-heat-alert" id="maduraiHeatAlertBox">
+    <h4 style="margin:0 0 8px 0; color:var(--neon-red); font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.2rem;">☀️</span> MADURAI HEAT ALERT: <span id="maduraiTempDisplay">--°C</span>
+    </h4>
+    <p id="maduraiDietSuggestion" style="margin:0; font-size:0.75rem; color:white; line-height:1.5; font-weight:bold;"></p>
+</div>
 <div class="app-card" style="border-top:4px solid var(--neon-green); margin-bottom:15px;">
 <div style="display:flex; justify-content:space-between; align-items:center;"><h3 class="card-title" style="margin:0; color:var(--neon-green);">🛒 Smart Grocery AI</h3><button class="water-btn" onclick="generateSmartGrocery()" style="font-size:0.7rem;">🔄 Refresh</button></div>
 <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Auto-calculated based on your weekly macro gaps:</p>
@@ -1268,6 +1289,102 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 </div>
 </div><!-- closes .app-container (FIX: was previously unclosed) -->
 <script>
+// ===== MADURAI HEAT WAVE & ELECTROLYTE ENGINE =====
+let currentElectrolyteLevel = 100;
+
+async function triggerHeatWaveProtocol() {
+    try {
+        // மதுரை தட்பவெப்ப நிலையை Live ஆக செக் செய்தல்
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=9.9252&longitude=78.1198&current=temperature_2m&timezone=auto`);
+        const data = await res.json();
+        const tempC = data?.current?.temperature_2m;
+        window.currentMaduraiTemp = tempC;
+        
+        // 36°C-க்கு மேல் வெயில் அடித்தால் Madurai Bio-Hacking Diet தோன்றும்
+        if (tempC && tempC >= 36) {
+            const heatAlert = document.getElementById('maduraiHeatAlertBox');
+            if (heatAlert) {
+                heatAlert.style.display = 'block';
+                document.getElementById('maduraiTempDisplay').innerText = tempC + '°C';
+                document.getElementById('maduraiDietSuggestion').innerText = "இன்று வெயில் உச்சம்! உங்கள் Bulking-க்கு பாதிப்பு வராமல் இருக்க: ஜிம் முடித்ததும் 1 இளநீர் அல்லது 3 நுங்கு கண்டிப்பாகச் சாப்பிடுங்கள். இது உடல் சூட்டைக் குறைத்து தசைகளை ரிலாக்ஸ் செய்யும்.";
+            }
+        }
+        
+        calculateElectrolytes(tempC || 32);
+    } catch(e) { console.log("Heat Wave API Error:", e); calculateElectrolytes(32); }
+}
+
+function calculateElectrolytes(tempC) {
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
+    let level = 100;
+    
+    // 1. வெயில் தாக்கம் (Heat Drain)
+    if (tempC >= 35) level -= 15;
+    if (tempC >= 38) level -= 25;
+    
+    // 2. நடந்த தூரம் (Steps Drain)
+    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    let todayCardio = cardioLogs.find(c => c.date === todayStr);
+    let steps = todayCardio ? todayCardio.steps : 0;
+    level -= Math.floor(steps / 2000) * 10; 
+    
+    // 3. ஜிம் தாக்கம் (Workout Drain)
+    let gymStatus = localStorage.getItem(`gym_done_${todayStr}`);
+    if (gymStatus === 'true') level -= 20;
+    
+    // 4. Recovery (எலுமிச்சை சாறு குடித்தால் ஏறும்)
+    if (localStorage.getItem(`electrolyte_replenished_${todayStr}`) === 'true') {
+        level += 40;
+    }
+    
+    if (level > 100) level = 100;
+    if (level < 0) level = 0;
+    
+    currentElectrolyteLevel = level;
+    updateElectrolyteUI();
+}
+
+function updateElectrolyteUI() {
+    const bar = document.getElementById('electroBarFill');
+    const statusText = document.getElementById('electroStatusText');
+    const pctText = document.getElementById('electroPctText');
+    const btn = document.getElementById('electroBtn');
+    if(!bar) return;
+    
+    bar.style.width = currentElectrolyteLevel + '%';
+    pctText.innerText = currentElectrolyteLevel + '%';
+    
+    if (currentElectrolyteLevel > 70) {
+        bar.style.background = 'linear-gradient(90deg, var(--neon-green), #4ade80)';
+        statusText.innerText = '✅ எலக்ட்ரோலைட்ஸ் & எனர்ஜி சீராக உள்ளது.';
+        btn.style.display = 'none';
+    } else if (currentElectrolyteLevel > 40) {
+        bar.style.background = 'linear-gradient(90deg, var(--neon-gold), #facc15)';
+        statusText.innerText = '⚠️ வியர்வையால் சத்துக்கள் குறைகிறது. தண்ணீர் அதிகம் குடிக்கவும்.';
+        btn.style.display = 'block';
+        btn.innerText = '🍹 Drink Electrolyte Mix (+40%)';
+    } else {
+        bar.style.background = 'linear-gradient(90deg, var(--neon-red), #ef4444)';
+        statusText.innerText = '🚨 DANGER: உப்புகள் மிகவும் குறைவு! தசைப்பிடிப்பு (Cramps) ஏற்படும்!';
+        btn.style.display = 'block';
+        btn.innerText = '🍋 Drink Lemon+Salt+Honey IMMEDIATELY!';
+    }
+}
+
+function replenishElectrolytes() {
+    triggerDeviceHapticPulse();
+    let appToday = getAppToday();
+    localStorage.setItem(`electrolyte_replenished_${appToday.toDateString()}`, 'true');
+    displayPremiumToastNotification("Electrolytes Restored! ⚡", "🔋");
+    calculateElectrolytes(window.currentMaduraiTemp || 36);
+    addWater(250); // எலுமிச்சை சாறு குடித்தால் 250ml Water-ம் தானாக add ஆகும்
+}
+
+// ஆப் திறக்கும்போது இந்த API-ஐ அழைக்க
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(triggerHeatWaveProtocol, 2000);
+});
 async function checkDailyWisdom() {
     let appToday = getAppToday();
     let todayStr = appToday.toDateString();
@@ -4489,6 +4606,8 @@ function updateCEODashboard_impl() {
         'Friday': 'Legs+Glutes',
         'Saturday': 'Yoga',
         'Sunday': 'Rest Day'
+     // Madurai Heat Wave & Electrolyte Auto-Update
+    if(typeof triggerHeatWaveProtocol === 'function') triggerHeatWaveProtocol(); 
     };
     let gymLabel = ceoGymMap[todayName] || 'Rest Day'; 
     document.getElementById('ceoGym').innerText = gymLabel;
