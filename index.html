@@ -1650,67 +1650,44 @@ function switchPage(pageId, swipeDir) {
     // FEATURE: Screen Wake Lock — gym page-க்கு போனா lock, வேற பக்கம் போனா release
     if (pageId === 'gym') { requestWakeLockIfOnGymPage(); } else if (currentPageId === 'gym') { releaseWakeLock(); }
 
-    // Determine slide direction
-    const fromIdx = PAGE_ORDER.indexOf(currentPageId);
-    const toIdx   = PAGE_ORDER.indexOf(pageId);
-    // swipeDir override: 'left' = new page comes from right, 'right' = from left
-    let dir = swipeDir;
-    if(!dir) dir = (toIdx > fromIdx) ? 'left' : 'right';
-
-    const outClass  = dir === 'left'  ? 'slide-out-left'  : 'slide-out-right';
-    const inClass   = dir === 'left'  ? 'slide-in-left'   : 'slide-in-right';
-
     const prevPage = document.getElementById('page-' + currentPageId);
     const nextPage = document.getElementById('page-' + pageId);
     if(!prevPage || !nextPage) return;
 
-    isPageTransitioning = true;
-
-    // Animate out current page
-    prevPage.classList.remove('active');
-    prevPage.classList.add(outClass);
-
-    // Animate in new page
+    // FIX: Swipe பண்ணினா உடனே next page வரணும் — slide animation/scroll இல்லாம INSTANT switch.
+    // (Tap-based navigation-க்கும் இதே instant switch, consistent-ஆ இருக்க.)
+    prevPage.classList.remove('active','slide-in-left','slide-in-right','slide-out-left','slide-out-right');
+    prevPage.style.display = '';
+    nextPage.classList.remove('slide-in-left','slide-in-right','slide-out-left','slide-out-right');
+    nextPage.classList.add('active');
     nextPage.style.display = 'block';
-    nextPage.classList.remove('active','slide-in-left','slide-in-right');
-    nextPage.classList.add(inClass);
+    nextPage.scrollTop = 0; // புது page top-ல இருந்து தொடங்கணும்
 
-    // Update tab highlight immediately
+    // Update tab highlight immediately — instant scroll, "smooth" இல்லை (அதுவும் delay-ஆ தெரியும்)
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     const selectedTab = document.getElementById('tab-' + pageId);
     if(selectedTab) {
         selectedTab.classList.add('active');
-        selectedTab.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+        selectedTab.scrollIntoView({ behavior:'auto', block:'nearest', inline:'center' });
     }
 
-    setTimeout(() => {
-        // Cleanup outgoing page
-        prevPage.classList.remove(outClass);
-        prevPage.style.display = '';
+    currentPageId = pageId;
 
-        // Settle incoming page
-        nextPage.classList.remove(inClass);
-        nextPage.classList.add('active');
-
-        currentPageId = pageId;
-        isPageTransitioning = false;
-
-        // Load page data
-        if(pageId === 'glowup') {
-            renderCurrentDay(); loadBioStates(); renderWakeupLogs();
-            updateProgressBars(); updateCEODashboard();
-            let cachedPred = localStorage.getItem('tobi_ai_predictions');
-            if(cachedPred) { try { let pred = JSON.parse(cachedPred); if(pred.date === getAppToday().toDateString()) { if(document.getElementById('predictWeightVal')) document.getElementById('predictWeightVal').innerText = pred.weight.toFixed(1) + ' kg'; if(document.getElementById('predictWeightBar')) document.getElementById('predictWeightBar').style.width = Math.min(100, ((pred.weight - 62) / 8) * 100) + '%'; if(document.getElementById('predictBudgetVal')) document.getElementById('predictBudgetVal').innerText = pred.budget > 100 ? 'OVER ⚠️' : Math.round(pred.budget) + '%'; if(document.getElementById('predictBudgetBar')) document.getElementById('predictBudgetBar').style.width = Math.min(100, pred.budget) + '%'; if(document.getElementById('predictOvertrainVal')) document.getElementById('predictOvertrainVal').innerText = Math.round(pred.overtrain) + '%'; if(document.getElementById('predictOvertrainBar')) document.getElementById('predictOvertrainBar').style.width = Math.min(100, pred.overtrain) + '%'; if(document.getElementById('predictMuscleVal')) document.getElementById('predictMuscleVal').innerText = Math.round(pred.muscle) + '%'; if(document.getElementById('predictMuscleBar')) document.getElementById('predictMuscleBar').style.width = Math.min(100, pred.muscle) + '%'; if(pred.insight && document.getElementById('predictAiInsight')) { document.getElementById('predictAiInsight').innerText = pred.insight; document.getElementById('predictAiInsight').style.display = 'block'; } } } catch(e) {} }
-            updatePredictiveAnalytics(); renderCardioLogs();
-        }
-        if(pageId === 'gym')     { initGymDay(); updateCalorieTargets(); renderWeightsCircleAndLists(); generateAdaptiveWorkout(); }
-        if(pageId === 'diet')    { renderMealLogsAndMacros(); renderWater(); updateCalorieTargets(); loadDietCheckboxes(); generateSmartGrocery(); }
-        if(pageId === 'expense') { renderExpenses(); renderSavings(); }
-        if(pageId === 'sleep')   { renderSleepLogs(); calculateSleepParagraphAnalysis(); }
-        if(pageId === 'notes')   { renderReminders(); }
-        if(pageId === 'calendar'){ renderMonthlyCalendar(); }
-        history.replaceState({app_running: true}, "");
-    }, 280);
+    // Load page data
+    if(pageId === 'glowup') {
+        renderCurrentDay(); loadBioStates(); renderWakeupLogs();
+        updateProgressBars(); updateCEODashboard();
+        let cachedPred = localStorage.getItem('tobi_ai_predictions');
+        if(cachedPred) { try { let pred = JSON.parse(cachedPred); if(pred.date === getAppToday().toDateString()) { if(document.getElementById('predictWeightVal')) document.getElementById('predictWeightVal').innerText = pred.weight.toFixed(1) + ' kg'; if(document.getElementById('predictWeightBar')) document.getElementById('predictWeightBar').style.width = Math.min(100, ((pred.weight - 62) / 8) * 100) + '%'; if(document.getElementById('predictBudgetVal')) document.getElementById('predictBudgetVal').innerText = pred.budget > 100 ? 'OVER ⚠️' : Math.round(pred.budget) + '%'; if(document.getElementById('predictBudgetBar')) document.getElementById('predictBudgetBar').style.width = Math.min(100, pred.budget) + '%'; if(document.getElementById('predictOvertrainVal')) document.getElementById('predictOvertrainVal').innerText = Math.round(pred.overtrain) + '%'; if(document.getElementById('predictOvertrainBar')) document.getElementById('predictOvertrainBar').style.width = Math.min(100, pred.overtrain) + '%'; if(document.getElementById('predictMuscleVal')) document.getElementById('predictMuscleVal').innerText = Math.round(pred.muscle) + '%'; if(document.getElementById('predictMuscleBar')) document.getElementById('predictMuscleBar').style.width = Math.min(100, pred.muscle) + '%'; if(pred.insight && document.getElementById('predictAiInsight')) { document.getElementById('predictAiInsight').innerText = pred.insight; document.getElementById('predictAiInsight').style.display = 'block'; } } } catch(e) {} }
+        updatePredictiveAnalytics(); renderCardioLogs();
+    }
+    if(pageId === 'gym')     { initGymDay(); updateCalorieTargets(); renderWeightsCircleAndLists(); generateAdaptiveWorkout(); }
+    if(pageId === 'diet')    { renderMealLogsAndMacros(); renderWater(); updateCalorieTargets(); loadDietCheckboxes(); generateSmartGrocery(); }
+    if(pageId === 'expense') { renderExpenses(); renderSavings(); }
+    if(pageId === 'sleep')   { renderSleepLogs(); calculateSleepParagraphAnalysis(); }
+    if(pageId === 'notes')   { renderReminders(); }
+    if(pageId === 'calendar'){ renderMonthlyCalendar(); }
+    history.replaceState({app_running: true}, "");
 }
 
 // ===== TOUCH SWIPE ENGINE =====
