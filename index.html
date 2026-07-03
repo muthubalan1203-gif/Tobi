@@ -384,12 +384,34 @@ body.theme-sharingan .toast-notification-hub {
 }
 /* ===== NEW CINEMATIC THEMES ===== */
 .theme-matrix { --neon-cyan: #22c55e; --neon-gold: #16a34a; --neon-red: #059669; --neon-green: #4ade80; --neon-purple: #10b981; --neon-indigo: #047857; --bg-ultra: #000000; --surface-ultra: #021c13; }
-
 .theme-gotham { --neon-cyan: #eab308; --neon-gold: #ca8a04; --neon-red: #facc15; --neon-green: #a16207; --neon-purple: #1e3a8a; --neon-indigo: #1d4ed8; --bg-ultra: #050505; --surface-ultra: #121212; }
-
 .theme-challenger { --neon-cyan: #ef4444; --neon-gold: #fbbf24; --neon-red: #dc2626; --neon-green: #f59e0b; --neon-purple: #b91c1c; --neon-indigo: #fcd34d; --bg-ultra: #050000; --surface-ultra: #140505; }
-
 .theme-karuppu { --neon-cyan: #9ca3af; --neon-gold: #ea580c; --neon-red: #b91c1c; --neon-green: #6b7280; --neon-purple: #4b5563; --neon-indigo: #374151; --bg-ultra: #000000; --surface-ultra: #0f0f0f; }
+ /* 🦸‍♂️ MARVEL / INFINITY THEME & FEATURES */
+.theme-marvel {
+  --neon-cyan: #0ea5e9; /* Tesseract Space Blue */
+  --neon-gold: #fbbf24; /* Mind Stone / Iron Man Gold */
+  --neon-red: #dc2626;  /* Reality Stone / Iron Man Red */
+  --neon-green: #22c55e;/* Time Stone Green */
+  --neon-purple: #9333ea;/* Power Stone Purple */
+  --neon-indigo: #f97316;/* Soul Stone Orange */
+  --bg-ultra: #050508;  /* Deep Space Black */
+  --surface-ultra: #111116; /* Avengers Compound Grey */
+  --glass-border: rgba(220, 38, 38, 0.25);
+}
+
+/* Infinity Gauntlet UI */
+.marvel-gauntlet-box { display: none; background: rgba(0,0,0,0.6); border: 1px solid var(--neon-gold); border-radius: 16px; padding: 15px; margin-bottom: 16px; text-align: center; box-shadow: inset 0 0 20px rgba(251, 191, 36, 0.1); }
+body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3s infinite; }
+.stones-container { display: flex; justify-content: space-around; margin-top: 15px; margin-bottom: 10px; }
+.stone { width: 35px; height: 35px; border-radius: 50%; opacity: 0.15; filter: grayscale(100%); transition: all 0.6s ease; box-shadow: 0 0 0 transparent; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
+.stone.active { opacity: 1; filter: grayscale(0%); transform: scale(1.1); }
+.stone.space { background: #0ea5e9; } .stone.active.space { box-shadow: 0 0 25px #0ea5e9; }
+.stone.mind { background: #fbbf24; } .stone.active.mind { box-shadow: 0 0 25px #fbbf24; }
+.stone.reality { background: #dc2626; } .stone.active.reality { box-shadow: 0 0 25px #dc2626; }
+.stone.power { background: #9333ea; } .stone.active.power { box-shadow: 0 0 25px #9333ea; }
+.stone.time { background: #22c55e; } .stone.active.time { box-shadow: 0 0 25px #22c55e; }
+.stone.soul { background: #f97316; } .stone.active.soul { box-shadow: 0 0 25px #f97316; } 
 /* 3D Holographic Cards */
 .app-card, .savings-card, .ceo-dashboard, .dash-box {
   position: relative; overflow: hidden;
@@ -562,6 +584,7 @@ body.theme-sharingan .toast-notification-hub {
   <button onclick="setTheme('gotham'); closeThemePicker()" style="background:rgba(234,179,8,0.08); border:1px solid rgba(234,179,8,0.25); border-radius:8px; color:#eab308; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🦇 GOTHAM</button>
   <button onclick="setTheme('challenger'); closeThemePicker()" style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:8px; color:#ef4444; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🦁 CHALLENGER</button>
   <button onclick="setTheme('karuppu'); closeThemePicker()" style="background:rgba(156,163,175,0.08); border:1px solid rgba(156,163,175,0.25); border-radius:8px; color:#9ca3af; font-size:0.7rem; font-weight:800; padding:7px 16px; cursor:pointer; letter-spacing:1px; text-align:left;">🎬 KARUPPU</button>
+  <button onclick="setTheme('marvel'); closeThemePicker()" style="background:linear-gradient(90deg, rgba(220,38,38,0.15), rgba(251,191,36,0.15)); border:1px solid rgba(251,191,36,0.4); border-radius:8px; color:#fbbf24; font-size:0.75rem; font-weight:900; padding:8px 16px; cursor:pointer; letter-spacing:1px; text-align:left; margin-top:5px; text-shadow: 0 0 5px rgba(251,191,36,0.5);">🦸‍♂️ MARVEL UNIVERSE</button>
 </div>
 
 <div id="pwaInstallBanner" class="pwa-install-banner"><span>📲 Install Muthubalan Personal App to Home Screen</span><button onclick="installPWA()">Install</button></div>
@@ -622,7 +645,22 @@ body.theme-sharingan .toast-notification-hub {
 </div>
 
 <!-- 👇👇👇 ITHU MUNNAADI PASTE PANNUNGA 👇👇👇 -->
-
+<!-- INFINITY GAUNTLET PROTOCOL -->
+<div class="marvel-gauntlet-box" id="marvelGauntlet">
+    <h3 style="color:var(--neon-gold); font-size:0.95rem; margin:0; font-weight:900; letter-spacing:1px;">🛡️ INFINITY GAUNTLET PROTOCOL</h3>
+    <p style="font-size:0.7rem; color:var(--text-secondary); margin:5px 0 10px 0;">Boss, collect all 6 stones to achieve the PERFECT DAY.</p>
+    <div class="stones-container">
+        <div class="stone space" id="stone-water" title="Space Stone: Water">💧</div>
+        <div class="stone mind" id="stone-sleep" title="Mind Stone: Sleep">🧠</div>
+        <div class="stone reality" id="stone-diet" title="Reality Stone: Macros">🍎</div>
+        <div class="stone power" id="stone-gym" title="Power Stone: Gym">💪</div>
+        <div class="stone time" id="stone-tasks" title="Time Stone: Tasks">⏳</div>
+        <div class="stone soul" id="stone-expense" title="Soul Stone: Budget">💰</div>
+    </div>
+    <div id="snapButtonContainer" style="display:none; margin-top:15px;">
+        <button class="btn-universal" style="background:linear-gradient(90deg, #fbbf24, #dc2626); color:white; font-size:0.9rem; padding:12px; font-weight:900; text-shadow: 1px 1px 2px black;" onclick="doThanosSnap()">🫰 THE SNAP (End Day Protocol)</button>
+    </div>
+</div>
 
 <!-- 2. TOBI Predictive AI Card -->
 <div class="app-card ai-predict-card" style="margin-bottom:16px;">
@@ -4350,7 +4388,11 @@ function updateCEODashboard_impl() {
     let overall = scores.length > 0 ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0; if(overall > 100) overall = 100;
     document.getElementById('ceoOverallText').innerText = overall + '%'; document.getElementById('ceoOverallText').style.color = overall >= 80 ? 'var(--neon-green)' : (overall >= 50 ? 'var(--neon-gold)' : 'var(--neon-red)'); document.getElementById('ceoOverallLabel').innerText = overall >= 80 ? '🔥 Beast Mode Activated' : (overall >= 50 ? '⚡ Keep Pushing' : '⚠️ System Needs Attention');
     // FIX: ring circumference updated for r=30 → 2*π*30 ≈ 188
+    // FIX: ring circumference updated for r=30 → 2*π*30 ≈ 188
     const ring = document.getElementById('ceoOverallRing'); if(ring) { let circ = 188; ring.style.strokeDashoffset = circ - (overall/100)*circ; }
+    
+    // Marvel Infinity Stones Auto-Update
+    if(typeof checkInfinityStones === 'function') checkInfinityStones();
 }
 // PERFORMANCE FIX: 27+ இடங்களில் updateCEODashboard() rapid-ஆ call ஆகுது (ஒவ்வொரு tap-க்கும்).
 // Debounce பண்ணி, 120ms-க்குள் வரும் அடுத்தடுத்த calls-ஐ ஒண்ணா collapse பண்றோம் — DOM thrashing குறையும்.
@@ -5403,16 +5445,98 @@ document.addEventListener('click', (e) => {
 });
 
 // 6. Theme Engine
+// 1. Updated Theme Manager with JARVIS Protocol
 function setTheme(themeName) {
-  // ஏற்கனவே உள்ள Themes மற்றும் புதிய Themes அனைத்தையும் Remove செய்கிறோம்
   document.body.classList.remove(
     'theme-stark', 'theme-arc', 'theme-vibranium', 'theme-sharingan', 
-    'theme-matrix', 'theme-gotham', 'theme-challenger', 'theme-karuppu'
+    'theme-matrix', 'theme-gotham', 'theme-challenger', 'theme-karuppu', 'theme-marvel'
   );
-  
   document.body.classList.add('theme-' + themeName);
   localStorage.setItem('premium_theme', themeName);
-  displayPremiumToastNotification('Theme: ' + themeName.toUpperCase() + ' ACTIVATED', '🎨');
+  
+  if(themeName === 'marvel') {
+      displayPremiumToastNotification("JARVIS Protocol Online, Boss.", "🛡️");
+      speakTamil("Welcome back, Boss. Avengers protocols initialized.");
+      // AI பெயரை JARVIS ஆக மாற்றுதல்
+      let chatHeader = document.querySelector('.TOBI-chat-header h4');
+      if(chatHeader) chatHeader.innerHTML = '<div class="pulse-dot" style="background:#fbbf24; box-shadow:0 0 8px #fbbf24;"></div> JARVIS SYSTEM';
+      setTimeout(checkInfinityStones, 500);
+  } else {
+      displayPremiumToastNotification('Theme: ' + themeName.toUpperCase() + ' ACTIVATED', '🎨');
+      let chatHeader = document.querySelector('.TOBI-chat-header h4');
+      if(chatHeader && chatHeader.innerHTML.includes('JARVIS')) {
+          chatHeader.innerHTML = '<div class="pulse-dot"></div> TOBI Companion';
+      }
+  }
+}
+
+// 2. Infinity Stones Tracker
+function checkInfinityStones() {
+    if(localStorage.getItem('premium_theme') !== 'marvel') return;
+    
+    let stonesCollected = 0;
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
+    
+    // 1. Space Stone (Water)
+    if(currentWater >= waterTargetML && waterTargetML > 0) { document.getElementById('stone-water').classList.add('active'); stonesCollected++; }
+    else { document.getElementById('stone-water').classList.remove('active'); }
+    
+    // 2. Mind Stone (Sleep)
+    let sleepScore = getEffectiveSleepScore(todayStr) || 0;
+    if(sleepScore >= 70) { document.getElementById('stone-sleep').classList.add('active'); stonesCollected++; }
+    else { document.getElementById('stone-sleep').classList.remove('active'); }
+    
+    // 3. Reality Stone (Protein/Diet)
+    if(currentLoggedProtein >= targetP && targetP > 0) { document.getElementById('stone-diet').classList.add('active'); stonesCollected++; }
+    else { document.getElementById('stone-diet').classList.remove('active'); }
+    
+    // 4. Power Stone (Gym)
+    if(localStorage.getItem(`gym_done_${todayStr}`) === 'true') { document.getElementById('stone-gym').classList.add('active'); stonesCollected++; }
+    else { document.getElementById('stone-gym').classList.remove('active'); }
+    
+    // 5. Time Stone (Glowup Tasks)
+    const checkBoxes = document.querySelectorAll('#dayCard input[type="checkbox"]');
+    let checkedCount = 0; checkBoxes.forEach(cb => { if(cb.checked) checkedCount++; });
+    if(checkBoxes.length > 0 && checkedCount === checkBoxes.length) { document.getElementById('stone-tasks').classList.add('active'); stonesCollected++; }
+    else { document.getElementById('stone-tasks').classList.remove('active'); }
+    
+    // 6. Soul Stone (Budget/Expenses) - Under daily limit
+    let todayExpenses = expenses.filter(e => new Date(e.date).toDateString() === todayStr);
+    let todayExpTotal = todayExpenses.reduce((s, e) => s + e.amount, 0);
+    // செலவு எதுவும் இல்லை என்றாலும் அல்லது ₹1000-க்கு கீழ் இருந்தாலும் Soul Stone கிடைக்கும்
+    if(todayExpTotal < 1000) { document.getElementById('stone-expense').classList.add('active'); stonesCollected++; }
+    else { document.getElementById('stone-expense').classList.remove('active'); }
+    
+    // Show SNAP Button if all 6 stones collected
+    if(stonesCollected === 6) {
+        document.getElementById('snapButtonContainer').style.display = 'block';
+        if(!localStorage.getItem('gauntlet_filled_' + todayStr)) {
+            speakTamil("Boss, you have collected all Infinity Stones. You have the power.");
+            localStorage.setItem('gauntlet_filled_' + todayStr, 'true');
+            triggerDeviceHapticPulse();
+        }
+    } else {
+        document.getElementById('snapButtonContainer').style.display = 'none';
+    }
+}
+
+// 3. Thanos Snap Effect Function
+function doThanosSnap() {
+    triggerDeviceHapticPulse();
+    displayPremiumToastNotification("I AM INEVITABLE 🫰", "💥");
+    
+    // Screen Flash Effect
+    let flash = document.createElement('div');
+    flash.style.position = 'fixed'; flash.style.inset = '0'; flash.style.background = 'white';
+    flash.style.zIndex = '99999'; flash.style.opacity = '1'; flash.style.transition = 'opacity 1.5s ease-out';
+    document.body.appendChild(flash);
+    
+    setTimeout(() => { flash.style.opacity = '0'; }, 100);
+    setTimeout(() => { 
+        flash.remove(); 
+        completeCurrentDay(); // ஏற்கனவே உள்ள End Day AI ரிப்போர்ட் ஓபன் ஆகும்
+    }, 1600);
 }
 const savedTheme = localStorage.getItem('premium_theme') || 'stark';
 document.body.classList.add('theme-' + savedTheme);
