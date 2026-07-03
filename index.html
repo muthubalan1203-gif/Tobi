@@ -1671,70 +1671,6 @@ async function triggerBiometricUnlock() {
     }
 }
 
-    try {
-        msg.innerText = "Scanning Biometrics...";
-        
-        // மொபைலின் Face/Finger ID-ஐ தூண்டும் விண்டோ
-        const challenge = new Uint8Array(32);
-        window.crypto.getRandomValues(challenge);
-        
-        // குறிப்பு: Local storage-ல் ஒரு dummy ID-ஐ சேமித்து வைத்து அதை verify செய்கிறோம்
-        let credId = localStorage.getItem('tobi_bio_cred_id');
-        
-        if (!credId) {
-            // முதல் முறை ஆப் திறக்கும்போது, Face ID-ஐ ரெஜிஸ்டர் செய்ய
-            const credential = await navigator.credentials.create({
-                publicKey: {
-                    challenge: challenge,
-                    rp: { name: "Muthubalan OS" },
-                    user: { id: new Uint8Array(16), name: "muthubalan", displayName: "Muthubalan" },
-                    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
-                    authenticatorSelection: { userVerification: "required" },
-                    timeout: 60000
-                }
-            });
-            // ArrayBuffer-ஐ String ஆக மாற்றி சேமிக்கிறோம்
-            const idString = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
-            localStorage.setItem('tobi_bio_cred_id', idString);
-        } else {
-            // அடுத்த முறை வரும்போது, சேமிக்கப்பட்ட Face ID-ஐ Verify செய்ய
-            const idArray = Uint8Array.from(atob(credId), c => c.charCodeAt(0));
-            await navigator.credentials.get({
-                publicKey: {
-                    challenge: challenge,
-                    allowCredentials: [{ type: "public-key", id: idArray }],
-                    userVerification: "required",
-                    timeout: 60000
-                }
-            });
-        }
-
-        // சக்ஸஸ்! முகத்தை ஸ்கேன் செய்த பிறகு லாக் ஸ்கிரீனை மறைக்க
-        msg.innerText = "ACCESS GRANTED. WELCOME BOSS.";
-        msg.style.color = "var(--neon-green)";
-        document.querySelector('.scanner-box').style.borderColor = "var(--neon-green)";
-        triggerDeviceHapticPulse();
-        playSuccessSound();
-        
-        setTimeout(() => {
-            lockScreen.classList.add('unlocked');
-        }, 1000);
-
-    } catch (err) {
-        console.error("Biometric Error:", err);
-        msg.innerText = "ACCESS DENIED! / CANCELLED";
-        msg.style.color = "var(--neon-red)";
-        document.querySelector('.scanner-box').style.borderColor = "var(--neon-red)";
-        triggerHapticPattern('warning');
-        
-        setTimeout(() => {
-            msg.innerText = "Tap below to try again";
-            msg.style.color = "var(--text-secondary)";
-            document.querySelector('.scanner-box').style.borderColor = "var(--neon-cyan)";
-        }, 2000);
-    }
-}
-
 // ஆப் Load ஆகும்போது தானாகவே Face Scan விண்டோ ஓபன் ஆக...
 window.addEventListener('DOMContentLoaded', () => {
     // மற்ற boot sequences எல்லாம் முடித்த பிறகு, இதை trigger செய்ய...
@@ -4726,9 +4662,9 @@ function updateCEODashboard_impl() {
         'Friday': 'Legs+Glutes',
         'Saturday': 'Yoga',
         'Sunday': 'Rest Day'
-     // Madurai Heat Wave & Electrolyte Auto-Update
-    if(typeof triggerHeatWaveProtocol === 'function') triggerHeatWaveProtocol(); 
     };
+     // Madurai Heat Wave & Electrolyte Auto-Update
+    if(typeof triggerHeatWaveProtocol === 'function') triggerHeatWaveProtocol();
     let gymLabel = ceoGymMap[todayName] || 'Rest Day'; 
     document.getElementById('ceoGym').innerText = gymLabel;
     let currentWt = weights.length > 0 ? weights[0].val.toFixed(1) : '--'; document.getElementById('ceoWeight').innerText = currentWt + 'kg';
