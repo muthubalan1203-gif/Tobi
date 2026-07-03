@@ -1767,9 +1767,35 @@ function loadBioStates() { ['bio-1','bio-2','bio-3'].forEach(id => { if(document
 
 function updateRecoveryRing() {
     let appToday = getAppToday(); let todayStr = appToday.toDateString();
-    let sleepScore = getEffectiveSleepScore(todayStr) ?? 50;
-    let waterScore = (currentWater / waterTargetML) * 100; if(waterScore > 100) waterScore = 100;
-    let recoveryPct = Math.round((sleepScore * 0.6) + (waterScore * 0.4)); if(recoveryPct > 100) recoveryPct = 100;
+    let yesterday = new Date(appToday); yesterday.setDate(yesterday.getDate()-1); let yesterdayStr = yesterday.toDateString();
+
+    // 1) இன்னிக்கு காலை sleep score (நேற்று இரவு தூக்கம்)
+    let sleepScore = getEffectiveSleepScore(todayStr) ?? getEffectiveSleepScore(yesterdayStr) ?? 50;
+
+    // 2) இன்னிக்கு காலை wake-up entry-ல quality (Good/Average/Bad) — இதுவும் recovery-ல முக்கியம்
+    let todayWakeup = (wakeupLogs || []).find(w => w.date === todayStr);
+    let wakeupQualityScore = 70;
+    if(todayWakeup) {
+        if(todayWakeup.quality && todayWakeup.quality.includes('Good')) wakeupQualityScore = 100;
+        else if(todayWakeup.quality && todayWakeup.quality.includes('Average')) wakeupQualityScore = 60;
+        else if(todayWakeup.quality && todayWakeup.quality.includes('Bad')) wakeupQualityScore = 25;
+    }
+
+    // 3) நேற்று training load — weight training day-ஆ இருந்தா அதிக recovery தேவை; rest/yoga day-ஆ இருந்தா full recovery bonus
+    let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list') || '{}');
+    let yesterdayDayName = daysOfWeek[yesterday.getDay()];
+    let yesterdayWasRestOrYoga = (yesterdayDayName === 'Wednesday' || yesterdayDayName === 'Saturday' || yesterdayDayName === 'Sunday');
+    let yesterdayWorkoutDone = !!loggedStreakDays[yesterdayStr];
+    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    let yesterdayCardio = cardioLogs.find(c => c.date === yesterdayStr);
+    let trainingLoadScore = 100;
+    if(!yesterdayWasRestOrYoga && yesterdayWorkoutDone) trainingLoadScore -= 25; // கனமான weight training day
+    if(yesterdayCardio && yesterdayCardio.steps > 8000) trainingLoadScore -= 15; // அதிக நடை/cardio load
+    if(trainingLoadScore < 0) trainingLoadScore = 0;
+
+    let recoveryPct = Math.round((sleepScore * 0.5) + (wakeupQualityScore * 0.25) + (trainingLoadScore * 0.25));
+    if(recoveryPct > 100) recoveryPct = 100; if(recoveryPct < 0) recoveryPct = 0;
+
     const circle = document.getElementById('recoveryRingCircle');
     if(circle) { let circumference = 263.89; circle.style.strokeDashoffset = circumference - (recoveryPct / 100) * circumference; }
     const textDisplay = document.getElementById('recoveryIndexPctDisplay');
@@ -1804,7 +1830,7 @@ function addWakeupLog() {
     else if(absoluteMinutesContext > 330 && absoluteMinutesContext <= 360) { msg = "பரவாயில்லை முத்துபாலன், நாளைக்கு இன்னும் கொஞ்சம் சீக்கிரம் எந்திரிக்க ட்ரை பண்ணுங்க!"; icon = "🌅"; }
     else if(absoluteMinutesContext > 360 && absoluteMinutesContext <= 420) { msg = "ரொம்ப மோசம் முத்துபாலன்! 🥱"; icon = "🥱"; }
     else { msg = "என்ன தூக்க மூட்டையா நீங்க? 🤦‍♂️ எந்திரிச்சு வேலையைப் பாருங்க!"; icon = "🤦‍♂️"; }
-    displayPremiumToastNotification(msg, icon); renderWakeupLogs(); updateCEODashboard();
+    displayPremiumToastNotification(msg, icon); renderWakeupLogs(); updateCEODashboard(); updateRecoveryRing();
 }
 function deleteWakeupLog(id) { triggerDeviceHapticPulse(); wakeupLogs = wakeupLogs.filter(w => w.id !== id); localStorage.setItem('person_wakeup_logs', JSON.stringify(wakeupLogs)); renderWakeupLogs(); updateCEODashboard(); }
 // FIX 5: AM/PM hard-coded இருந்தது நீக்கி proper time display
@@ -2028,6 +2054,14 @@ function getDayElapsedPct() {
     return ((nowMin - DAY_WINDOW_START_MIN) / (DAY_WINDOW_END_MIN - DAY_WINDOW_START_MIN)) * 100;
 }
 
+// இப்போ rate-ல போனா, day முடியும்போது எவ்ளோ ஆகும்னு project பண்றது
+// எ.கா: காலை 9 மணிக்கு 1L குடிச்சிருந்தா, அந்த rate-ல calculate பண்ணி "நீங்க day முழுக்க இவ்ளோதான் குடிப்பீங்க" அப்படினு சொல்லும்
+function getProjectedEndOfDay(actualAmount) {
+    const elapsedPct = getDayElapsedPct();
+    if(elapsedPct <= 3) return null; // நாள் ஆரம்பிச்சு உடனே project பண்ண முடியாது
+    return actualAmount / (elapsedPct / 100);
+}
+
 // actualPct: இப்போ வரைக்கும் எவ்ளோ % எடுத்தாச்சு (0-100)
 // label: "தண்ணீர்" அல்லது "Macros" போன்ற பெயர்
 function getPaceStatus(actualPct, label) {
@@ -2043,7 +2077,14 @@ function getPaceStatus(actualPct, label) {
     } else {
         icon = "🔴"; verdict = "நல்லா பின்தங்கியிருக்கீங்க"; tip = `இந்த நேரத்துக்கு ${Math.round(expectedPct)}% இருக்கணும், நீங்க வெறும் ${Math.round(actualPct)}%தான் எடுத்திருக்கீங்க. இப்போவே எடுத்துக்கோங்க இல்லனா day full-ஆ miss ஆகும்.`;
     }
-    return `${icon} ${label}: ${verdict}\n${tip}`;
+    let projectionLine = "";
+    if(expectedPct > 3 && expectedPct < 97) {
+        const projectedPct = Math.round(actualPct / (expectedPct / 100));
+        if(projectedPct < 90) projectionLine = `\n📉 இந்த rate-ல போனா, day முடியும்போது வெறும் ${Math.min(projectedPct,999)}%தான் complete ஆகும் — இன்னும் அதிகமா எடுங்க.`;
+        else if(projectedPct > 130) projectionLine = `\n📈 இந்த rate-ல போனா, day முடியும்போது target-ஐ தாண்டி ${projectedPct}% ஆகும் — வேகத்தை கொஞ்சம் குறையுங்க.`;
+        else projectionLine = `\n📊 இந்த rate-ல போனா, day முடியும்போது சுமார் ${projectedPct}% complete ஆகும் — நல்ல track.`;
+    }
+    return `${icon} ${label}: ${verdict}\n${tip}${projectionLine}`;
 }
 
 function updateWaterPaceDisplay() {
@@ -2154,10 +2195,13 @@ async function updateSunriseWakeupSuggestion() {
 
     const applySunrise = async (latitude, longitude) => {
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 6000);
-            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=sunrise,sunset&timezone=auto`, { signal: controller.signal });
-            clearTimeout(timeoutId);
+            // FIX: AbortController.signal-ஐ fetch()-க்கு நேரடியா pass பண்ணினா, sandboxed preview
+            // iframe-கள் (postMessage-மூலம் fetch proxy பண்றது) அதை clone பண்ண முடியாம "AbortSignal
+            // object could not be cloned" எர்ரர் தரும். அதனால Promise.race()-வச்சு timeout பண்றோம்,
+            // signal எதுவும் fetch()-க்கு அனுப்பமாட்டோம்.
+            const fetchPromise = fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=sunrise,sunset&timezone=auto`);
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Sunrise fetch timeout')), 6000));
+            const res = await Promise.race([fetchPromise, timeoutPromise]);
             if (!res.ok) throw new Error('Sunrise fetch failed');
             const data = await res.json();
             const sunriseISO = data?.daily?.sunrise?.[0];
@@ -4403,6 +4447,11 @@ async function updatePredictiveAnalytics() {
     let dayOfWeek = now.getDay() || 7;
     let weekStart = new Date(now); weekStart.setDate(now.getDate()-dayOfWeek+1);
     let weekSum = expenses.reduce((sum,e)=>{let d=new Date(e.date); return d>=weekStart?sum+e.amount:sum},0);
+
+    // இப்போ pace-ல போனா day முடிவுல water/protein எவ்ளோ ஆகும்னு project பண்றது
+    let dayElapsedPct = getDayElapsedPct();
+    let projectedWaterL = dayElapsedPct > 3 ? ((currentWater/1000) / (dayElapsedPct/100)) : null;
+    let projectedProtein = dayElapsedPct > 3 && targetP > 0 ? (currentLoggedProtein / (dayElapsedPct/100)) : null;
     
     // Show "Analyzing..." state
     document.getElementById('predictWeightVal').innerText = '🧠...';
@@ -4428,13 +4477,16 @@ TAMIL_INSIGHT: [2-3 sentences in Tamil motivating him or warning him]
 • Weight Trend: ${(currentWt - 62.0).toFixed(1)} kg gained so far
 • Daily Protein: ${currentLoggedProtein}g / Target: ${targetP}g
 • Water Intake: ${(currentWater/1000).toFixed(1)}L / ${(waterTargetML/1000).toFixed(1)}L Goal
+• Day Elapsed (6:40AM–10:30PM window): ${Math.round(dayElapsedPct)}%
+• Projected End-of-Day Water (at current rate): ${projectedWaterL !== null ? projectedWaterL.toFixed(1)+'L' : 'N/A too early'}
+• Projected End-of-Day Protein (at current rate): ${projectedProtein !== null ? Math.round(projectedProtein)+'g' : 'N/A too early'}
 • Sleep Score (3-day avg): ${sleepAvg.toFixed(0)}%
 • Tired/Sore Mood Days (last 7): ${tiredCount} days
 • Weekly Expenses: ₹${weekSum} / Budget: ₹${weeklyBudgetTarget}
 • Gym Streak: ${localStorage.getItem('gym_streak')||0} days
 • Missed Gym (last 7 days): ${getMissedGymDays(7)} days
 
-Analyze like a professional coach. Be honest but motivating.`;
+Analyze like a professional coach. Be honest but motivating. If projected water/protein at current rate looks like it will fall short of goal by end of day, mention it in TAMIL_INSIGHT and tell him to speed up.`;
 
     try {
         // 🔥 Call Gemini API
