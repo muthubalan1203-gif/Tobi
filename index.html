@@ -1303,7 +1303,7 @@ function logGymAttendance(didGo) {
         document.getElementById('workoutListContainer').style.display = 'none';
         
         // Remove from streak days
-        let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list')) || {};
+        let loggedStreakDays = safeGetItem('gym_streak_days_list', {});
         delete loggedStreakDays[todayStr];
         localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays));
         
@@ -1350,6 +1350,39 @@ function safeGetItem(key, defaultValue) {
         return defaultValue;
     }
 }
+// FIX: எல்லா localStorage.setItem calls-க்கும் centralized safe wrapper — quota exceeded
+// (storage full) அல்லது private-browsing errors வந்தா silent-ஆ app crash ஆகாம, toast காட்டும்.
+function safeSetItem(key, value) {
+    try {
+        const payload = (typeof value === 'string') ? value : JSON.stringify(value);
+        localStorage.setItem(key, payload);
+        return true;
+    } catch (error) {
+        console.error(`Storage write failed for ${key}:`, error);
+        if(typeof displayPremiumToastNotification === 'function') {
+            displayPremiumToastNotification("⚠️ Storage full! பழைய data-வை export/clear பண்ணுங்க.", "❌");
+        }
+        return false;
+    }
+}
+
+// ===== DATA SCHEMA VERSIONING — schema மாறும்போது பழைய users-ஓட data corrupt ஆகாம protect பண்ண =====
+const TOBI_SCHEMA_VERSION = 1;
+function runDataMigrations() {
+    let storedVersion = parseInt(localStorage.getItem('tobi_schema_version') || '0');
+    if(storedVersion >= TOBI_SCHEMA_VERSION) return; // ஏற்கனவே up-to-date
+
+    try {
+        // ஒவ்வொரு migration step-உம் இங்க sequential-ஆ சேர்க்கவும்.
+        // எ.கா: if(storedVersion < 1) { /* v0 -> v1 migration logic */ }
+
+        localStorage.setItem('tobi_schema_version', String(TOBI_SCHEMA_VERSION));
+        console.log(`TOBI data migrated to schema v${TOBI_SCHEMA_VERSION}`);
+    } catch(err) {
+        console.error("Data migration failed:", err);
+    }
+}
+runDataMigrations();
 const startDate = new Date('2026-06-22T00:00:00');
 const daysOfWeek = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1401,7 +1434,7 @@ let selectedInjurySeverity = 0;
 let wimHofInterval = null;
 let wimHofRound = 0;
 let wimHofPhase = 'idle';
-let chatHistory = JSON.parse(localStorage.getItem('TOBI_chat_history')) || [];
+let chatHistory = safeGetItem('TOBI_chat_history', []);
 
 // 🔐 SECURITY FIX: API Key இப்ப localStorage-ல save பண்ணுவுங்க (Settings-ல add செய்யுங்க)
 // const GEMINI_API_KEY = "REMOVED FOR SECURITY"; // <-- Never hardcode API keys!
@@ -1759,11 +1792,11 @@ function updateRecoveryRing() {
     }
 
     // 3) நேற்று training load — weight training day-ஆ இருந்தா அதிக recovery தேவை; rest/yoga day-ஆ இருந்தா full recovery bonus
-    let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list') || '{}');
+    let loggedStreakDays = safeGetItem('gym_streak_days_list', {});
     let yesterdayDayName = daysOfWeek[yesterday.getDay()];
     let yesterdayWasRestOrYoga = (yesterdayDayName === 'Wednesday' || yesterdayDayName === 'Saturday' || yesterdayDayName === 'Sunday');
     let yesterdayWorkoutDone = !!loggedStreakDays[yesterdayStr];
-    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    let cardioLogs = safeGetItem('cardio_logs', []);
     let yesterdayCardio = cardioLogs.find(c => c.date === yesterdayStr);
     let trainingLoadScore = 100;
     if(!yesterdayWasRestOrYoga && yesterdayWorkoutDone) trainingLoadScore -= 25; // கனமான weight training day
@@ -1782,8 +1815,8 @@ function updateRecoveryRing() {
 }
 
 function handleTaskChange(dateKey, taskId) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(taskId).checked; saveCheckboxState(dateKey, taskId, isChecked); calculateGlowupCardPercentage(); updateCEODashboard(); }
-function saveCheckboxState(dateKey, taskId, isChecked) { let taskStates = JSON.parse(localStorage.getItem(`glowup_tasks_${dateKey}`)) || {}; taskStates[taskId] = isChecked; localStorage.setItem(`glowup_tasks_${dateKey}`, JSON.stringify(taskStates)); }
-function getSavedCheckboxStates(dateKey) { return JSON.parse(localStorage.getItem(`glowup_tasks_${dateKey}`)) || {}; }
+function saveCheckboxState(dateKey, taskId, isChecked) { let taskStates = safeGetItem(`glowup_tasks_${dateKey}`, {}); taskStates[taskId] = isChecked; localStorage.setItem(`glowup_tasks_${dateKey}`, JSON.stringify(taskStates)); }
+function getSavedCheckboxStates(dateKey) { return safeGetItem(`glowup_tasks_${dateKey}`, {}); }
 
 function calculateGlowupCardPercentage() {
     let appToday = getAppToday(); let todayDateKey = getIsoDateStr(appToday);
@@ -1924,7 +1957,7 @@ async function calculateLifeEnergyMatrix() {
     if(activeCard) { const gymCbs = activeCard.querySelectorAll('input[type="checkbox"]'); gymTotal = gymCbs.length; gymCbs.forEach(cb => { if(cb.checked) gymCompleted++; }); }
 
     // --- STEPS ---
-    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    let cardioLogs = safeGetItem('cardio_logs', []);
     let todayCardio = cardioLogs.find(c => c.date === todayStr);
     let stepsLine = todayCardio ? `🚶 ${todayCardio.steps} steps | 📏 ${todayCardio.distanceKm || 0}km | 🔥 ${todayCardio.burn} Kcal burn` : "Steps log பண்ணல";
 
@@ -1947,7 +1980,7 @@ async function calculateLifeEnergyMatrix() {
         sleep: sleepLine,
         waterIntake: (currentWater / 1000).toFixed(1) + "L / " + (waterTargetML/1000).toFixed(1) + "L",
         dietMacros: { protein: `${currentLoggedProtein}g/${targetP}g`, carbs: `${currentLoggedCarbs}g/${targetC}g`, cal: currentLoggedCal },
-        mood: JSON.parse(localStorage.getItem('gym_moods') || '{}')[todayStr] || "Normal"
+        mood: safeGetItem('gym_moods', {})[todayStr] || "Normal"
     };
 
     // 2. AI-க்கான கட்டளை (Prompt) — Sleep + Steps + Gym + Diet ஒன்றாக இணைத்து
@@ -1983,7 +2016,7 @@ async function calculateLifeEnergyMatrix() {
 function logGymMood(mood, elem) { 
     let appToday = getAppToday(); 
     let todayStr = appToday.toDateString(); 
-    let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; 
+    let moods = safeGetItem('gym_moods', {}); 
     moods[todayStr] = mood; 
     localStorage.setItem('gym_moods', JSON.stringify(moods)); 
     document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected')); 
@@ -2013,7 +2046,7 @@ function logGymMood(mood, elem) {
         }, 500); 
     }
 }
-function reviewWeeklyMoods() { let appToday = getAppToday(); let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; let counts = {"Energetic":0,"Normal":0,"Tired":0,"Sore":0}; let total = 0; for(let i=0;i<7;i++) { let d = new Date(appToday); d.setDate(d.getDate()-i); let m = moods[d.toDateString()]; if(m) { if(m.includes('Energetic')) counts["Energetic"]++; if(m.includes('Normal')) counts["Normal"]++; if(m.includes('Tired')) counts["Tired"]++; if(m.includes('Sore')) counts["Sore"]++; total++; } } let aiReport = `📊 Weekly Mood Analysis (${total} Days)\n======================\n🤩 Energetic: ${counts["Energetic"]}\n🥱 Tired: ${counts["Tired"]}\n🤕 Sore: ${counts["Sore"]}\n\n`; if(counts["Tired"]+counts["Sore"] > 3) aiReport += "⚠️ Overtraining detected!"; else aiReport += "✅ Optimal training state!"; openModalWithHistory('aiEngineModal'); document.getElementById('aiHeaderTitle').innerText = "TOBI RECOVERY AI"; document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`; playAiTyping(aiReport, document.getElementById('aiTypingText')); }
+function reviewWeeklyMoods() { let appToday = getAppToday(); let moods = safeGetItem('gym_moods', {}); let counts = {"Energetic":0,"Normal":0,"Tired":0,"Sore":0}; let total = 0; for(let i=0;i<7;i++) { let d = new Date(appToday); d.setDate(d.getDate()-i); let m = moods[d.toDateString()]; if(m) { if(m.includes('Energetic')) counts["Energetic"]++; if(m.includes('Normal')) counts["Normal"]++; if(m.includes('Tired')) counts["Tired"]++; if(m.includes('Sore')) counts["Sore"]++; total++; } } let aiReport = `📊 Weekly Mood Analysis (${total} Days)\n======================\n🤩 Energetic: ${counts["Energetic"]}\n🥱 Tired: ${counts["Tired"]}\n🤕 Sore: ${counts["Sore"]}\n\n`; if(counts["Tired"]+counts["Sore"] > 3) aiReport += "⚠️ Overtraining detected!"; else aiReport += "✅ Optimal training state!"; openModalWithHistory('aiEngineModal'); document.getElementById('aiHeaderTitle').innerText = "TOBI RECOVERY AI"; document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`; playAiTyping(aiReport, document.getElementById('aiTypingText')); }
 
 function addWater(ml) { let appToday = getAppToday(); triggerDeviceHapticPulse(); currentWater += ml; if(currentWater > waterTargetML) currentWater = waterTargetML; localStorage.setItem('TOBI_water_intake_v6', currentWater); renderWater(); updateRecoveryRing(); updateCEODashboard(); broadcastDataChange(); if(currentWater === waterTargetML && !localStorage.getItem('water_goal_met_' + appToday.toDateString())) { displayPremiumToastNotification("Daily Water Goal Completed!", "🌊"); triggerHapticPattern('achievement'); localStorage.setItem('water_goal_met_' + appToday.toDateString(), 'true'); } }
 function renderWater() { let pct = (currentWater / waterTargetML) * 100; const flask = document.getElementById('flaskWaterFill'); const lbl = document.getElementById('waterLabel'); if(flask) flask.style.height = `${pct}%`; if(lbl) lbl.innerText = `${(currentWater/1000).toFixed(1)} / ${(waterTargetML/1000).toFixed(1)} L`; const targetLbl = document.getElementById('waterTargetLabelText'); if(targetLbl) targetLbl.innerText = `Target: ${(waterTargetML/1000).toFixed(1)} Liters / Day`; updateWaterPaceDisplay(); }
@@ -2111,7 +2144,7 @@ async function updateWaterTargetFromWeather() {
         } catch (err) { console.log("Weather API skipped:", err.message); }
 
         const weightKg = weights.length > 0 ? weights[0].val : null;
-        const bodyMetrics = JSON.parse(localStorage.getItem('saved_body_metrics') || 'null');
+        const bodyMetrics = safeGetItem('saved_body_metrics', null);
         const heightCm = bodyMetrics ? bodyMetrics.height : null;
 
         let newTarget = BASE_TARGET_ML;
@@ -2445,7 +2478,7 @@ function showAppDiagnostics() {
     report.push(`Drive Client ID Set: ${localStorage.getItem('drive_client_id') ? 'Yes ✅' : 'No ❌'}`);
     report.push(`Last Drive Sync: ${localStorage.getItem('last_drive_sync_time') || 'Never'}`);
     report.push(`Online Status: ${navigator.onLine ? 'Online ✅' : 'Offline ⚠️'}`);
-    const recentErrors = JSON.parse(localStorage.getItem('tobi_error_log') || '[]');
+    const recentErrors = safeGetItem('tobi_error_log', []);
     report.push(`Recent Errors Logged: ${recentErrors.length}`);
     if (recentErrors.length > 0) report.push(`Last Error: ${recentErrors[recentErrors.length - 1].message}`);
     logEl.style.display = 'block';
@@ -2456,7 +2489,7 @@ function showAppDiagnostics() {
 // --- 13. Local Error Logging (lightweight, no external service) ---
 window.addEventListener('error', (event) => {
     try {
-        let errLog = JSON.parse(localStorage.getItem('tobi_error_log') || '[]');
+        let errLog = safeGetItem('tobi_error_log', []);
         errLog.push({ message: event.message, time: new Date().toISOString() });
         if (errLog.length > 20) errLog = errLog.slice(-20); // சமீபத்திய 20 மட்டும் வைத்திரு
         localStorage.setItem('tobi_error_log', JSON.stringify(errLog));
@@ -2544,8 +2577,8 @@ function renderCustomWorkouts() {
 function handleCustomGymCheck(day, id) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(`cw_${day}_${id}`).checked; localStorage.setItem(`cw_${day}_${id}`, isChecked); renderCustomWorkouts(); calculateGymStreak(); updateCEODashboard(); }
 function deleteCustomWorkout(day, id) { customWorkouts[day] = customWorkouts[day].filter(x => x.id !== id); localStorage.setItem('custom_workouts', JSON.stringify(customWorkouts)); renderCustomWorkouts(); calculateGymStreak(); updateCEODashboard(); }
 function saveGymCheck(id) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(id).checked; localStorage.setItem(id, isChecked); calculateGymStreak(); updateCEODashboard(); }
-function calculateGymStreak() { let appToday = getAppToday(); let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list')) || {}; const todayStr = appToday.toDateString(); const todayName = daysOfWeek[appToday.getDay()]; const activeCard = document.getElementById(`workout-${todayName}`); let allDone = true; let dayHasWorkout = false; if(activeCard) { const checkboxes = activeCard.querySelectorAll('input[type="checkbox"]'); if(checkboxes.length > 0) { dayHasWorkout = true; checkboxes.forEach(cb => { if(!cb.checked) allDone = false; }); if(allDone) loggedStreakDays[todayStr] = true; else delete loggedStreakDays[todayStr]; } else { dayHasWorkout = false; allDone = false; } } else { dayHasWorkout = false; allDone = false; } if(!dayHasWorkout && (todayName === 'Sunday' || todayName === 'Wednesday' || todayName === 'Saturday')) { loggedStreakDays[todayStr] = true; allDone = true; } localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays)); updateStreakDisplay(); }
-function updateStreakDisplay() { let appToday = getAppToday(); let loggedStreakDays = JSON.parse(localStorage.getItem('gym_streak_days_list')) || {}; let streakCount = 0; let checkDate = new Date(appToday); while(true) { const dateStr = checkDate.toDateString(); if(loggedStreakDays[dateStr]) { streakCount++; checkDate.setDate(checkDate.getDate()-1); } else { if(checkDate.toDateString() === appToday.toDateString()) { checkDate.setDate(checkDate.getDate()-1); if(loggedStreakDays[checkDate.toDateString()]) { checkDate.setDate(checkDate.getDate()-1); streakCount = 1; continue; } } break; } } if(document.getElementById('gymStreakDisplay')) document.getElementById('gymStreakDisplay').innerText = `🔥 ${streakCount} Days`; localStorage.setItem('gym_streak', streakCount.toString()); }
+function calculateGymStreak() { let appToday = getAppToday(); let loggedStreakDays = safeGetItem('gym_streak_days_list', {}); const todayStr = appToday.toDateString(); const todayName = daysOfWeek[appToday.getDay()]; const activeCard = document.getElementById(`workout-${todayName}`); let allDone = true; let dayHasWorkout = false; if(activeCard) { const checkboxes = activeCard.querySelectorAll('input[type="checkbox"]'); if(checkboxes.length > 0) { dayHasWorkout = true; checkboxes.forEach(cb => { if(!cb.checked) allDone = false; }); if(allDone) loggedStreakDays[todayStr] = true; else delete loggedStreakDays[todayStr]; } else { dayHasWorkout = false; allDone = false; } } else { dayHasWorkout = false; allDone = false; } if(!dayHasWorkout && (todayName === 'Sunday' || todayName === 'Wednesday' || todayName === 'Saturday')) { loggedStreakDays[todayStr] = true; allDone = true; } localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays)); updateStreakDisplay(); }
+function updateStreakDisplay() { let appToday = getAppToday(); let loggedStreakDays = safeGetItem('gym_streak_days_list', {}); let streakCount = 0; let checkDate = new Date(appToday); while(true) { const dateStr = checkDate.toDateString(); if(loggedStreakDays[dateStr]) { streakCount++; checkDate.setDate(checkDate.getDate()-1); } else { if(checkDate.toDateString() === appToday.toDateString()) { checkDate.setDate(checkDate.getDate()-1); if(loggedStreakDays[checkDate.toDateString()]) { checkDate.setDate(checkDate.getDate()-1); streakCount = 1; continue; } } break; } } if(document.getElementById('gymStreakDisplay')) document.getElementById('gymStreakDisplay').innerText = `🔥 ${streakCount} Days`; localStorage.setItem('gym_streak', streakCount.toString()); }
 
 function setWeeklyTarget() { const val = prompt("Set Weekly Budget Target (₹):", weeklyBudgetTarget); if(val !== null) { weeklyBudgetTarget = parseFloat(val) || 0; localStorage.setItem('weekly_budget_target', weeklyBudgetTarget); renderExpenses(); updateCEODashboard(); } }
 function addExpense() { let appToday = getAppToday(); const amt = parseFloat(document.getElementById('expAmount').value); const desc = document.getElementById('expDesc').value.trim(); const cat = document.getElementById('expCategory').value; const mode = document.getElementById('expPaymentMode').value; if(!amt || !desc) return displayPremiumToastNotification("Please enter all details!", "❌"); expenses.unshift({ id: Date.now(), amount: amt, desc: desc, category: cat, paymentMode: mode, date: appToday.toISOString() }); localStorage.setItem('person_expenses', JSON.stringify(expenses)); document.getElementById('expAmount').value = ''; document.getElementById('expDesc').value = ''; displayPremiumToastNotification("Expense saved!", "💳"); renderExpenses(); updateCEODashboard(); }
@@ -2688,7 +2721,7 @@ function renderSavings() { const container = document.getElementById('savingsLis
 
 function handleDietCheck(index) { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const cb = document.getElementById(`diet-${index+1}`); if(cb) { localStorage.setItem(`diet_${todayStr}_${index+1}`, cb.checked ? 'true' : 'false'); } calculateDietMacrosFromSchedule(); updateCEODashboard(); }
 function loadDietCheckboxes() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); for(let i=1;i<=8;i++) { const cb = document.getElementById(`diet-${i}`); if(cb) cb.checked = localStorage.getItem(`diet_${todayStr}_${i}`) === 'true'; } calculateDietMacrosFromSchedule(); }
-function calculateDietMacrosFromSchedule() { let tP = 0, tC = 0, tF = 0, tCal = 0; let appToday = getAppToday(); const todayStr = appToday.toDateString(); for(let i=0;i<dietScheduleMacros.length;i++) { if(localStorage.getItem(`diet_${todayStr}_${i+1}`) === 'true') { tP += dietScheduleMacros[i].p; tC += dietScheduleMacros[i].c; tF += dietScheduleMacros[i].f; tCal += dietScheduleMacros[i].cal; } } mealLogs.forEach(m => { if(m.date === todayStr) { tP += m.p; tC += m.c; tF += m.f; tCal += m.cal; } }); currentLoggedProtein = tP; currentLoggedCarbs = tC; currentLoggedFats = tF; currentLoggedCal = tCal; let pPct = targetP > 0 ? Math.round((tP / targetP) * 100) : 0; if(pPct > 100) pPct = 100; let cPct = targetC > 0 ? Math.round((tC / targetC) * 100) : 0; if(cPct > 100) cPct = 100; let fPct = targetF > 0 ? Math.round((tF / targetF) * 100) : 0; if(fPct > 100) fPct = 100; if(document.getElementById('mealFillProtein')) { document.getElementById('mealFillProtein').style.width = `${pPct}%`; document.getElementById('mealLabelProtein').innerText = `${tP} / ${targetP > 0 ? targetP : '--'}g`; document.getElementById('mealFillCarbs').style.width = `${cPct}%`; document.getElementById('mealLabelCarbs').innerText = `${tC} / ${targetC > 0 ? targetC : '--'}g`; document.getElementById('mealFillFats').style.width = `${fPct}%`; document.getElementById('mealLabelFats').innerText = `${tF} / ${targetF > 0 ? targetF : '--'}g`; document.getElementById('mealLabelCals').innerText = tCal; } updateMacroPaceDisplay(); let cardioLogsForBudget = JSON.parse(localStorage.getItem('cardio_logs') || '[]'); let todayCardioForBudget = cardioLogsForBudget.find(c => c.date === todayStr); updateCardioBurnBudgetOnDietPage(todayCardioForBudget); }
+function calculateDietMacrosFromSchedule() { let tP = 0, tC = 0, tF = 0, tCal = 0; let appToday = getAppToday(); const todayStr = appToday.toDateString(); for(let i=0;i<dietScheduleMacros.length;i++) { if(localStorage.getItem(`diet_${todayStr}_${i+1}`) === 'true') { tP += dietScheduleMacros[i].p; tC += dietScheduleMacros[i].c; tF += dietScheduleMacros[i].f; tCal += dietScheduleMacros[i].cal; } } mealLogs.forEach(m => { if(m.date === todayStr) { tP += m.p; tC += m.c; tF += m.f; tCal += m.cal; } }); currentLoggedProtein = tP; currentLoggedCarbs = tC; currentLoggedFats = tF; currentLoggedCal = tCal; let pPct = targetP > 0 ? Math.round((tP / targetP) * 100) : 0; if(pPct > 100) pPct = 100; let cPct = targetC > 0 ? Math.round((tC / targetC) * 100) : 0; if(cPct > 100) cPct = 100; let fPct = targetF > 0 ? Math.round((tF / targetF) * 100) : 0; if(fPct > 100) fPct = 100; if(document.getElementById('mealFillProtein')) { document.getElementById('mealFillProtein').style.width = `${pPct}%`; document.getElementById('mealLabelProtein').innerText = `${tP} / ${targetP > 0 ? targetP : '--'}g`; document.getElementById('mealFillCarbs').style.width = `${cPct}%`; document.getElementById('mealLabelCarbs').innerText = `${tC} / ${targetC > 0 ? targetC : '--'}g`; document.getElementById('mealFillFats').style.width = `${fPct}%`; document.getElementById('mealLabelFats').innerText = `${tF} / ${targetF > 0 ? targetF : '--'}g`; document.getElementById('mealLabelCals').innerText = tCal; } updateMacroPaceDisplay(); let cardioLogsForBudget = safeGetItem('cardio_logs', []); let todayCardioForBudget = cardioLogsForBudget.find(c => c.date === todayStr); updateCardioBurnBudgetOnDietPage(todayCardioForBudget); }
 
 function renderMealLogsAndMacros() { calculateDietMacrosFromSchedule(); const container = document.getElementById('mealLogListContainer'); if(!container) return; container.innerHTML = ''; let appToday = getAppToday(); const todayStr = appToday.toDateString(); mealLogs.forEach(m => { if(m.date === todayStr) { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = 'var(--neon-cyan)'; li.innerHTML = `<div><b>${m.foodText}</b><br><small style="color:var(--text-secondary)">${m.time}</small></div><div style="text-align:right; font-size:0.75rem;"><span style="color:var(--neon-red)">P:${m.p}</span> | <span style="color:var(--neon-cyan)">C:${m.c}</span><br><button class="delete-btn" onclick="deleteMealLog(${m.id})" style="font-size:0.8rem; margin-top:4px;">🗑️ Rem</button></div>`; container.appendChild(li); }  }); }
 function deleteMealLog(id) { mealLogs = mealLogs.filter(m => m.id !== id); localStorage.setItem('person_meal_logs', JSON.stringify(mealLogs)); renderMealLogsAndMacros(); updateCEODashboard(); }
@@ -3118,14 +3151,14 @@ function addWeight() { let appToday = getAppToday(); const todayStr = appToday.t
 function deleteWeight(id) { triggerDeviceHapticPulse(); weights = weights.filter(w => w.id !== id); localStorage.setItem('person_weights', JSON.stringify(weights)); renderWeightsCircleAndLists(); updateCEODashboard(); }
 function renderWeightsCircleAndLists() { const container = document.getElementById('weightListContainer'); if(!container) return; container.innerHTML = ''; let currentWt = 62.0; if(weights.length > 0) currentWt = weights[0].val; document.getElementById('weightCurrentStatusDisplay').innerText = `${currentWt.toFixed(1)} kg`; let delta = currentWt - 62.0; if(delta < 0) delta = 0; let scalePct = Math.round((delta / 8.0) * 100); if(scalePct > 100) scalePct = 100; document.getElementById('ringWeightPct').innerHTML = `${scalePct}%<span>Gained</span>`; const circle = document.getElementById('weightProgressCircle'); if(circle) { let circumference = 2 * Math.PI * 42; circle.style.strokeDashoffset = circumference - (scalePct / 100) * circumference; } weights.forEach(w => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = 'var(--neon-purple)'; li.innerHTML = `<div><b>${w.val} kg</b><br><small style="color:var(--text-secondary)">${w.date}</small></div><button class="delete-btn" onclick="deleteWeight(${w.id})">🗑️</button>`; container.appendChild(li); }); }
 
-function addAdvancedSleepLog() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const bedtime = document.getElementById('sleepBedtime').value; const wakeup = document.getElementById('sleepWakeup').value; const interruptions = parseInt(document.getElementById('sleepInterruptions').value); const dreamText = document.getElementById('dreamInput').value; if(!bedtime || !wakeup) return displayPremiumToastNotification("Fill Bedtime & Wakeup!", "❌"); let bParts = bedtime.split(':'); let wParts = wakeup.split(':'); let bMin = parseInt(bParts[0]) * 60 + parseInt(bParts[1]); let wMin = parseInt(wParts[0]) * 60 + parseInt(wParts[1]); let diffMin = wMin - bMin; if(diffMin < 0) diffMin += 1440; let totalHours = diffMin / 60; let baseEfficiency = 100 - (interruptions * 12); if(totalHours < 6) baseEfficiency -= (6 - totalHours) * 15; if(totalHours > 9) baseEfficiency -= (totalHours - 9) * 5; if(baseEfficiency < 20) baseEfficiency = 20; let finalScore = Math.round(baseEfficiency); sleepLogs = sleepLogs.filter(s => s.date !== todayStr); sleepLogs.unshift({ id: Date.now(), hours: parseFloat(totalHours.toFixed(1)), bedtime: bedtime, wakeup: wakeup, score: finalScore, interruptions: interruptions, date: todayStr }); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); { let aiData = JSON.parse(localStorage.getItem('ai_sleep_recovery') || 'null'); if(aiData && aiData.date === todayStr) { localStorage.removeItem('ai_sleep_recovery'); if(document.getElementById('aiSleepAnalysisBox')) document.getElementById('aiSleepAnalysisBox').style.display = 'none'; } } if(dreamText.trim() !== '') localStorage.setItem('dream_log_' + todayStr, dreamText); document.getElementById('sleepBedtime').value = ''; document.getElementById('sleepWakeup').value = ''; document.getElementById('dreamInput').value = ''; displayPremiumToastNotification("Sleep Cycle Logged!", "😴"); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
+function addAdvancedSleepLog() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const bedtime = document.getElementById('sleepBedtime').value; const wakeup = document.getElementById('sleepWakeup').value; const interruptions = parseInt(document.getElementById('sleepInterruptions').value); const dreamText = document.getElementById('dreamInput').value; if(!bedtime || !wakeup) return displayPremiumToastNotification("Fill Bedtime & Wakeup!", "❌"); let bParts = bedtime.split(':'); let wParts = wakeup.split(':'); let bMin = parseInt(bParts[0]) * 60 + parseInt(bParts[1]); let wMin = parseInt(wParts[0]) * 60 + parseInt(wParts[1]); let diffMin = wMin - bMin; if(diffMin < 0) diffMin += 1440; let totalHours = diffMin / 60; let baseEfficiency = 100 - (interruptions * 12); if(totalHours < 6) baseEfficiency -= (6 - totalHours) * 15; if(totalHours > 9) baseEfficiency -= (totalHours - 9) * 5; if(baseEfficiency < 20) baseEfficiency = 20; let finalScore = Math.round(baseEfficiency); sleepLogs = sleepLogs.filter(s => s.date !== todayStr); sleepLogs.unshift({ id: Date.now(), hours: parseFloat(totalHours.toFixed(1)), bedtime: bedtime, wakeup: wakeup, score: finalScore, interruptions: interruptions, date: todayStr }); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); { let aiData = safeGetItem('ai_sleep_recovery', null); if(aiData && aiData.date === todayStr) { localStorage.removeItem('ai_sleep_recovery'); if(document.getElementById('aiSleepAnalysisBox')) document.getElementById('aiSleepAnalysisBox').style.display = 'none'; } } if(dreamText.trim() !== '') localStorage.setItem('dream_log_' + todayStr, dreamText); document.getElementById('sleepBedtime').value = ''; document.getElementById('sleepWakeup').value = ''; document.getElementById('dreamInput').value = ''; displayPremiumToastNotification("Sleep Cycle Logged!", "😴"); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
 function deleteSleepLog(id) { triggerDeviceHapticPulse(); sleepLogs = sleepLogs.filter(s => s.id !== id); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
 function renderSleepLogs() { const container = document.getElementById('sleepListContainer'); if(!container) return; container.innerHTML = ''; sleepLogs.forEach(s => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = s.score >= 80 ? 'var(--neon-green)' : (s.score >= 55 ? 'var(--neon-gold)' : 'var(--neon-red)'); li.innerHTML = `<div><b>${s.hours} Hours</b> (${s.bedtime} - ${s.wakeup})<br><small style="color:var(--text-secondary)">Efficiency: ${s.score}% • Interrupts: ${s.interruptions}</small></div><button class="delete-btn" onclick="deleteSleepLog(${s.id})">🗑️</button>`; container.appendChild(li); }); }
 function calculateSleepParagraphAnalysis() { const display = document.getElementById('sleepDebtDisplay'); const advice = document.getElementById('sleepDebtAdvice'); if(!display) return; if(sleepLogs.length === 0) { display.innerText = "0% Score"; advice.innerText = "No logs recorded yet."; return; } let latest = sleepLogs[0]; let effectiveScore = getEffectiveSleepScore(latest.date); display.innerText = `${effectiveScore}% Deep Sleep Efficiency`; if(effectiveScore >= 80) { display.style.color = "var(--neon-green)"; advice.innerText = "அருமையான தூக்கம் முத்துபாலன்! தசை வளர்ச்சி (Anabolic Growth) மற்றும் நரம்பு மண்டல ரெக்கவரி 100% சிறப்பாக உள்ளது. 🧘‍♂️"; } else if(effectiveScore >= 55) { display.style.color = "var(--neon-gold)"; advice.innerText = `தூக்கம் சற்றே பாதிக்கப்பட்டுள்ளது. நடுவில் ${latest.interruptions} முறை விழித்துள்ளீர்கள். படுக்கைக்குச் செல்லும் முன் மொபைல் பார்ப்பதைத் தவிர்க்கவும்! ⚠️`; } else { display.style.color = "var(--neon-red)"; advice.innerText = "ரொம்ப மோசமான தூக்க தரம்! 🥱 உடல் அசதி மற்றும் சோர்வு அதிகம் இருக்கும். இன்று இரவு சீக்கிரம் தூங்கச் செல்ல TOBI பரிந்துரைக்கிறது."; } }
 
 // 🧠 SINGLE SOURCE OF TRUTH: AI Sleep Recovery Score (falls back to local rule-based score)
 function getAiSleepScoreForToday() {
-    let aiData = JSON.parse(localStorage.getItem('ai_sleep_recovery') || 'null');
+    let aiData = safeGetItem('ai_sleep_recovery', null);
     let todayStr = getAppToday().toDateString();
     if(aiData && aiData.date === todayStr) return aiData.pct;
     return null;
@@ -3292,7 +3325,7 @@ function snoozeReminder(id, minutes) {
     localStorage.setItem('person_notes', JSON.stringify(notes));
 
     // Store globally for smart-time analysis across all reminders
-    let allSnoozes = JSON.parse(localStorage.getItem('reminder_snooze_log') || '[]');
+    let allSnoozes = safeGetItem('reminder_snooze_log', []);
     allSnoozes.push(minutes);
     if (allSnoozes.length > 50) allSnoozes = allSnoozes.slice(-50);
     localStorage.setItem('reminder_snooze_log', JSON.stringify(allSnoozes));
@@ -3306,7 +3339,7 @@ function snoozeReminder(id, minutes) {
 function updateSmartTimeTip() {
     const el = document.getElementById('smartTimeTipText');
     if (!el) return;
-    let allSnoozes = JSON.parse(localStorage.getItem('reminder_snooze_log') || '[]');
+    let allSnoozes = safeGetItem('reminder_snooze_log', []);
     if (allSnoozes.length < 3) { el.style.display = 'none'; return; }
     let avgDelay = Math.round(allSnoozes.reduce((a, b) => a + b, 0) / allSnoozes.length);
     if (avgDelay < 5) { el.style.display = 'none'; return; }
@@ -3474,7 +3507,19 @@ function openDayModalLifelong(dateStr, displayDay) {
     document.getElementById('dayStarRatingBox').parentElement.style.display = 'block';
     openModalWithHistory('dayClickModal');
 }
-function exportSystemDatabaseFile() { let databaseBackupObject = {}; for(let i=0;i<localStorage.length;i++) { let k = localStorage.key(i); databaseBackupObject[k] = localStorage.getItem(k); } let blob = new Blob([JSON.stringify(databaseBackupObject, null, 2)], {type: "application/json"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Muthubalan_Companion_Backup.json`; a.click(); }
+function exportSystemDatabaseFile() { let databaseBackupObject = {}; for(let i=0;i<localStorage.length;i++) { let k = localStorage.key(i); databaseBackupObject[k] = localStorage.getItem(k); } let blob = new Blob([JSON.stringify(databaseBackupObject, null, 2)], {type: "application/json"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Muthubalan_Companion_Backup.json`; a.click(); localStorage.setItem('tobi_last_backup_ts', Date.now().toString()); }
+
+// ===== RELIABILITY: Auto-backup nudge — data loss தடுக்க, ஒவ்வொரு 3 நாளும் backup பண்ணலைனா நினைவூட்டும் =====
+const BACKUP_REMINDER_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000; // 3 நாட்கள்
+function checkAndRemindBackup() {
+    const lastBackup = parseInt(localStorage.getItem('tobi_last_backup_ts') || '0');
+    const elapsed = Date.now() - lastBackup;
+    if(elapsed > BACKUP_REMINDER_INTERVAL_MS) {
+        setTimeout(() => {
+            displayPremiumToastNotification("⚠️ 3+ நாட்களா backup எடுக்கல! Settings-ல் 'Export Backup' தட்டுங்க.", "💾");
+        }, 3000); // page load ஆன உடனே காட்டாம, கொஞ்சம் நேரம் விட்டு காட்டுறோம்
+    }
+}
 function importSystemDatabaseFile() { const fileSelectorInput = document.getElementById('importDatabaseFileInput'); if(!fileSelectorInput.files[0]) return; let reader = new FileReader(); reader.onload = function(e) { try { let parsed = JSON.parse(e.target.result); localStorage.clear(); for(let k in parsed) { localStorage.setItem(k, parsed[k]); } location.reload(); } catch(err) { alert("Invalid backup file!"); } }; reader.readAsText(fileSelectorInput.files[0]); }
 
 // 🔐 Gemini API Key Management (SECURITY FIX)
@@ -3879,7 +3924,7 @@ function triggerNightlyStrictReview() {
     let p = currentLoggedProtein;
     
     // ===== STEPS / CARDIO =====
-    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    let cardioLogs = safeGetItem('cardio_logs', []);
     let todayCardio = cardioLogs.find(c => c.date === todayDateStr);
     let stepsLine, weightGainAdviceLine;
     if (todayCardio) {
@@ -4214,7 +4259,7 @@ function logStepsCardio() {
     let appToday = getAppToday();
     let todayStr = appToday.toDateString();
 
-    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    let cardioLogs = safeGetItem('cardio_logs', []);
     cardioLogs = cardioLogs.filter(c => c.date !== todayStr);
     cardioLogs.unshift({ id: Date.now(), date: todayStr, steps, distanceKm, burn: burnRounded });
     localStorage.setItem('cardio_logs', JSON.stringify(cardioLogs));
@@ -4230,7 +4275,7 @@ function logStepsCardio() {
 
 function renderCardioLogs() {
     let container = document.getElementById('cardioLogList');
-    let cardioLogs = JSON.parse(localStorage.getItem('cardio_logs') || '[]');
+    let cardioLogs = safeGetItem('cardio_logs', []);
     let appToday = getAppToday();
     let todayStr = appToday.toDateString();
 
@@ -4260,7 +4305,16 @@ function renderCardioLogs() {
     });
 }
 
-function updateCEODashboard() {
+// ===== PERFORMANCE: generic debounce utility — rapid repeat calls-ஐ ஒண்ணா collapse பண்ணும் =====
+function debounce(fn, delay) {
+    let timerId;
+    return function(...args) {
+        clearTimeout(timerId);
+        timerId = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
+function updateCEODashboard_impl() {
     let appToday = getAppToday(); const todayStr = appToday.toDateString();
     let waterLiters = (currentWater / 1000).toFixed(1); document.getElementById('ceoWater').innerText = waterLiters + 'L';
     calculateDietMacrosFromSchedule(); document.getElementById('ceoProtein').innerText = currentLoggedProtein + 'g'; document.getElementById('ceoCals').innerText = currentLoggedCal;
@@ -4285,6 +4339,9 @@ function updateCEODashboard() {
     // FIX: ring circumference updated for r=30 → 2*π*30 ≈ 188
     const ring = document.getElementById('ceoOverallRing'); if(ring) { let circ = 188; ring.style.strokeDashoffset = circ - (overall/100)*circ; }
 }
+// PERFORMANCE FIX: 27+ இடங்களில் updateCEODashboard() rapid-ஆ call ஆகுது (ஒவ்வொரு tap-க்கும்).
+// Debounce பண்ணி, 120ms-க்குள் வரும் அடுத்தடுத்த calls-ஐ ஒண்ணா collapse பண்றோம் — DOM thrashing குறையும்.
+const updateCEODashboard = debounce(updateCEODashboard_impl, 120);
 async function runMonthlyAudit() {
     let appToday = getAppToday();
     let currentMonth = appToday.getMonth();
@@ -4413,7 +4470,7 @@ async function updatePredictiveAnalytics() {
     
     // Collect recent data for AI context
     let weekAgo = new Date(appToday); weekAgo.setDate(weekAgo.getDate()-7);
-    let recentMoods = JSON.parse(localStorage.getItem('gym_moods') || '{}');
+    let recentMoods = safeGetItem('gym_moods', {});
     let moodEntries = Object.entries(recentMoods).slice(0, 7);
     let tiredCount = moodEntries.filter(([d,m]) => m.includes('Tired') || m.includes('Sore')).length;
     
@@ -4540,7 +4597,7 @@ function runLocalPredictiveAnalytics() {
     document.getElementById('predictBudgetVal').innerText = budgetRisk > 100 ? 'OVER ⚠️' : Math.round(budgetRisk) + '% Used';
     document.getElementById('predictBudgetBar').style.width = Math.min(100, budgetRisk) + '%';
 
-    let moodData = JSON.parse(localStorage.getItem('gym_moods')) || {};
+    let moodData = safeGetItem('gym_moods', {});
     let tiredCount = 0, totalMoodDays = 0;
     for(let i=0;i<7;i++) { let d = new Date(appToday); d.setDate(d.getDate()-i); let m = moodData[d.toDateString()]; if(m) { totalMoodDays++; if(m.includes('Tired') || m.includes('Sore')) tiredCount++; } }
     let sleepAvg = sleepLogs.length > 0 ? sleepLogs.slice(0,3).map(l => getEffectiveSleepScore(l.date) ?? l.score).reduce((s,v)=>s+v,0)/Math.min(3,sleepLogs.length) : 70;
@@ -4648,7 +4705,7 @@ function generateAdaptiveWorkout() {
     let sleepScore = getEffectiveSleepScore(todayStr) ?? 50;
     let waterScore = (currentWater / waterTargetML) * 100;
     let recoveryPct = Math.round((sleepScore * 0.6) + (waterScore * 0.4));
-    let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; let todayMood = moods[todayStr] || 'Normal';
+    let moods = safeGetItem('gym_moods', {}); let todayMood = moods[todayStr] || 'Normal';
     document.getElementById('adaptiveRecoveryFill').style.width = recoveryPct + '%';
     document.getElementById('adaptiveRecoveryFill').style.background = recoveryPct >= 70 ? 'var(--neon-green)' : (recoveryPct >= 40 ? 'var(--neon-gold)' : 'var(--neon-red)');
     document.getElementById('adaptiveRecoveryPct').innerText = recoveryPct + '%';
@@ -5108,6 +5165,7 @@ window.addEventListener('DOMContentLoaded', () => {
     loadBodyMetrics();
     updateRecoveryRing(); updateCalorieTargets(); updateCEODashboard(); updatePredictiveAnalytics();
     verifyGymLocation();
+    checkAndRemindBackup();
     batteryIntervalNightly = setInterval(checkNightlyPlanningTimer, 60000);
     checkNightlyPlanningTimer();
     if('Notification' in window) {
@@ -5278,7 +5336,7 @@ const ACHIEVEMENTS = {
   'weight_gain_5kg': { icon: '⚖️', title: 'BULKING BEAST', desc: 'Gained 5kg from starting weight' },
   'savings_1000': { icon: '🏦', title: 'SAVINGS MASTER', desc: 'Saved ₹1000 total' }
 };
-let unlockedAchievements = JSON.parse(localStorage.getItem('premium_achievements') || '[]');
+let unlockedAchievements = safeGetItem('premium_achievements', []);
 
 function unlockAchievement(key) {
   if(unlockedAchievements.includes(key)) return;
