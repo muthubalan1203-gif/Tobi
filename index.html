@@ -906,17 +906,22 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <div style="font-size:1.4rem; font-weight:900; margin:3px 0;" id="weightCurrentStatusDisplay">62.0 kg</div>
 <div style="font-size:0.78rem; color:var(--neon-purple); font-weight:700;" id="weightRemainingGoalLabel">Target Weight: 70.0 kg</div></div></div>
 <div style="border-top:1px dashed var(--glass-border); padding-top:15px; margin-top:15px;">
+<div id="weightLogFormBox">
 <h3 class="card-title" style="font-size:0.9rem; margin-bottom:10px;">Log Current Weight</h3>
 <div class="form-row"><div class="form-group" style="flex:1;"><input type="number" id="weightVal" class="form-control" placeholder="e.g. 62.9" step="0.1" inputmode="decimal"></div>
 <button class="btn-universal" style="background:var(--neon-purple); width:auto; padding:12px 20px;" onclick="addWeight()">Log</button></div></div>
+<div id="weightNextDueMsg" style="display:none; font-size:0.78rem; color:var(--text-secondary); font-weight:700; text-align:center; background:rgba(168,85,247,0.08); border:1px dashed var(--neon-purple); border-radius:12px; padding:10px;"></div>
 <h3 class="card-title" style="font-size:0.9rem; margin-top:15px; margin-bottom:8px;">Weight History</h3>
 <ul class="list-container" id="weightListContainer" style="max-height:150px;"></ul></div>
 
 <div class="app-card" style="border-top:4px solid var(--neon-purple); background:rgba(168,85,247,0.05);">
 <h3 class="card-title" style="color:var(--neon-purple);">📐 Body Metrics & TDEE</h3>
+<div id="bodyMetricsFormBox">
 <div class="form-row"><div class="form-group"><label>Height (cm):</label><input type="number" id="metricHeight" class="form-control" placeholder="175"></div><div class="form-group"><label>Age (Yrs):</label><input type="number" id="metricAge" class="form-control" placeholder="25"></div></div>
 <div class="form-row"><div class="form-group"><label>Chest (cm):</label><input type="number" id="metricChest" class="form-control" placeholder="100"></div><div class="form-group"><label>Arm (cm):</label><input type="number" id="metricArm" class="form-control" placeholder="38"></div><div class="form-group"><label>Leg (cm):</label><input type="number" id="metricLeg" class="form-control" placeholder="55"></div></div>
 <button class="btn-universal" style="background:var(--neon-purple);" onclick="calcBodyMetrics()">Calculate BMI & TDEE</button>
+</div>
+<div id="bodyMetricsNextDueMsg" style="display:none; font-size:0.78rem; color:var(--text-secondary); font-weight:700; text-align:center; background:rgba(168,85,247,0.08); border:1px dashed var(--neon-purple); border-radius:12px; padding:10px; margin-top:10px;"></div>
 <div style="display:flex; justify-content:space-between; margin-top:15px; border-top:1px dashed var(--glass-border); padding-top:10px;">
 <div style="text-align:center;"><span style="font-size:0.75rem; color:var(--text-secondary);">Your BMI</span><br><b style="color:white; font-size:1.3rem;" id="bmiDisplay">--</b></div>
 <div style="text-align:center;"><span style="font-size:0.75rem; color:var(--text-secondary);">Daily TDEE</span><br><b style="color:var(--neon-green); font-size:1.3rem;" id="tdeeDisplay">-- Kcal</b></div></div></div>
@@ -2329,6 +2334,7 @@ function calcBodyMetrics() {
     let currentMonthKey = appToday.getFullYear() + "-" + appToday.getMonth(); // Ex: "2026-5"
     let metricsData = {
         monthKey: currentMonthKey,
+        date: appToday.toDateString(),
         height: h, age: age, chest: chest, arm: arm, leg: leg, bmi: bmi.toFixed(1)
     };
     localStorage.setItem('saved_body_metrics', JSON.stringify(metricsData));
@@ -2337,6 +2343,7 @@ function calcBodyMetrics() {
     displayPremiumToastNotification("Body Metrics Monthly Data Synced!", "📐"); 
     renderMealLogsAndMacros(); 
     updateCEODashboard();
+    updateBodyMetricsEntryVisibility();
 }
 // --- NEW: Load Saved Body Metrics Automatically ---
 function loadBodyMetrics() {
@@ -2345,28 +2352,19 @@ function loadBodyMetrics() {
     
     if(savedMetricsStr) {
         let savedMetrics = JSON.parse(savedMetricsStr);
-        let appToday = getAppToday();
-        let currentMonthKey = appToday.getFullYear() + "-" + appToday.getMonth();
-        
-        // இது அதே மாதம் தானா என்று செக் செய்வது
-        if(savedMetrics.monthKey === currentMonthKey) {
-            if(savedMetrics.height) document.getElementById('metricHeight').value = savedMetrics.height;
-            if(savedMetrics.age) document.getElementById('metricAge').value = savedMetrics.age;
-            if(savedMetrics.chest) document.getElementById('metricChest').value = savedMetrics.chest;
-            if(savedMetrics.arm) document.getElementById('metricArm').value = savedMetrics.arm;
-            if(savedMetrics.leg) document.getElementById('metricLeg').value = savedMetrics.leg;
-            
-            if(savedMetrics.bmi) document.getElementById('bmiDisplay').innerText = savedMetrics.bmi;
-            if(savedTdee) document.getElementById('tdeeDisplay').innerText = savedTdee + " Kcal";
-        } else {
-            // புது மாதம் வந்துவிட்டால், பழைய டேட்டாவை Clear செய்துவிட்டு புதிதாக கேட்கும்!
-            localStorage.removeItem('saved_body_metrics');
-            displayPremiumToastNotification("New Month! Please update your body metrics.", "🔄");
-        }
+        if(savedMetrics.height) document.getElementById('metricHeight').value = savedMetrics.height;
+        if(savedMetrics.age) document.getElementById('metricAge').value = savedMetrics.age;
+        if(savedMetrics.chest) document.getElementById('metricChest').value = savedMetrics.chest;
+        if(savedMetrics.arm) document.getElementById('metricArm').value = savedMetrics.arm;
+        if(savedMetrics.leg) document.getElementById('metricLeg').value = savedMetrics.leg;
+
+        if(savedMetrics.bmi) document.getElementById('bmiDisplay').innerText = savedMetrics.bmi;
+        if(savedTdee) document.getElementById('tdeeDisplay').innerText = savedTdee + " Kcal";
     } else {
         // வெறும் TDEE மட்டும் இருந்தால் அதை காட்டுவது
         if(savedTdee) document.getElementById('tdeeDisplay').innerText = savedTdee + " Kcal";
     }
+    updateBodyMetricsEntryVisibility();
 }
 async function calculateLifeEnergyMatrix() {
     triggerDeviceHapticPulse();
@@ -3579,8 +3577,55 @@ function confirmMealLog() {
 
 function checkPhaseShifter(val) { if(val >= 70 && localStorage.getItem('training_mode') !== 'cutting') { localStorage.setItem('training_mode', 'cutting'); localStorage.setItem('daily_tdee', 2000); updateCalorieTargets(); displayPremiumToastNotification("Target 70kg Reached! Phase shifted to Cutting Mode (2000 Kcal).", "🚀"); } }
 function addWeight() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const val = parseFloat(document.getElementById('weightVal').value); if(!val) return; weights = weights.filter(w => w.date !== todayStr); weights.unshift({ id: Date.now(), val: val, date: todayStr }); localStorage.setItem('person_weights', JSON.stringify(weights)); document.getElementById('weightVal').value = ''; displayPremiumToastNotification("Weight log updated.", "⚖️"); renderWeightsCircleAndLists(); checkPhaseShifter(val); updateCEODashboard(); }
+
+// --- Entry-gating helpers: 10-day weight cycle & 30-day body-metrics cycle, never due on Sunday ---
+function formatNiceDate(d) { return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }); }
+function getAdjustedDueDate(lastDateObj, intervalDays) {
+    let due = new Date(lastDateObj.getFullYear(), lastDateObj.getMonth(), lastDateObj.getDate());
+    due.setDate(due.getDate() + intervalDays);
+    if(due.getDay() === 0) due.setDate(due.getDate() + 1); // Sunday-ஐ தவிர்த்து Monday-க்கு தள்ளுவது
+    return due;
+}
+function updateWeightEntryVisibility() {
+    const formBox = document.getElementById('weightLogFormBox');
+    const msgBox = document.getElementById('weightNextDueMsg');
+    if(!formBox || !msgBox) return;
+    const formRow = formBox.querySelector('.form-row');
+    if(weights.length === 0) { if(formRow) formRow.style.display = ''; msgBox.style.display = 'none'; return; }
+    let appToday = getAppToday();
+    let todayMid = new Date(appToday.getFullYear(), appToday.getMonth(), appToday.getDate());
+    let lastDate = new Date(weights[0].date);
+    let due = getAdjustedDueDate(lastDate, 10);
+    if(todayMid.getTime() >= due.getTime()) {
+        if(formRow) formRow.style.display = '';
+        msgBox.style.display = 'none';
+    } else {
+        if(formRow) formRow.style.display = 'none';
+        msgBox.style.display = '';
+        msgBox.innerHTML = `⏳ Next weight entry: <b style="color:var(--neon-purple);">${formatNiceDate(due)}</b>`;
+    }
+}
+function updateBodyMetricsEntryVisibility() {
+    const formBox = document.getElementById('bodyMetricsFormBox');
+    const msgBox = document.getElementById('bodyMetricsNextDueMsg');
+    if(!formBox || !msgBox) return;
+    let saved = safeGetItem('saved_body_metrics', null);
+    if(!saved || !saved.date) { formBox.style.display = ''; msgBox.style.display = 'none'; return; }
+    let appToday = getAppToday();
+    let todayMid = new Date(appToday.getFullYear(), appToday.getMonth(), appToday.getDate());
+    let lastDate = new Date(saved.date);
+    let due = getAdjustedDueDate(lastDate, 30);
+    if(todayMid.getTime() >= due.getTime()) {
+        formBox.style.display = '';
+        msgBox.style.display = 'none';
+    } else {
+        formBox.style.display = 'none';
+        msgBox.style.display = '';
+        msgBox.innerHTML = `⏳ Next body metrics & TDEE entry: <b style="color:var(--neon-purple);">${formatNiceDate(due)}</b>`;
+    }
+}
 function deleteWeight(id) { triggerDeviceHapticPulse(); weights = weights.filter(w => w.id !== id); localStorage.setItem('person_weights', JSON.stringify(weights)); renderWeightsCircleAndLists(); updateCEODashboard(); }
-function renderWeightsCircleAndLists() { const container = document.getElementById('weightListContainer'); if(!container) return; container.innerHTML = ''; let currentWt = 62.0; if(weights.length > 0) currentWt = weights[0].val; document.getElementById('weightCurrentStatusDisplay').innerText = `${currentWt.toFixed(1)} kg`; let delta = currentWt - 62.0; if(delta < 0) delta = 0; let scalePct = Math.round((delta / 8.0) * 100); if(scalePct > 100) scalePct = 100; document.getElementById('ringWeightPct').innerHTML = `${scalePct}%<span>Gained</span>`; const circle = document.getElementById('weightProgressCircle'); if(circle) { let circumference = 2 * Math.PI * 42; circle.style.strokeDashoffset = circumference - (scalePct / 100) * circumference; } weights.forEach(w => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = 'var(--neon-purple)'; li.innerHTML = `<div><b>${w.val} kg</b><br><small style="color:var(--text-secondary)">${w.date}</small></div><button class="delete-btn" onclick="deleteWeight(${w.id})">🗑️</button>`; container.appendChild(li); }); }
+function renderWeightsCircleAndLists() { const container = document.getElementById('weightListContainer'); if(!container) return; container.innerHTML = ''; let currentWt = 62.0; if(weights.length > 0) currentWt = weights[0].val; document.getElementById('weightCurrentStatusDisplay').innerText = `${currentWt.toFixed(1)} kg`; let delta = currentWt - 62.0; if(delta < 0) delta = 0; let scalePct = Math.round((delta / 8.0) * 100); if(scalePct > 100) scalePct = 100; document.getElementById('ringWeightPct').innerHTML = `${scalePct}%<span>Gained</span>`; const circle = document.getElementById('weightProgressCircle'); if(circle) { let circumference = 2 * Math.PI * 42; circle.style.strokeDashoffset = circumference - (scalePct / 100) * circumference; } weights.forEach(w => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = 'var(--neon-purple)'; li.innerHTML = `<div><b>${w.val} kg</b><br><small style="color:var(--text-secondary)">${w.date}</small></div><button class="delete-btn" onclick="deleteWeight(${w.id})">🗑️</button>`; container.appendChild(li); }); updateWeightEntryVisibility(); }
 
 function addAdvancedSleepLog() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const bedtime = document.getElementById('sleepBedtime').value; const wakeup = document.getElementById('sleepWakeup').value; const interruptions = parseInt(document.getElementById('sleepInterruptions').value); const dreamText = document.getElementById('dreamInput').value; if(!bedtime || !wakeup) return displayPremiumToastNotification("Fill Bedtime & Wakeup!", "❌"); let bParts = bedtime.split(':'); let wParts = wakeup.split(':'); let bMin = parseInt(bParts[0]) * 60 + parseInt(bParts[1]); let wMin = parseInt(wParts[0]) * 60 + parseInt(wParts[1]); let diffMin = wMin - bMin; if(diffMin < 0) diffMin += 1440; let totalHours = diffMin / 60; let baseEfficiency = 100 - (interruptions * 12); if(totalHours < 6) baseEfficiency -= (6 - totalHours) * 15; if(totalHours > 9) baseEfficiency -= (totalHours - 9) * 5; if(baseEfficiency < 20) baseEfficiency = 20; let finalScore = Math.round(baseEfficiency); sleepLogs = sleepLogs.filter(s => s.date !== todayStr); sleepLogs.unshift({ id: Date.now(), hours: parseFloat(totalHours.toFixed(1)), bedtime: bedtime, wakeup: wakeup, score: finalScore, interruptions: interruptions, date: todayStr }); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); { let aiData = safeGetItem('ai_sleep_recovery', null); if(aiData && aiData.date === todayStr) { localStorage.removeItem('ai_sleep_recovery'); if(document.getElementById('aiSleepAnalysisBox')) document.getElementById('aiSleepAnalysisBox').style.display = 'none'; } } if(dreamText.trim() !== '') localStorage.setItem('dream_log_' + todayStr, dreamText); document.getElementById('sleepBedtime').value = ''; document.getElementById('sleepWakeup').value = ''; document.getElementById('dreamInput').value = ''; displayPremiumToastNotification("Sleep Cycle Logged!", "😴"); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
 function deleteSleepLog(id) { triggerDeviceHapticPulse(); sleepLogs = sleepLogs.filter(s => s.id !== id); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
