@@ -899,7 +899,11 @@ body.theme-sharingan .toast-notification-hub {
 <div class="macro-bar-row"><span class="macro-bar-lbl" style="color:var(--neon-red)">PROTEIN</span><div class="macro-bar-bg"><div id="mealFillProtein" class="macro-bar-fill" style="background:var(--neon-red)"></div></div><span id="mealLabelProtein" style="color:var(--neon-red)">0 / --g</span></div>
 <div class="macro-bar-row"><span class="macro-bar-lbl" style="color:var(--neon-cyan)">CARBS</span><div class="macro-bar-bg"><div id="mealFillCarbs" class="macro-bar-fill" style="background:var(--neon-cyan)"></div></div><span id="mealLabelCarbs" style="color:var(--neon-cyan)">0 / --g</span></div>
 <div class="macro-bar-row"><span class="macro-bar-lbl" style="color:var(--neon-gold)">FATS</span><div class="macro-bar-bg"><div id="mealFillFats" class="macro-bar-fill" style="background:var(--neon-gold)"></div></div><span id="mealLabelFats" style="color:var(--neon-gold)">0 / --g</span></div>
-<div style="text-align:right; font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">Target Cal: <span id="mealLabelCals" style="color:#fff;">0</span> / <span id="targetCalDisplay" style="color:var(--neon-gold); font-weight:bold;">--</span> Kcal</div></div>
+<div style="text-align:right; font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">Target Cal: <span id="mealLabelCals" style="color:#fff;">0</span> / <span id="targetCalDisplay" style="color:var(--neon-gold); font-weight:bold;">--</span> Kcal</div>
+<div id="cardioBurnBudgetText" style="text-align:right; font-size:0.68rem; color:var(--neon-orange); margin-top:2px; display:none;"></div>
+<div id="macroPaceText" style="margin-top:8px; font-size:0.72rem; color:var(--text-secondary); background:rgba(0,0,0,0.2); padding:8px 10px; border-radius:10px; line-height:1.4;"></div>
+</div>
+
 
 <div class="app-card" style="border-top:4px solid var(--neon-gold);">
 <h3 class="card-title" style="color:var(--neon-gold);">⏰ Daily Anabolic Food Schedule</h3>
@@ -939,6 +943,7 @@ body.theme-sharingan .toast-notification-hub {
     <div class="flask-container"><div id="flaskWaterFill" class="flask-water"></div><div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; font-weight:900; font-size:0.8rem; z-index:2; text-shadow:0 0 5px black;" id="waterLabel">0 L</div></div>
     <div class="water-btn-group"><button class="water-btn" onclick="addWater(250)">+ 250 ML</button><button class="water-btn" onclick="addWater(500)">+ 500 ML</button></div>
     <p id="aiWaterReasonText" style="font-size:0.7rem; color:var(--neon-gold); margin-top:10px; line-height:1.4;"></p>
+    <div id="waterPaceText" style="margin-top:6px; font-size:0.72rem; color:var(--text-secondary); background:rgba(0,0,0,0.2); padding:8px 10px; border-radius:10px; line-height:1.4; text-align:left;"></div>
 </div>
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 0 10px 0;"><h3 class="card-title" style="margin:0;">Today's Meal Log</h3></div>
@@ -2008,7 +2013,65 @@ function logGymMood(mood, elem) {
 function reviewWeeklyMoods() { let appToday = getAppToday(); let moods = JSON.parse(localStorage.getItem('gym_moods')) || {}; let counts = {"Energetic":0,"Normal":0,"Tired":0,"Sore":0}; let total = 0; for(let i=0;i<7;i++) { let d = new Date(appToday); d.setDate(d.getDate()-i); let m = moods[d.toDateString()]; if(m) { if(m.includes('Energetic')) counts["Energetic"]++; if(m.includes('Normal')) counts["Normal"]++; if(m.includes('Tired')) counts["Tired"]++; if(m.includes('Sore')) counts["Sore"]++; total++; } } let aiReport = `📊 Weekly Mood Analysis (${total} Days)\n======================\n🤩 Energetic: ${counts["Energetic"]}\n🥱 Tired: ${counts["Tired"]}\n🤕 Sore: ${counts["Sore"]}\n\n`; if(counts["Tired"]+counts["Sore"] > 3) aiReport += "⚠️ Overtraining detected!"; else aiReport += "✅ Optimal training state!"; openModalWithHistory('aiEngineModal'); document.getElementById('aiHeaderTitle').innerText = "TOBI RECOVERY AI"; document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`; playAiTyping(aiReport, document.getElementById('aiTypingText')); }
 
 function addWater(ml) { let appToday = getAppToday(); triggerDeviceHapticPulse(); currentWater += ml; if(currentWater > waterTargetML) currentWater = waterTargetML; localStorage.setItem('TOBI_water_intake_v6', currentWater); renderWater(); updateRecoveryRing(); updateCEODashboard(); broadcastDataChange(); if(currentWater === waterTargetML && !localStorage.getItem('water_goal_met_' + appToday.toDateString())) { displayPremiumToastNotification("Daily Water Goal Completed!", "🌊"); triggerHapticPattern('achievement'); localStorage.setItem('water_goal_met_' + appToday.toDateString(), 'true'); } }
-function renderWater() { let pct = (currentWater / waterTargetML) * 100; const flask = document.getElementById('flaskWaterFill'); const lbl = document.getElementById('waterLabel'); if(flask) flask.style.height = `${pct}%`; if(lbl) lbl.innerText = `${(currentWater/1000).toFixed(1)} / ${(waterTargetML/1000).toFixed(1)} L`; const targetLbl = document.getElementById('waterTargetLabelText'); if(targetLbl) targetLbl.innerText = `Target: ${(waterTargetML/1000).toFixed(1)} Liters / Day`; }
+function renderWater() { let pct = (currentWater / waterTargetML) * 100; const flask = document.getElementById('flaskWaterFill'); const lbl = document.getElementById('waterLabel'); if(flask) flask.style.height = `${pct}%`; if(lbl) lbl.innerText = `${(currentWater/1000).toFixed(1)} / ${(waterTargetML/1000).toFixed(1)} L`; const targetLbl = document.getElementById('waterTargetLabelText'); if(targetLbl) targetLbl.innerText = `Target: ${(waterTargetML/1000).toFixed(1)} Liters / Day`; updateWaterPaceDisplay(); }
+
+// ===== PACE ENGINE: நாள் முழுக்க எவ்ளோ time-ல எவ்ளோ % ஆகணும்னு கணக்கு =====
+// நாள் 6:40 AM ல ஆரம்பிச்சு இரவு 10:30 PM (22:30) வரைக்கும்தான் "active day window"
+const DAY_WINDOW_START_MIN = 6 * 60 + 40;   // 6:40 AM
+const DAY_WINDOW_END_MIN   = 22 * 60 + 30;  // 10:30 PM
+
+function getDayElapsedPct() {
+    const now = new Date();
+    let nowMin = now.getHours() * 60 + now.getMinutes();
+    if(nowMin <= DAY_WINDOW_START_MIN) return 0;
+    if(nowMin >= DAY_WINDOW_END_MIN) return 100;
+    return ((nowMin - DAY_WINDOW_START_MIN) / (DAY_WINDOW_END_MIN - DAY_WINDOW_START_MIN)) * 100;
+}
+
+// actualPct: இப்போ வரைக்கும் எவ்ளோ % எடுத்தாச்சு (0-100)
+// label: "தண்ணீர்" அல்லது "Macros" போன்ற பெயர்
+function getPaceStatus(actualPct, label) {
+    const expectedPct = getDayElapsedPct();
+    const diff = actualPct - expectedPct;
+    let icon, verdict, tip;
+    if(expectedPct <= 0) {
+        icon = "🌅"; verdict = "நாள் இன்னும் ஆரம்பிக்கல"; tip = `6:40 AM முதல் track ஆகும்.`;
+    } else if(diff >= -5) {
+        icon = "🟢"; verdict = "Correct pace-ல இருக்கீங்க!"; tip = `இப்போ நேரத்துக்கு (${Math.round(expectedPct)}% expected) நீங்க ${Math.round(actualPct)}% எடுத்திருக்கீங்க. இப்படியே தொடருங்க.`;
+    } else if(diff >= -20) {
+        icon = "🟠"; verdict = "கொஞ்சம் பின்தங்கியிருக்கீங்க"; tip = `இந்த நேரத்துக்கு ${Math.round(expectedPct)}% இருக்கணும், நீங்க ${Math.round(actualPct)}%தான். கொஞ்சம் வேகமா catch-up பண்ணுங்க.`;
+    } else {
+        icon = "🔴"; verdict = "நல்லா பின்தங்கியிருக்கீங்க"; tip = `இந்த நேரத்துக்கு ${Math.round(expectedPct)}% இருக்கணும், நீங்க வெறும் ${Math.round(actualPct)}%தான் எடுத்திருக்கீங்க. இப்போவே எடுத்துக்கோங்க இல்லனா day full-ஆ miss ஆகும்.`;
+    }
+    return `${icon} ${label}: ${verdict}\n${tip}`;
+}
+
+function updateWaterPaceDisplay() {
+    const el = document.getElementById('waterPaceText');
+    if(!el) return;
+    const actualPct = waterTargetML > 0 ? (currentWater / waterTargetML) * 100 : 0;
+    el.innerText = getPaceStatus(actualPct, "💧 தண்ணீர்");
+}
+
+function updateMacroPaceDisplay() {
+    const el = document.getElementById('macroPaceText');
+    if(!el) return;
+    // protein-ஐ முக்கிய benchmark-ஆ எடுத்துக்கறோம் (bulking goal-க்கு protein தான் முக்கியம்)
+    const actualPct = dailyTargetCals > 0 ? (currentLoggedCal / dailyTargetCals) * 100 : (targetP > 0 ? (currentLoggedProtein / targetP) * 100 : 0);
+    el.innerText = getPaceStatus(actualPct, "🍽️ Macros/Calories");
+}
+
+// நடந்த Steps burn-ஐ diet page-ல extra calorie budget-ஆ காட்டறோம்
+function updateCardioBurnBudgetOnDietPage(todayLog) {
+    const el = document.getElementById('cardioBurnBudgetText');
+    if(!el) return;
+    if(todayLog && todayLog.burn > 0) {
+        el.style.display = 'block';
+        el.innerText = `🚶 Steps-ல் ${todayLog.burn} Kcal extra burn ஆகிருச்சு → இன்னிக்கு இந்த Kcal-ஐ கூடுதலா சாப்பிட்டு balance பண்ணுங்க.`;
+    } else {
+        el.style.display = 'none';
+    }
+}
 
 // FEATURE: Weather-based Smart Water Nudge — வெயில் அதிகமா இருந்தா water target automatic-ஆ அதிகரிக்கும்
 async function updateWaterTargetFromWeather() {
@@ -2604,7 +2667,7 @@ function renderSavings() { const container = document.getElementById('savingsLis
 
 function handleDietCheck(index) { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const cb = document.getElementById(`diet-${index+1}`); if(cb) { localStorage.setItem(`diet_${todayStr}_${index+1}`, cb.checked ? 'true' : 'false'); } calculateDietMacrosFromSchedule(); updateCEODashboard(); }
 function loadDietCheckboxes() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); for(let i=1;i<=8;i++) { const cb = document.getElementById(`diet-${i}`); if(cb) cb.checked = localStorage.getItem(`diet_${todayStr}_${i}`) === 'true'; } calculateDietMacrosFromSchedule(); }
-function calculateDietMacrosFromSchedule() { let tP = 0, tC = 0, tF = 0, tCal = 0; let appToday = getAppToday(); const todayStr = appToday.toDateString(); for(let i=0;i<dietScheduleMacros.length;i++) { if(localStorage.getItem(`diet_${todayStr}_${i+1}`) === 'true') { tP += dietScheduleMacros[i].p; tC += dietScheduleMacros[i].c; tF += dietScheduleMacros[i].f; tCal += dietScheduleMacros[i].cal; } } mealLogs.forEach(m => { if(m.date === todayStr) { tP += m.p; tC += m.c; tF += m.f; tCal += m.cal; } }); currentLoggedProtein = tP; currentLoggedCarbs = tC; currentLoggedFats = tF; currentLoggedCal = tCal; let pPct = targetP > 0 ? Math.round((tP / targetP) * 100) : 0; if(pPct > 100) pPct = 100; let cPct = targetC > 0 ? Math.round((tC / targetC) * 100) : 0; if(cPct > 100) cPct = 100; let fPct = targetF > 0 ? Math.round((tF / targetF) * 100) : 0; if(fPct > 100) fPct = 100; if(document.getElementById('mealFillProtein')) { document.getElementById('mealFillProtein').style.width = `${pPct}%`; document.getElementById('mealLabelProtein').innerText = `${tP} / ${targetP > 0 ? targetP : '--'}g`; document.getElementById('mealFillCarbs').style.width = `${cPct}%`; document.getElementById('mealLabelCarbs').innerText = `${tC} / ${targetC > 0 ? targetC : '--'}g`; document.getElementById('mealFillFats').style.width = `${fPct}%`; document.getElementById('mealLabelFats').innerText = `${tF} / ${targetF > 0 ? targetF : '--'}g`; document.getElementById('mealLabelCals').innerText = tCal; } }
+function calculateDietMacrosFromSchedule() { let tP = 0, tC = 0, tF = 0, tCal = 0; let appToday = getAppToday(); const todayStr = appToday.toDateString(); for(let i=0;i<dietScheduleMacros.length;i++) { if(localStorage.getItem(`diet_${todayStr}_${i+1}`) === 'true') { tP += dietScheduleMacros[i].p; tC += dietScheduleMacros[i].c; tF += dietScheduleMacros[i].f; tCal += dietScheduleMacros[i].cal; } } mealLogs.forEach(m => { if(m.date === todayStr) { tP += m.p; tC += m.c; tF += m.f; tCal += m.cal; } }); currentLoggedProtein = tP; currentLoggedCarbs = tC; currentLoggedFats = tF; currentLoggedCal = tCal; let pPct = targetP > 0 ? Math.round((tP / targetP) * 100) : 0; if(pPct > 100) pPct = 100; let cPct = targetC > 0 ? Math.round((tC / targetC) * 100) : 0; if(cPct > 100) cPct = 100; let fPct = targetF > 0 ? Math.round((tF / targetF) * 100) : 0; if(fPct > 100) fPct = 100; if(document.getElementById('mealFillProtein')) { document.getElementById('mealFillProtein').style.width = `${pPct}%`; document.getElementById('mealLabelProtein').innerText = `${tP} / ${targetP > 0 ? targetP : '--'}g`; document.getElementById('mealFillCarbs').style.width = `${cPct}%`; document.getElementById('mealLabelCarbs').innerText = `${tC} / ${targetC > 0 ? targetC : '--'}g`; document.getElementById('mealFillFats').style.width = `${fPct}%`; document.getElementById('mealLabelFats').innerText = `${tF} / ${targetF > 0 ? targetF : '--'}g`; document.getElementById('mealLabelCals').innerText = tCal; } updateMacroPaceDisplay(); let cardioLogsForBudget = JSON.parse(localStorage.getItem('cardio_logs') || '[]'); let todayCardioForBudget = cardioLogsForBudget.find(c => c.date === todayStr); updateCardioBurnBudgetOnDietPage(todayCardioForBudget); }
 
 function renderMealLogsAndMacros() { calculateDietMacrosFromSchedule(); const container = document.getElementById('mealLogListContainer'); if(!container) return; container.innerHTML = ''; let appToday = getAppToday(); const todayStr = appToday.toDateString(); mealLogs.forEach(m => { if(m.date === todayStr) { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = 'var(--neon-cyan)'; li.innerHTML = `<div><b>${m.foodText}</b><br><small style="color:var(--text-secondary)">${m.time}</small></div><div style="text-align:right; font-size:0.75rem;"><span style="color:var(--neon-red)">P:${m.p}</span> | <span style="color:var(--neon-cyan)">C:${m.c}</span><br><button class="delete-btn" onclick="deleteMealLog(${m.id})" style="font-size:0.8rem; margin-top:4px;">🗑️ Rem</button></div>`; container.appendChild(li); }  }); }
 function deleteMealLog(id) { mealLogs = mealLogs.filter(m => m.id !== id); localStorage.setItem('person_meal_logs', JSON.stringify(mealLogs)); renderMealLogsAndMacros(); updateCEODashboard(); }
@@ -4156,7 +4219,14 @@ function renderCardioLogs() {
         if(document.getElementById('cardioBurnDisplay')) document.getElementById('cardioBurnDisplay').innerText = `${todayLog.burn} Kcal 🔥 | ${todayLog.distanceKm || 0} km`;
         if(document.getElementById('stepsBenefitText')) document.getElementById('stepsBenefitText').innerText = getStepsBenefitText(todayLog.steps);
         if(document.getElementById('stepsWeightGainAdvice')) document.getElementById('stepsWeightGainAdvice').innerText = getStepsWeightGainAdvice(todayLog.burn);
+    } else {
+        // FIX: இன்னிக்கு log இல்லைனா, முந்தைய நாள் data screen-ல தங்கிடாம clear பண்றோம்
+        if(document.getElementById('stepsInput')) document.getElementById('stepsInput').value = '';
+        if(document.getElementById('cardioBurnDisplay')) document.getElementById('cardioBurnDisplay').innerText = `0 Kcal 🔥 | 0 km`;
+        if(document.getElementById('stepsBenefitText')) document.getElementById('stepsBenefitText').innerText = getStepsBenefitText(0);
+        if(document.getElementById('stepsWeightGainAdvice')) document.getElementById('stepsWeightGainAdvice').innerText = '';
     }
+    updateCardioBurnBudgetOnDietPage(todayLog);
 
     if(!container) return;
     container.innerHTML = '';
