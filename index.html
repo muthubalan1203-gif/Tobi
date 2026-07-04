@@ -598,12 +598,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
   position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 30px rgba(6, 182, 212, 0.2); margin-bottom: 20px;
 }
-.scanner-box::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
-  background: var(--neon-cyan); box-shadow: 0 0 15px var(--neon-cyan);
-  animation: scanFace 2s ease-in-out infinite alternate;
-}
-@keyframes scanFace { 0% { transform: translateY(0); } 100% { transform: translateY(145px); } }
+
 
 .lock-title { font-family: var(--font-hud), sans-serif; font-size: 1.5rem; color: var(--neon-cyan); font-weight: 900; letter-spacing: 3px; margin-bottom: 5px; }
 .lock-subtitle { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
