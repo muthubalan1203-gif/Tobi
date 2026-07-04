@@ -1192,7 +1192,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <!-- FEATURE: Recipe Suggestion based on remaining macros -->
 <div class="app-card" style="border-top:4px solid var(--neon-green); margin-top:16px;">
     <h3 class="card-title" style="color:var(--neon-green);">🍳 AI Recipe Suggestion</h3>
-    <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:-8px;">Today mudiyala macro gap-ku recipe suggest pannும்:</p>
+    <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:-8px;">இன்று மீதம் இருக்கும் macros-க்கு ஏற்ற உணவு செய்முறை:</p>
     <button class="btn-universal" style="background:var(--neon-green); color:black;" onclick="suggestRecipeForRemainingMacros()">🔄 Suggest Recipe</button>
     <div id="recipeSuggestionBox" style="margin-top:12px; display:none; background:rgba(0,0,0,0.25); border-radius:12px; padding:12px; font-size:0.8rem; color:var(--text-secondary); white-space:pre-line; line-height:1.5;"></div>
 </div>
@@ -3659,7 +3659,8 @@ async function suggestRecipeForRemainingMacros() {
 - பதிலை முழுவதும் தமிழ் எழுத்துக்களில் மட்டுமே எழுதவும் (Tanglish/English வேண்டாம்)
 - எளிதில் கிடைக்கும் தமிழ்நாடு உணவுகளில் இருந்தே தேர்வு செய்யவும்
 - அப்பொழுது நேரத்தை பார்த்து இந்த நேரத்தில் எந்த உணவு சாப்பிட வேண்டுமோ அதை தான் பரிந்துரை செய்ய வேண்டும்
-- 20 வரிகளுக்குள் விரிவாக இருக்கட்டும்: உணவின் பெயர், முக்கிய பொருட்கள்,செய்முறை தோராயமான Macros
+- ஒரு நாளில் ஒரு முறை மட்டுமே ஒரு உணவை பரிந்துரை செய்ய வேண்டும்
+- 25 வரிகளுக்குள் விரிவாக இருக்கட்டும்: உணவின் பெயர், முக்கிய பொருட்கள்,விரிவான செய்முறை தோராயமான Macros
 - வேறு எந்த மொழியிலும் பதில் தர வேண்டாம்`;
         const aiResponse = await askGemini(prompt);
         box.innerText = aiResponse;
