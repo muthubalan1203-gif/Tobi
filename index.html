@@ -7,7 +7,7 @@
 <meta http-equiv="Expires" content="0">
 <script>
   if ('serviceWorker' in navigator) {
-    // Check if running on Claude's doain - skip SW there (can't serve files from that domain)
+    // Check if running on Claude's domain - skip SW there (can't serve files from that domain)
     const isClaudeEnvironment = location.hostname.includes('claudeusercontent.com') || 
                                 location.hostname.includes('localhost') ||
                                 location.protocol === 'file:';
@@ -601,6 +601,22 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 .electro-btn { background: rgba(249, 115, 22, 0.1); border: 1px solid var(--neon-orange); color: var(--neon-orange); padding: 10px; border-radius: 12px; font-weight: 900; cursor: pointer; width: 100%; font-size: 0.8rem; transition: 0.3s; }
 .electro-btn:active { background: var(--neon-orange); color: #000; transform: scale(0.98); }
 .madurai-heat-alert { background: linear-gradient(135deg, rgba(220,38,38,0.1), rgba(249,115,22,0.1)); border-left: 4px solid var(--neon-red); border-radius: 12px; padding: 14px; margin-bottom: 16px; display: none; }
+/* ===== FAKE ANDROID-STYLE NOTIFICATION BANNER — hosting/OS-permission edhuvum illama, ella phone-லும் velai seiyum ===== */
+#fakeNotifBanner {
+  position: fixed; top: -140px; left: 12px; right: 12px; z-index: 99999999;
+  background: rgba(28,28,30,0.97); backdrop-filter: blur(10px); border-radius: 18px; padding: 12px 14px;
+  display: flex; align-items: flex-start; gap: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+  transition: top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#fakeNotifBanner.show { top: 12px; }
+#fakeNotifBanner .fn-icon { font-size: 1.7rem; line-height: 1; }
+#fakeNotifBanner .fn-content { flex: 1; min-width: 0; }
+#fakeNotifBanner .fn-title-row { display: flex; justify-content: space-between; align-items: center; }
+#fakeNotifBanner .fn-app { font-size: 0.65rem; color: #9ca3af; font-weight: 700; letter-spacing: 0.5px; }
+#fakeNotifBanner .fn-time { font-size: 0.65rem; color: #9ca3af; }
+#fakeNotifBanner .fn-title { font-size: 0.86rem; color: #fff; font-weight: 800; margin-top: 3px; }
+#fakeNotifBanner .fn-body { font-size: 0.78rem; color: #e5e7eb; margin-top: 3px; line-height: 1.35; }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -610,6 +626,15 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <body>
 <!-- JARVIS SECURITY LOCK (PIN ONLY) -->
 <div id="biometricLockScreen">
+  <!-- FAKE ANDROID NOTIFICATION BANNER — Wrong PIN podta idhu இந்த page-லேயே slide-down aagum -->
+  <div id="fakeNotifBanner">
+    <div class="fn-icon">🚨</div>
+    <div class="fn-content">
+      <div class="fn-title-row"><span class="fn-app">MUTHUBALAN PERSONAL APP</span><span class="fn-time" id="fnTime">now</span></div>
+      <div class="fn-title" id="fnTitle">Security Alert</div>
+      <div class="fn-body" id="fnBody">Wrong PIN entered!</div>
+    </div>
+  </div>
   <div class="scanner-box"><span style="font-size:4rem;">🔒</span></div>
   <div class="lock-title">RESTRICTED ACCESS</div>
   <div class="lock-subtitle" id="lockMessage">Enter PIN to Unlock</div>
@@ -1441,6 +1466,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
     <p id="driveClientIdStatus" style="font-size:0.7rem; color:var(--neon-green); text-align:center;"></p>
 </div>
 <div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:15px;"><h4 style="font-size:0.9rem; color:var(--neon-gold); margin-bottom:10px;">🔔 Smart Notifications</h4><button class="notif-permission-btn" id="notifPermissionBtn" onclick="requestNotificationPermission()"><span>🔔</span> Enable Push Alerts</button><p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Get reminded for water, meals, gym time, and sleep.</p></div>
+<div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:15px;"><h4 style="font-size:0.9rem; color:var(--neon-red); margin-bottom:10px;">🔒 Security Log (Wrong PIN Alerts)</h4><p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">Yaaravadhu Wrong PIN podta, Boss phone-ku Notification alert varum + log-ல save aagum.</p><button class="btn-universal" style="background:var(--neon-red); margin-bottom:8px;" onclick="viewIntruderLog()">🚨 View Security Log</button></div>
 <button class="btn-universal" style="background:rgba(255,255,255,0.04); color:white; border:1px solid var(--glass-border); margin-top:15px;" onclick="closeModalAction('systemSettingsModal')">Close Panel</button></div></div>
 
 <div id="dayClickModal" class="universal-modal">
@@ -1786,18 +1812,120 @@ function checkPin() {
     if (userInput === "1207") {
         document.getElementById('biometricLockScreen').classList.add('unlocked');
         displayPremiumToastNotification("Welcome back, Boss.", "✅");
+        localStorage.setItem('pin_fail_streak', '0'); // correct-ஆ open panna fail streak reset
+        // Boss genuine-ஆ unlock panra நேரத்தில்-ல Notification permission கேட்கலாம் (silent-ஆ, intruder பார்க்க மாட்டான்)
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
     } 
     // 1212 Potta Calculator Open Aagum
     else if (userInput === "1212") {
         document.getElementById('biometricLockScreen').style.display = 'none'; // Lock screen-a marachidum
         document.getElementById('stealthCalculator').style.display = 'flex'; // Calculator-a kattidum
         displayPremiumToastNotification("Calculator Mode Activated.", "🕶️");
+        localStorage.setItem('pin_fail_streak', '0');
     } 
     // Thappa PIN potta
     else {
-        displayPremiumToastNotification("Invalid PIN! ENGA BOSS-TA PHONE AH KUDUNGA", "❌");
+        displayPremiumToastNotification("Invalid PIN!", "❌");
         triggerHapticPattern('warning');
+        logIntruderAttemptAndAlert();
     }
+    document.getElementById('pinInput').value = '';
+}
+
+// ===== 🔔 ROBUST DEVICE NOTIFICATION HELPER =====
+// Mobile Android Chrome-ல 'new Notification()' NEVER work aagathu — Service Worker வழியா
+// registration.showNotification() call பண்ணினா தான் Lock Screen-ல notification தெரியும்.
+// Desktop browsers-க்கு 'new Notification()' fallback-ஆ வச்சிருக்கோம்.
+function fireDeviceNotification(title, body, tag) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+        console.log('Notification permission illa, skip pannuren.');
+        return;
+    }
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration().then(reg => {
+            if (reg) {
+                reg.showNotification(title, {
+                    body: body,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/2936/2936886.png',
+                    badge: 'https://cdn-icons-png.flaticon.com/512/2936/2936886.png',
+                    tag: tag,
+                    requireInteraction: true,
+                    vibrate: [300, 100, 300, 100, 300]
+                }).catch(e => console.log('SW showNotification failed:', e.message));
+            } else {
+                // Service Worker register aagalanaa (Claude preview/localhost/file://), Desktop fallback try pannu
+                try { new Notification(title, { body: body, tag: tag }); }
+                catch(e) { console.log('Notification illegal-constructor (mobile Chrome-ல expected):', e.message); }
+            }
+        });
+    } else {
+        try { new Notification(title, { body: body, tag: tag }); } catch(e) { console.log('Notification failed:', e.message); }
+    }
+}
+
+// ===== 📱 ON-PAGE FAKE NOTIFICATION BANNER — Hosting/OS permission edhuvum illama, indha lock screen page-லேயே direct-ஆ காட்டும் =====
+function showFakeLockNotification(title, body) {
+    const banner = document.getElementById('fakeNotifBanner');
+    if (!banner) return;
+    document.getElementById('fnTitle').innerText = title;
+    document.getElementById('fnBody').innerText = body;
+    document.getElementById('fnTime').innerText = 'now';
+    banner.classList.add('show');
+    // Phone vibrate pannum (support இருந்தா)
+    if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+    clearTimeout(window._fakeNotifTimer);
+    window._fakeNotifTimer = setTimeout(() => banner.classList.remove('show'), 6000);
+}
+
+// ===== 🚨 INTRUDER ALERT ENGINE — Wrong PIN podta Boss phone-ku Notification + Log =====
+function logIntruderAttemptAndAlert() {
+    // Consecutive wrong attempts count pannurom
+    let failCount = parseInt(localStorage.getItem('pin_fail_streak') || '0') + 1;
+    localStorage.setItem('pin_fail_streak', failCount.toString());
+
+    // Security Log-ல timestamp save pannurom (Settings-ல Boss பார்க்கலாம்)
+    let intruderLog = safeGetItem('intruder_log', []);
+    intruderLog.unshift({ time: new Date().toLocaleString('en-IN'), attempts: failCount });
+    if (intruderLog.length > 25) intruderLog = intruderLog.slice(0, 25); // max 25 entries வச்சிக்கோ
+    localStorage.setItem('intruder_log', JSON.stringify(intruderLog));
+
+    const alertTitle = '🚨 SECURITY ALERT — Wrong PIN!';
+    const alertBody = 'இது Muthubalan Boss-ஓட Personal Phone! தயவு செய்து இதை Boss-கிட்ட (📞 93842 86406) திருப்பி கொடுங்கள் 🙏';
+
+    // 1. Idhe lock screen page-லேயே fake notification banner காட்டு (எப்போவும் velai seiyum, hosting தேவை இல்லை)
+    showFakeLockNotification(alertTitle, alertBody);
+
+    // 2. Real OS Notification-um try pannு (deployed HTTPS domain-ல installed PWA-ல mattum velai seiyum)
+    fireDeviceNotification(alertTitle, alertBody, 'intruder-alert-' + Date.now());
+}
+
+// Security Log-ஐ Settings-ல பார்க்க
+function viewIntruderLog() {
+    let intruderLog = safeGetItem('intruder_log', []);
+    let report = "🔒 SECURITY LOG (Wrong PIN Attempts)\n=========================================\n\n";
+    if (intruderLog.length === 0) {
+        report += "✅ இதுவரை எந்த Wrong PIN attempt-உம் இல்லை. Phone Safe-ஆ இருக்கு!";
+    } else {
+        intruderLog.forEach((entry, i) => {
+            report += `${i+1}. 🕒 ${entry.time} — ${entry.attempts} wrong try(s)\n`;
+        });
+    }
+    openModalWithHistory('aiEngineModal');
+    document.getElementById('aiHeaderTitle').innerText = "🔒 TOBI SECURITY LOG";
+    document.getElementById('aiActionButtons').innerHTML = `
+        <button class="ai-btn-close" style="background:var(--neon-red); margin-top:8px;" onclick="clearIntruderLog()">🗑️ Clear Log</button>
+        <button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Close</button>
+    `;
+    playAiTyping(report, document.getElementById('aiTypingText'));
+}
+
+function clearIntruderLog() {
+    localStorage.removeItem('intruder_log');
+    localStorage.setItem('pin_fail_streak', '0');
+    displayPremiumToastNotification("Security log cleared!", "✅");
+    closeModalAction('aiEngineModal');
 }
 
 // ===== STEALTH CALCULATOR ENGINE (1212 Disguise Mode) =====
@@ -3460,7 +3588,7 @@ async function suggestRecipeForRemainingMacros() {
 - பதிலை முழுவதும் தமிழ் எழுத்துக்களில் மட்டுமே எழுதவும் (Tanglish/English வேண்டாம்)
 - எளிதில் கிடைக்கும் தமிழ்நாடு உணவுகளில் இருந்தே தேர்வு செய்யவும்
 - அப்பொழுது நேரத்தை பார்த்து இந்த நேரத்தில் எந்த உணவு சாப்பிட வேண்டுமோ அதை தான் பரிந்துரை செய்ய வேண்டும்
-- உணவின் பெயர், முக்கிய பொருட்கள்,விரிவான செய்முறை தோராயமான Macros
+- 20 வரிகளுக்குள் விரிவாக இருக்கட்டும்: உணவின் பெயர், முக்கிய பொருட்கள்,செய்முறை தோராயமான Macros
 - வேறு எந்த மொழியிலும் பதில் தர வேண்டாம்`;
         const aiResponse = await askGemini(prompt);
         box.innerText = aiResponse;
@@ -6043,9 +6171,7 @@ function scheduleSmartNotifications() {
     }, 60000);
 }
 function sendPushNotif(body, tag) {
-    if(Notification.permission === 'granted') {
-        new Notification('Muthubalan Personal App', { body: body, icon: 'https://cdn-icons-png.flaticon.com/512/2936/2936886.png', tag: tag });
-    }
+    fireDeviceNotification('Muthubalan Personal App', body, tag);
 }
 
 // Service Worker — blob: URL மூலம் register பண்ண browsers allow பண்றதில்லை
