@@ -6277,8 +6277,17 @@ window.addEventListener('DOMContentLoaded', () => {
     batteryIntervalNightly = setInterval(checkNightlyPlanningTimer, 60000);
     checkNightlyPlanningTimer();
     if('Notification' in window) {
+        const notifBtn = document.getElementById('notifPermissionBtn');
         if(Notification.permission === 'default') { setTimeout(requestNotificationPermission, 3000); }
-        else if(Notification.permission === 'granted') { scheduleSmartNotifications(); } // FIX: restart schedule on every app load for returning users, not just first grant
+        else if(Notification.permission === 'granted') {
+            scheduleSmartNotifications();
+            // FIX: Button UI-ஐ actual permission state-ஓட sync pண்ணுரோம் — இல்லனா ovvoru reload-லும் "OFF" mathiri தப்பா காட்டும்
+            if(notifBtn) notifBtn.innerHTML = '<span>✅</span> Notifications Active';
+        }
+        else if(Notification.permission === 'denied') {
+            // Browser-லேயே block பண்ணிட்டானு காட்டுரோம், app bug இல்ல-னு தெளிவா தெரியும்
+            if(notifBtn) notifBtn.innerHTML = '<span>🚫</span> Blocked - Enable in Browser Settings';
+        }
     }
     initAutoDailyBackupUI(); // FEATURE: restore auto-backup toggle state + last sync time on load
     updateWaterTargetFromWeather(); // FEATURE: adjust water goal based on today's weather
