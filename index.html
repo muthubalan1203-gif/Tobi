@@ -1795,7 +1795,7 @@ function checkPin() {
     } 
     // Thappa PIN potta
     else {
-        displayPremiumToastNotification("Invalid PIN!", "❌");
+        displayPremiumToastNotification("Invalid PIN! ENGA BOSS-TA PHONE AH KUDUNGA", "❌");
         triggerHapticPattern('warning');
     }
 }
@@ -3460,7 +3460,7 @@ async function suggestRecipeForRemainingMacros() {
 - பதிலை முழுவதும் தமிழ் எழுத்துக்களில் மட்டுமே எழுதவும் (Tanglish/English வேண்டாம்)
 - எளிதில் கிடைக்கும் தமிழ்நாடு உணவுகளில் இருந்தே தேர்வு செய்யவும்
 - அப்பொழுது நேரத்தை பார்த்து இந்த நேரத்தில் எந்த உணவு சாப்பிட வேண்டுமோ அதை தான் பரிந்துரை செய்ய வேண்டும்
-- 20 வரிகளுக்குள் விரிவாக இருக்கட்டும்: உணவின் பெயர், முக்கிய பொருட்கள்,செய்முறை தோராயமான Macros
+- உணவின் பெயர், முக்கிய பொருட்கள்,விரிவான செய்முறை தோராயமான Macros
 - வேறு எந்த மொழியிலும் பதில் தர வேண்டாம்`;
         const aiResponse = await askGemini(prompt);
         box.innerText = aiResponse;
@@ -4727,7 +4727,33 @@ function downloadMonthlyArchive() {
 }
 function downloadYearlyArchive() { triggerDeviceHapticPulse(); const { jsPDF } = window.jspdf; const doc = new jsPDF(); let now = getAppToday(); let year = now.getFullYear(); doc.setFillColor(10, 14, 28); doc.rect(0, 0, 220, 40, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(22); doc.setFont("helvetica", "bold"); doc.text("MUTHUBALAN PRO ELITE", 14, 20); doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text(`Yearly Archive • ${now.toLocaleDateString()}`, 14, 30); doc.setTextColor(0, 0, 0); doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.text(`YEARLY HISTORY FOR ${year}`, 14, 50); doc.line(14, 53, 195, 53); doc.setFontSize(10); doc.setFont("helvetica", "normal"); let mSum = expenses.reduce((sum, e) => { if(new Date(e.date).getFullYear() === year) return sum + e.amount; return sum; }, 0); let sSum = savings.reduce((sum, s) => { if(s.date.includes(year)) return sum + s.amount; return sum; }, 0); doc.text(`Total Expenses: INR ${mSum}`, 14, 65); doc.text(`Total Savings: INR ${sSum}`, 14, 75); doc.text(`Weight Logs: ${weights.length} entries`, 14, 85); doc.text(`Meal Entries: ${mealLogs.length} entries`, 14, 95); doc.text(`Sleep Logs: ${sleepLogs.length} entries`, 14, 105); doc.save(`Muthubalan_Yearly_Archive_${year}.pdf`); displayPremiumToastNotification("Yearly Archive Downloaded!", "🗄️"); }
 
-function triggerNightlyStrictReview() { 
+// FEATURE: AI Food Health Analysis for Nightly Review — Inniku saapta food-la unhealthy items find pannitu, healthy alternative suggest pannum
+async function getFoodHealthAnalysisAI(todayMeals) {
+    if (!todayMeals || todayMeals.length === 0) {
+        return "• இன்னிக்கு meals log பண்ணலனா, AI food analysis panna முடியாது.";
+    }
+    const foodListForAI = todayMeals.map(m => `${m.foodText} (P:${m.p}g C:${m.c}g F:${m.f || 0}g Cal:${m.cal})`).join('; ');
+
+    const prompt = `நீங்க TOBI, Muthubalan-ஓட கண்டிப்பான ஆனால் அக்கறையுள்ள Nutrition Coach. Muthubalan தற்போது Lean Bulking (Weight Gain, High Protein Diet) Goal-ல இருக்கிறார்.
+
+இன்று அவர் சாப்பிட்ட உணவுகள் (full list): ${foodListForAI}
+
+இதை பகுப்பாய்வு செய்து கீழ்க்கண்டவாறு பதில் கொடு:
+
+1. இதில் ஏதேனும் Unhealthy / Junk / Deep-fried / அதிக Sugar / Processed / Bulking Goal-க்கு உதவாத உணவு இருந்தால், ஒவ்வொன்றாக பட்டியலிடு (❌ item name).
+2. ஒவ்வொரு unhealthy item-க்கும், அதே craving/taste-ஐ சமாளிக்கும், ஆனால் High-Protein Bulking Goal-க்கு உதவும் 2 Healthy Indian Alternatives கொடு (👉 alternative 1, 👉 alternative 2).
+3. இன்று சாப்பிட்டது எல்லாமே ஏற்கனவே healthy-ஆ, bulking-க்கு நல்லா இருந்தால், unhealthy items எதுவும் இல்லைனு சொல்லி, "இன்னிக்கு Food Choices அருமை முத்துபாலன்!" nu appreciate பண்ணு.
+
+STRICT FORMAT RULES:
+- பதில் முழுக்க தமிழ்-ல (Tanglish கலந்து) இரு.
+- Bullet point format-ல, சுருக்கமா இரு (long paragraph வேண்டாம்).
+- ஒரு Review Meeting-ல Coach நேரடியா பேசுற மாதிரி tone-ல இரு.
+- Markdown backticks/hashtags வேண்டாம், plain text-ஆ மட்டும் இரு.`;
+
+    return await askGemini(prompt);
+}
+
+async function triggerNightlyStrictReview() { 
     let appToday = getAppToday(); 
     let todayDateStr = appToday.toDateString();
     let todayName = daysOfWeek[appToday.getDay()];
@@ -4830,13 +4856,21 @@ function triggerNightlyStrictReview() {
     // Store for WhatsApp
     window.lastNightlyReport = aiReport;
     
-    playAiTyping(aiReport, document.getElementById('aiTypingText')); 
-    
-    // WhatsApp + Tomorrow Protocol buttons
+    // WhatsApp + Tomorrow Protocol buttons (base report ready-ஆ காட்டு)
     document.getElementById('aiActionButtons').innerHTML = `
         <button class="ai-btn-close" style="background:var(--neon-green); color:black;" onclick="shareNightlyReportToWhatsApp()">📲 Share to WhatsApp</button>
     
     `; 
+
+    // Base report-ஐ முதலில் காட்டு, food AI analysis loading ஆகும் வரை
+    playAiTyping(aiReport + "\n\n🥗 FOOD HEALTH ANALYSIS (AI):\n⏳ TOBI unga food-ஐ analyze பண்றேன், wait பண்ணுங்க...", document.getElementById('aiTypingText'));
+
+    // AI food health analysis fetch pannitu, final report-ஐ update pannurom
+    const foodAnalysis = await getFoodHealthAnalysisAI(todayMeals);
+    aiReport += `\n\n🥗 FOOD HEALTH ANALYSIS (AI):\n${foodAnalysis}`;
+    window.lastNightlyReport = aiReport;
+
+    playAiTyping(aiReport, document.getElementById('aiTypingText'));
 }
 
 function shareNightlyReportToWhatsApp() {
