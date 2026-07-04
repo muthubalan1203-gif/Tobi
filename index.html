@@ -3459,7 +3459,8 @@ async function suggestRecipeForRemainingMacros() {
 கண்டிப்பான விதிமுறைகள்:
 - பதிலை முழுவதும் தமிழ் எழுத்துக்களில் மட்டுமே எழுதவும் (Tanglish/English வேண்டாம்)
 - எளிதில் கிடைக்கும் தமிழ்நாடு உணவுகளில் இருந்தே தேர்வு செய்யவும்
-- 10 வரிகளுக்குள் சுருக்கமாக இருக்கட்டும்: உணவின் பெயர், முக்கிய பொருட்கள்,செய்முறை தோராயமான Macros
+- அப்பொழுது நேரத்தை பார்த்து இந்த நேரத்தில் எந்த உணவு சாப்பிட வேண்டுமோ அதை தான் பரிந்துரை செய்ய வேண்டும்
+- 20 வரிகளுக்குள் விரிவாக இருக்கட்டும்: உணவின் பெயர், முக்கிய பொருட்கள்,செய்முறை தோராயமான Macros
 - வேறு எந்த மொழியிலும் பதில் தர வேண்டாம்`;
         const aiResponse = await askGemini(prompt);
         box.innerText = aiResponse;
@@ -4834,7 +4835,7 @@ function triggerNightlyStrictReview() {
     // WhatsApp + Tomorrow Protocol buttons
     document.getElementById('aiActionButtons').innerHTML = `
         <button class="ai-btn-close" style="background:var(--neon-green); color:black;" onclick="shareNightlyReportToWhatsApp()">📲 Share to WhatsApp</button>
-        <button class="ai-btn-close" style="background:var(--neon-cyan); color:black;" onclick="generateTomorrowProtocol()">நாளைக்கான Protocol-ஐ காட்டு</button>
+    
     `; 
 }
 
@@ -5316,7 +5317,7 @@ async function getGeminiInsights(reportType, data) {
     
     IMPORTANT INSTRUCTION: Your response must be entirely in TAMIL (தமிழ்). 
     Provide a concise summary, highlight key achievements, suggest areas for improvement, and set a specific goal for the next period. 
-    Maintain a friendly, motivating, and professional tone in Tamil.`;
+    Maintain a friendly, motivating, and professional and teacher tone in Tamil.`;
 
     return await askGemini(prompt);
 }
