@@ -31,6 +31,21 @@
               }
             });
           });
+          // App fully close aana bodhum reminder varradhukku BEST-EFFORT ah Periodic Background Sync register pannurom
+          // (Browser support + PWA installed + engagement criteria meet aana mattum velai seiyum, exact time guarantee illa)
+          if ('periodicSync' in reg) {
+            navigator.permissions.query({ name: 'periodic-background-sync' }).then(status => {
+              if (status.state === 'granted') {
+                reg.periodicSync.register('tobi-smart-reminders', { minInterval: 60 * 60 * 1000 })
+                  .then(() => console.log('✅ Periodic Background Sync registered'))
+                  .catch(err => console.log('⚠️ Periodic Sync register failed:', err.message));
+              } else {
+                console.log('ℹ️ Periodic Background Sync permission not granted yet.');
+              }
+            }).catch(() => console.log('ℹ️ Periodic Background Sync permission API not supported.'));
+          } else {
+            console.log('ℹ️ Periodic Background Sync not supported in this browser.');
+          }
         })
         .catch(err => {
           console.log('⚠️ Service Worker registration failed (offline mode still works):', err.message);
@@ -1223,14 +1238,20 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <ul class="list-container" id="recurringExpenseListContainer" style="max-height:180px;"></ul>
 </div>
 
-<!-- FEATURE: Monthly Expense Trend -->
+<!-- FEATURE: Weekly Expense Trend (Mon-Sun) -->
 <div class="app-card" style="border-top:4px solid var(--neon-cyan);">
-<h3 class="card-title" style="color:var(--neon-cyan);">📈 Monthly Trend</h3>
+<h3 class="card-title" style="color:var(--neon-cyan);">📈 Weekly Trend</h3>
 <div style="display:flex; justify-content:space-around; text-align:center;">
-<div><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">LAST MONTH</div><div style="font-size:1.2rem; font-weight:900; color:#fff;" id="lastMonthSpendDisplay">₹0</div></div>
-<div><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">THIS MONTH</div><div style="font-size:1.2rem; font-weight:900; color:var(--neon-cyan);" id="thisMonthSpendDisplay">₹0</div></div>
+<div><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">LAST WEEK</div><div style="font-size:1.2rem; font-weight:900; color:#fff;" id="lastMonthSpendDisplay">₹0</div></div>
+<div><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">THIS WEEK</div><div style="font-size:1.2rem; font-weight:900; color:var(--neon-cyan);" id="thisMonthSpendDisplay">₹0</div></div>
 </div>
 <div style="text-align:center; margin-top:8px; font-size:0.8rem; font-weight:700;" id="monthlyTrendMsg"></div>
+</div>
+
+<!-- FEATURE: Top 3 Biggest Expenses (This Week) -->
+<div class="app-card" style="border-top:4px solid var(--neon-gold);">
+<h3 class="card-title" style="color:var(--neon-gold);">🏆 Top 3 Biggest Expenses (This Week)</h3>
+<ul class="list-container" id="topExpensesListContainer" style="margin-top:8px;"></ul>
 </div>
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 0 10px 0;"><h3 class="card-title" style="margin:0;">Expense History</h3><select id="expenseTimeFilter" class="form-control" style="width:auto; padding:6px; font-size:0.75rem; background:#000; border:1px solid var(--glass-border); border-radius:8px; color:white; margin:0 10px;" onchange="renderExpenses()">
@@ -1892,7 +1913,7 @@ function logIntruderAttemptAndAlert() {
     localStorage.setItem('intruder_log', JSON.stringify(intruderLog));
 
     const alertTitle = '🚨 SECURITY ALERT — Wrong PIN!';
-    const alertBody = ' தயவு செய்து இதை Phone-Ah Boss-கிட்ட  திருப்பி கொடுங்கள் 🙏';
+    const alertBody = 'இது Muthubalan Boss-ஓட Personal Phone! தயவு செய்து இதை Boss-கிட்ட (📞 93842 86406) திருப்பி கொடுங்கள் 🙏';
 
     // 1. Idhe lock screen page-லேயே fake notification banner காட்டு (எப்போவும் velai seiyum, hosting தேவை இல்லை)
     showFakeLockNotification(alertTitle, alertBody);
@@ -3386,30 +3407,80 @@ function quickAddRecurring(id) {
 }
 function deleteRecurringExpense(id) { recurringExpenses = recurringExpenses.filter(r => r.id !== id); localStorage.setItem('recurring_expenses_list', JSON.stringify(recurringExpenses)); renderRecurringExpenses(); }
 
-// FEATURE: Monthly Expense Trend
-function renderMonthlyTrend() {
+// SHARED HELPER: Monday-Sunday week range கண்டுபிடிக்க (Weekly Trend + Top Expenses ரெண்டுக்கும் use pண்ணும்)
+function getCurrentWeekRange() {
+    let appToday = getAppToday();
+    let dayOfWeek = appToday.getDay() || 7; // Sunday-ஐ 7-ஆ treat பண்ணு, Monday=1
+    let thisWeekStart = new Date(appToday);
+    thisWeekStart.setDate(appToday.getDate() - (dayOfWeek - 1));
+    thisWeekStart.setHours(0, 0, 0, 0);
+    let thisWeekEnd = new Date(thisWeekStart);
+    thisWeekEnd.setDate(thisWeekStart.getDate() + 7); // அடுத்த Monday 00:00 (exclusive)
+    return { thisWeekStart, thisWeekEnd };
+}
+
+// FEATURE: Weekly Expense Trend (Monday to Sunday)
+function renderWeeklyExpenseTrend() {
     const lastEl = document.getElementById('lastMonthSpendDisplay'); const thisEl = document.getElementById('thisMonthSpendDisplay'); const msgEl = document.getElementById('monthlyTrendMsg');
     if(!lastEl || !thisEl) return;
-    let appToday = getAppToday();
-    const curM = appToday.getMonth(), curY = appToday.getFullYear();
-    let lastM = curM - 1, lastY = curY; if(lastM < 0) { lastM = 11; lastY -= 1; }
+
+    const { thisWeekStart, thisWeekEnd } = getCurrentWeekRange();
+    let lastWeekStart = new Date(thisWeekStart);
+    lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+    let lastWeekEnd = new Date(thisWeekStart); // இந்த வாரம் start ஆவே கடந்த வாரத்தின் exclusive end
+
     let thisTotal = 0, lastTotal = 0;
-    expenses.forEach(e => { const d = new Date(e.date); if(d.getFullYear() === curY && d.getMonth() === curM) thisTotal += e.amount; else if(d.getFullYear() === lastY && d.getMonth() === lastM) lastTotal += e.amount; });
+    expenses.forEach(e => {
+        const d = new Date(e.date);
+        if (d >= thisWeekStart && d < thisWeekEnd) thisTotal += e.amount;
+        else if (d >= lastWeekStart && d < lastWeekEnd) lastTotal += e.amount;
+    });
+
     lastEl.innerText = `₹${lastTotal.toFixed(0)}`; thisEl.innerText = `₹${thisTotal.toFixed(0)}`;
     if(!msgEl) return;
     if(lastTotal === 0) { msgEl.innerText = ''; return; }
     const diffPct = Math.round(((thisTotal - lastTotal) / lastTotal) * 100);
     if(diffPct > 0) { msgEl.innerText = `⚠️ ${diffPct}% adhigama செலவு`; msgEl.style.color = 'var(--neon-red)'; }
     else if(diffPct < 0) { msgEl.innerText = `✅ ${Math.abs(diffPct)}% குறைவா செலவு`; msgEl.style.color = 'var(--neon-green)'; }
-    else { msgEl.innerText = 'Same as last month'; msgEl.style.color = 'var(--text-secondary)'; }
+    else { msgEl.innerText = 'Same as last week'; msgEl.style.color = 'var(--text-secondary)'; }
 }
+
+// FEATURE: Top 3 Biggest Expenses (This Week, Mon-Sun)
+const categoryEmojiMap = { 'Food': '🍔', 'Gym Diet': '💪', 'Travel': '🚗', 'Personal Care': '🧴', 'Others': '📦' };
+function renderTopExpenses() {
+    const container = document.getElementById('topExpensesListContainer');
+    if(!container) return;
+
+    const { thisWeekStart, thisWeekEnd } = getCurrentWeekRange();
+    let weekExpenses = expenses.filter(e => { const d = new Date(e.date); return d >= thisWeekStart && d < thisWeekEnd; });
+
+    container.innerHTML = '';
+    if(weekExpenses.length === 0) {
+        container.innerHTML = '<li class="list-item" style="justify-content:center; color:var(--text-secondary); font-size:0.8rem;">இந்த வாரம் இன்னும் expense log பண்ணல</li>';
+        return;
+    }
+
+    // Amount adhigama irundhathu முதல்ல வரும் மாதிரி sort பண்ணி top 3 எடு
+    let topThree = [...weekExpenses].sort((a, b) => b.amount - a.amount).slice(0, 3);
+    const medals = ['🥇', '🥈', '🥉'];
+
+    topThree.forEach((e, i) => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+        li.style.borderLeftColor = 'var(--neon-gold)';
+        const emoji = categoryEmojiMap[e.category] || '📦';
+        li.innerHTML = `<div><b>${medals[i] || '💰'} ${e.desc}</b><br><small style="color:var(--text-secondary)">${emoji} ${e.category} • ${new Date(e.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}</small></div><div style="text-align:right; font-size:1rem; font-weight:900; color:var(--neon-gold);">₹${e.amount.toFixed(0)}</div>`;
+        container.appendChild(li);
+    });
+}
+
 function deleteExpense(id) { triggerDeviceHapticPulse(); expenses = expenses.filter(e => e.id !== id); localStorage.setItem('person_expenses', JSON.stringify(expenses)); renderExpenses(); updateCEODashboard(); }
 
 function renderExpenses() {
     const container = document.getElementById('expenseListContainer');
     if(!container) return;
     container.innerHTML = '';
-    renderRecurringExpenses(); renderMonthlyTrend(); renderSavingsGoalUI();
+    renderRecurringExpenses(); renderWeeklyExpenseTrend(); renderTopExpenses(); renderSavingsGoalUI();
     
     const filterElem = document.getElementById('expenseTimeFilter');
     const filterVal = filterElem ? filterElem.value : 'today';
