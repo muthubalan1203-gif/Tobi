@@ -1115,16 +1115,23 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
             <h3 class="card-title" style="margin:0; color:var(--neon-green);">🛒 TOBI Monthly Grocery AI</h3>
             <button class="water-btn" onclick="generateSmartGrocery()" style="font-size:0.7rem;">🔄 Generate 30-Days</button>
         </div>
-        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Smartly planned for 1 month (D-Mart Bulk + Weekly Fresh) with 1-day/week Non-Veg plan.</p>
+        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Dry/Bulk items bought once a month (soya chunks, groundnut, dal, rice, oil etc.)</p>
         
-        <div id="smartGroceryContainer" style="margin-top:15px;">
+        <div id="smartGroceryContainerMonthly" style="margin-top:15px;">
             <div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">Tap Generate to plan your monthly budget</div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:12px;">
+            <input type="text" id="manualNameMonthly" class="custom-input" placeholder="பொருள் பெயர்" style="flex:2;">
+            <input type="text" id="manualQtyMonthly" class="custom-input" placeholder="அளவு" style="flex:1;">
+            <input type="number" id="manualPriceMonthly" class="custom-input" placeholder="₹ (optional)" style="flex:1;">
+            <button class="water-btn" style="font-size:0.7rem;" onclick="addManualGroceryItem('monthly')">+ சேர்</button>
         </div>
         
         <div style="border-top:1px dashed var(--glass-border); margin-top:12px; padding-top:12px;">
             <div style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:700;">
                 <span style="color:var(--text-secondary);">Est. Monthly Cost:</span>
-                <span id="groceryCostEstimate" style="color:var(--neon-gold);">₹0</span>
+                <span id="groceryCostEstimateMonthly" style="color:var(--neon-gold);">₹0</span>
             </div>
         </div>
         
@@ -1150,10 +1157,18 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
     <p id="maduraiDietSuggestion" style="margin:0; font-size:0.75rem; color:white; line-height:1.5; font-weight:bold;"></p>
 </div>
 <div class="app-card" style="border-top:4px solid var(--neon-green); margin-bottom:15px;">
-<div style="display:flex; justify-content:space-between; align-items:center;"><h3 class="card-title" style="margin:0; color:var(--neon-green);">🛒 Smart Grocery AI</h3><button class="water-btn" onclick="generateSmartGrocery()" style="font-size:0.7rem;">🔄 Refresh</button></div>
-<p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Auto-calculated based on your weekly macro gaps:</p>
+<div style="display:flex; justify-content:space-between; align-items:center;"><h3 class="card-title" style="margin:0; color:var(--neon-green);">🥦 Smart Grocery AI (Weekly)</h3><button class="water-btn" onclick="generateSmartGrocery()" style="font-size:0.7rem;">🔄 Refresh</button></div>
+<p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Fresh items to buy every week (vegetables, curd, milk, eggs, non-veg 1 day/week):</p>
 <div id="smartGroceryContainerWeekly" style="margin-top:10px;"><div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">Tap Refresh to generate AI grocery list</div></div>
-<div style="border-top:1px dashed var(--glass-border); margin-top:12px; padding-top:12px;"><div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700;"><span style="color:var(--text-secondary);">Est. Market Cost:</span><span id="groceryCostEstimateWeekly" style="color:var(--neon-gold);">₹0</span></div></div></div>
+
+<div style="display:flex; gap:8px; margin-top:12px;">
+    <input type="text" id="manualNameWeekly" class="custom-input" placeholder="பொருள் பெயர்" style="flex:2;">
+    <input type="text" id="manualQtyWeekly" class="custom-input" placeholder="அளவு" style="flex:1;">
+    <input type="number" id="manualPriceWeekly" class="custom-input" placeholder="₹ (optional)" style="flex:1;">
+    <button class="water-btn" style="font-size:0.7rem;" onclick="addManualGroceryItem('weekly')">+ சேர்</button>
+</div>
+
+<div style="border-top:1px dashed var(--glass-border); margin-top:12px; padding-top:12px;"><div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700;"><span style="color:var(--text-secondary);">Est. Weekly Cost:</span><span id="groceryCostEstimateWeekly" style="color:var(--neon-gold);">₹0</span></div></div></div>
 
 <div class="macros-dashboard">
 <div style="font-size:0.75rem; font-weight:800; color:#fff; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.3px;">Today's Accumulated Macros</div>
@@ -2635,7 +2650,7 @@ function switchPage(pageId, swipeDir) {
         updatePredictiveAnalytics(); renderCardioLogs();
     }
     if(pageId === 'gym')     { initGymDay(); updateCalorieTargets(); renderWeightsCircleAndLists(); generateAdaptiveWorkout(); }
-    if(pageId === 'diet')    { renderMealLogsAndMacros(); renderWater(); updateCalorieTargets(); loadDietCheckboxes(); generateSmartGrocery(); }
+    if(pageId === 'diet')    { renderMealLogsAndMacros(); renderWater(); updateCalorieTargets(); loadDietCheckboxes(); loadOrRenderGrocery(); }
     if(pageId === 'expense') { renderExpenses(); renderSavings(); }
     if(pageId === 'sleep')   { renderSleepLogs(); calculateSleepParagraphAnalysis(); }
     if(pageId === 'notes')   { renderReminders(); }
@@ -6148,6 +6163,38 @@ function generateAdaptiveWorkout() {
 
 
 let whatsappGroceryText = ""; 
+const GROCERY_PLAN_KEY = 'tobi_grocery_plan';
+const GROCERY_VALID_DAYS = 30;
+
+// ---------- Storage helpers ----------
+function getGroceryPlan() {
+    try {
+        let raw = localStorage.getItem(GROCERY_PLAN_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch(e) { return null; }
+}
+function saveGroceryPlan(plan) {
+    localStorage.setItem(GROCERY_PLAN_KEY, JSON.stringify(plan));
+}
+
+// Called every time the Diet page opens. Renders whatever plan is already saved
+// (so the list stays exactly as the user left it — including cancelled/added items)
+// and only triggers a fresh AI generation if there is no saved plan yet, or the
+// saved plan is older than 30 days (time for a new monthly cycle).
+function loadOrRenderGrocery() {
+    let plan = getGroceryPlan();
+    if (!plan) {
+        // First time ever - auto generate if we can, else just show placeholder.
+        if (targetP > 0 && GEMINI_API_KEY) { generateSmartGrocery(); }
+        return;
+    }
+    let daysSince = (new Date(getAppToday()) - new Date(plan.generatedDate)) / (1000*60*60*24);
+    if (daysSince >= GROCERY_VALID_DAYS) {
+        generateSmartGrocery(); // 30 days passed - time for a new plan
+    } else {
+        renderGroceryUI(plan); // Same plan as before - untouched
+    }
+}
 
 async function generateSmartGrocery() {
     let appToday = getAppToday(); 
@@ -6160,25 +6207,21 @@ async function generateSmartGrocery() {
     let avgP = Math.round(totalP/7) || 0; 
     let avgC = Math.round(totalC/7) || 0;
     
-    let container = document.getElementById('smartGroceryContainer');
+    let containerMonthly = document.getElementById('smartGroceryContainerMonthly');
     let containerWeekly = document.getElementById('smartGroceryContainerWeekly');
     let shareBtn = document.getElementById('whatsappShareBtn');
 
-    // Helper: keeps the Monthly Grocery AI card and the Weekly Smart Grocery AI card in sync,
-    // since both cards' buttons trigger this same generator (fixes the old duplicate-id bug
-    // where only the first card on the page would ever update).
-    function setGroceryHTML(html) {
-        container.innerHTML = html;
+    function setLoadingHTML(html) {
+        if (containerMonthly) containerMonthly.innerHTML = html;
         if (containerWeekly) containerWeekly.innerHTML = html;
     }
-    function setGroceryCost(text) {
-        document.getElementById('groceryCostEstimate').innerText = text;
-        const costWeekly = document.getElementById('groceryCostEstimateWeekly');
-        if (costWeekly) costWeekly.innerText = text;
+    function setCost(text) {
+        document.getElementById('groceryCostEstimateMonthly').innerText = text;
+        document.getElementById('groceryCostEstimateWeekly').innerText = text;
     }
 
     if(targetP === 0) { 
-        setGroceryHTML('<div style="color:var(--text-secondary); text-align:center;">Set TDEE in Gym page first!</div>'); 
+        setLoadingHTML('<div style="color:var(--text-secondary); text-align:center;">Set TDEE in Gym page first!</div>'); 
         return;
     }
 
@@ -6188,31 +6231,33 @@ async function generateSmartGrocery() {
         return;
     }
 
-    setGroceryHTML('<div style="text-align:center; color: #888; padding: 20px;">🤖 TOBI ஒரு மாதத்திற்கான திட்டத்தை உருவாக்குகிறது...<br><br><small>D-Mart விலைகள் & மளிகை கணக்கிடப்படுகிறது...</small></div>');
-    setGroceryCost('₹...');
+    setLoadingHTML('<div style="text-align:center; color: #888; padding: 20px;">🤖 TOBI ஒரு மாதத்திற்கான திட்டத்தை உருவாக்குகிறது...<br><br><small>D-Mart விலைகள் & மளிகை கணக்கிடப்படுகிறது...</small></div>');
+    setCost('₹...');
     if(shareBtn) shareBtn.style.display = 'none';
 
-    // 100% Tamil Prompt
+    // 100% Tamil Prompt — explicitly separates MONTHLY (dry/bulk, long shelf-life)
+    // items from WEEKLY (fresh/perishable) items so the two cards never mix up.
     const prompt = `
         நான் மதுரையில் வசிக்கிறேன். எனது தினசரி Fitness target: Protein ${targetP}g, Carbs ${targetC}g. கடந்த 7 நாட்களில் நான் சராசரியாக எடுத்தது: Protein ${avgP}g, Carbs ${avgC}g. 
         எனது இலக்கு: மிக பிரம்மாண்டமான பாடிபில்டர் உடலமைப்பு அல்ல, மாறாக சாதாரண மற்றும் ஃபிட்டான (normal and realistic) உடலமைப்பைப் பெறுவது.
         
-        எனக்கு ஒரு மாதத்திற்கான (30 நாட்கள்) ஸ்மார்ட் மளிகை பட்டியல் தேவை. 
-        நிபந்தனைகள்:
-        1. அசைவம் (கோழி/மட்டன்/மீன்) வாரத்திற்கு ஒரு நாள் மட்டுமே (மாதத்திற்கு 4 நாட்கள்). மீதமுள்ள நாட்களுக்கு சைவ புரதங்களை (முட்டை, சோயா சங்ஸ், பனீர், சுண்டல், பருப்பு வகைகள்) சேர்க்கவும்.
-        2. D-Mart மற்றும் உள்ளூர் மார்க்கெட்டின் உத்தேச விலைகளை (இந்திய ரூபாயில்) குறிப்பிடவும்.
-        3. சமையலறைக்கு தேவையான அடிப்படை பொருட்கள் (எண்ணெய், உப்பு, மசாலா) தேவைப்பட்டால் சேர்க்கவும்.
-        4. பிரிவுகளின் தலைப்புகள், பொருட்களின் பெயர்கள் மற்றும் மாற்று யோசனைகள் அனைத்தும் முழுமையாக தமிழில் மட்டுமே இருக்க வேண்டும்.
+        எனக்கு ஒரு மாதத்திற்கான (30 நாட்கள்) ஸ்மார்ட் மளிகை பட்டியல் தேவை. இதை கண்டிப்பாக இரண்டு தனித் தனி பிரிவுகளாக (monthly, weekly) பிரிக்க வேண்டும்:
+        
+        "monthly" = நீண்ட நாள் உபயோகிக்கக்கூடிய, மாதத்திற்கு ஒரு முறை மட்டும் வாங்கும் உலர் பொருட்கள் மட்டுமே (உ.ம்: சோயா சங்ஸ், வேர்க்கடலை, பருப்பு வகைகள், அரிசி, எண்ணெய், உப்பு, மசாலா, சர்க்கரை போன்றவை). காய்கறி, பால் பொருட்கள், முட்டை, அசைவம் போன்ற எதுவும் இதில் இருக்கக்கூடாது.
+        "weekly" = வாரம் ஒரு முறை புதிதாக வாங்க வேண்டிய அழிந்துபோகும் பொருட்கள் மட்டுமே (உ.ம்: காய்கறிகள், தயிர், பால், முட்டை, பழங்கள்). அசைவம் (கோழி/மட்டன்/மீன்) வாரத்திற்கு ஒரு நாள் மட்டுமே (மாதத்திற்கு 4 நாட்கள்) இதே weekly பிரிவில் தனி வகையாகச் சேர்க்கவும். மீதமுள்ள நாட்களுக்கு சைவ புரதங்கள் (முட்டை, பனீர், சுண்டல்) monthly/weekly பொருத்தமான பிரிவில் வரும்.
+        
+        மற்ற நிபந்தனைகள்:
+        1. D-Mart மற்றும் உள்ளூர் மார்க்கெட்டின் உத்தேச விலைகளை (இந்திய ரூபாயில்) குறிப்பிடவும்.
+        2. பிரிவுகளின் தலைப்புகள், பொருட்களின் பெயர்கள் மற்றும் மாற்று யோசனைகள் அனைத்தும் முழுமையாக தமிழில் மட்டுமே இருக்க வேண்டும்.
+        3. ஒரு பொருள் monthly-ல் இருந்தால் அது weekly-ல் மீண்டும் வரக்கூடாது (duplicate வேண்டாம்).
 
         கீழே உள்ள JSON வடிவில் மட்டுமே பதிலை தரவும். வேறு எந்த வார்த்தைகளும், markdown formatting-உம் (e.g., \`\`\`json) கண்டிப்பாக இருக்கக்கூடாது:
         {
-          "categories": [
-            {
-              "title": "பிரிவின் பெயர் (உ.ம்: 🛒 D-Mart மாத மளிகை / 🥦 உள்ளூர் வாராந்திர பொருட்கள் / 🍗 அசைவம் - வாரத்திற்கு ஒருமுறை)",
-              "items": [
-                { "name": "பொருளின் பெயர் தமிழில்", "qty": "அளவு", "price": 100, "swap": "விலை குறைந்த மாற்றுப்பொருள் (இருந்தால் தமிழில் குறிப்பிடவும், இல்லையெனில் காலியாக விடவும்)" }
-              ]
-            }
+          "monthly": [
+            { "title": "பிரிவின் பெயர் (உ.ம்: 🛒 மாதாந்திர உலர் பொருட்கள்)", "items": [ { "name": "பொருளின் பெயர் தமிழில்", "qty": "அளவு", "price": 100, "swap": "விலை குறைந்த மாற்றுப்பொருள் (இருந்தால், இல்லையெனில் காலியாக விடவும்)" } ] }
+          ],
+          "weekly": [
+            { "title": "பிரிவின் பெயர் (உ.ம்: 🥦 வாராந்திர பொருட்கள் / 🍗 அசைவம் - வாரத்திற்கு ஒருமுறை)", "items": [ { "name": "பொருளின் பெயர் தமிழில்", "qty": "அளவு", "price": 100, "swap": "" } ] }
           ],
           "totalCost": மொத்த உத்தேச செலவு (எண்ணாக)
         }
@@ -6228,7 +6273,7 @@ async function generateSmartGrocery() {
         const data = await response.json();
         
         if (data.error) {
-            setGroceryHTML('<div style="color:var(--neon-red); text-align:center;">API Error! Settings-ல் Key-ஐ சரிபார்க்கவும்.</div>');
+            setLoadingHTML('<div style="color:var(--neon-red); text-align:center;">API Error! Settings-ல் Key-ஐ சரிபார்க்கவும்.</div>');
             return;
         }
 
@@ -6236,49 +6281,191 @@ async function generateSmartGrocery() {
         aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim(); 
         const result = JSON.parse(aiText);
 
-        let html = ''; 
-        whatsappGroceryText = "🛒 *TOBI - இந்த மாத மளிகை திட்டம்* 🗓️\n(Diet & Fitness-க்காக AI உருவாக்கியது)\n\n";
+        // Tag every item with a stable id so it can be individually cancelled later.
+        (result.monthly||[]).forEach((cat, ci) => { cat.items.forEach((item, ii) => { item.id = `m-${ci}-${ii}`; }); });
+        (result.weekly||[]).forEach((cat, ci) => { cat.items.forEach((item, ii) => { item.id = `w-${ci}-${ii}`; }); });
 
-        result.categories.forEach(category => {
-            // UI HTML
-            html += `<h4 style="color:var(--neon-gold); margin: 15px 0 5px 0; font-size:0.85rem; border-bottom:1px solid #333; padding-bottom:5px;">${category.title}</h4>`;
-            whatsappGroceryText += `*${category.title}*\n`;
-            
-            category.items.forEach((item, index) => {
-                let swapHtml = item.swap ? `<div style="font-size:0.65rem; color:#aaa; margin-top:2px;">💡 மாற்று: ${item.swap}</div>` : '';
-                
-                html += `
-                    <div class="grocery-item" style="padding: 8px 0; border-bottom: 1px dashed #222;">
-                        <div style="flex:1;">
-                            <span style="font-size:0.85rem; color:var(--text-main);">${item.name}</span>
-                            ${swapHtml}
-                        </div>
-                        <div style="text-align:right;">
-                            <span class="grocery-qty" style="display:block; font-size:0.75rem;">${item.qty}</span>
-                            <span style="font-size:0.75rem; color:var(--text-secondary);">₹${item.price}</span>
-                        </div>
-                    </div>`;
-                    
-                whatsappGroceryText += `🔹 ${item.name} - ${item.qty} (₹${item.price})\n`;
-                if(item.swap) whatsappGroceryText += `   _💡 மாற்று யோசனை: ${item.swap}_\n`;
-            });
-            whatsappGroceryText += `\n`;
-        });
+        const plan = {
+            generatedDate: getAppToday().toDateString(),
+            monthly: result.monthly || [],
+            weekly: result.weekly || [],
+            totalCost: result.totalCost || 0,
+            removed: [],               // ids of items the user cancelled
+            manual: { monthly: [], weekly: [] } // user's own manually added items
+        };
+        saveGroceryPlan(plan);
+        renderGroceryUI(plan);
 
-        whatsappGroceryText += `💰 *மொத்த மாத பட்ஜெட்:* ₹${result.totalCost}`;
-
-        setGroceryHTML(html);
-        setGroceryCost('₹' + result.totalCost);
-        
-        if(shareBtn) shareBtn.style.display = 'block'; 
         displayPremiumToastNotification("Monthly Plan Ready!", "📅");
         triggerDeviceHapticPulse();
 
     } catch (error) {
         console.error("AI Grocery Fetch Error:", error);
-        setGroceryHTML('<div style="color:var(--neon-red); text-align:center;">Failed to generate plan. AI server might be busy. Try again.</div>');
-        setGroceryCost('₹0');
+        setLoadingHTML('<div style="color:var(--neon-red); text-align:center;">Failed to generate plan. AI server might be busy. Try again.</div>');
+        setCost('₹0');
     }
+}
+
+// Renders the Monthly and Weekly cards from a saved plan object, respecting
+// cancelled items and any manually-added items. Also rebuilds the clean
+// WhatsApp share text (name + qty only, no prices/logos).
+function renderGroceryUI(plan) {
+    let containerMonthly = document.getElementById('smartGroceryContainerMonthly');
+    let containerWeekly = document.getElementById('smartGroceryContainerWeekly');
+    let shareBtn = document.getElementById('whatsappShareBtn');
+    let removedSet = new Set(plan.removed || []);
+
+    function itemRow(item) {
+        let swapHtml = item.swap ? `<div style="font-size:0.65rem; color:#aaa; margin-top:2px;">💡 மாற்று: ${item.swap}</div>` : '';
+        return `
+            <div class="grocery-item" style="padding: 8px 0; border-bottom: 1px dashed #222;">
+                <div style="flex:1;">
+                    <span style="font-size:0.85rem; color:var(--text-main);">${item.name}</span>
+                    ${swapHtml}
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="text-align:right;">
+                        <span class="grocery-qty" style="display:block; font-size:0.75rem;">${item.qty}</span>
+                        <div style="display:flex; align-items:center; gap:2px; justify-content:flex-end;">
+                            <span style="font-size:0.75rem; color:var(--text-secondary);">₹</span>
+                            <input type="number" value="${item.price||0}" onchange="updateGroceryItemPrice('${item.id}', this.value)" style="width:52px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-secondary); font-size:0.75rem; padding:2px 4px;">
+                        </div>
+                    </div>
+                    <button onclick="toggleRemoveGroceryItem('${item.id}')" title="Cancel this item" style="background:none; border:1px solid var(--neon-red); color:var(--neon-red); border-radius:6px; width:22px; height:22px; line-height:1; cursor:pointer; font-size:0.75rem;">✕</button>
+                </div>
+            </div>`;
+    }
+    function manualItemRow(item, type) {
+        return `
+            <div class="grocery-item" style="padding: 8px 0; border-bottom: 1px dashed #222;">
+                <div style="flex:1;">
+                    <span style="font-size:0.85rem; color:var(--text-main);">${item.name}</span>
+                    <div style="font-size:0.65rem; color:var(--neon-cyan); margin-top:2px;">✏️ மேனுவலாக சேர்க்கப்பட்டது</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="text-align:right;">
+                        <span class="grocery-qty" style="display:block; font-size:0.75rem;">${item.qty}</span>
+                        <div style="display:flex; align-items:center; gap:2px; justify-content:flex-end;">
+                            <span style="font-size:0.75rem; color:var(--text-secondary);">₹</span>
+                            <input type="number" value="${item.price||0}" onchange="updateManualGroceryItemPrice('${type}','${item.id}', this.value)" style="width:52px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-secondary); font-size:0.75rem; padding:2px 4px;">
+                        </div>
+                    </div>
+                    <button onclick="removeManualGroceryItem('${type}','${item.id}')" title="Remove" style="background:none; border:1px solid var(--neon-red); color:var(--neon-red); border-radius:6px; width:22px; height:22px; line-height:1; cursor:pointer; font-size:0.75rem;">✕</button>
+                </div>
+            </div>`;
+    }
+
+    function buildSectionHTML(categories, manualItems, type) {
+        let html = '';
+        let visibleCount = 0;
+        (categories||[]).forEach(category => {
+            let visibleItems = category.items.filter(item => !removedSet.has(item.id));
+            if (visibleItems.length === 0) return;
+            visibleCount += visibleItems.length;
+            html += `<h4 style="color:var(--neon-gold); margin: 15px 0 5px 0; font-size:0.85rem; border-bottom:1px solid #333; padding-bottom:5px;">${category.title}</h4>`;
+            visibleItems.forEach(item => { html += itemRow(item); });
+        });
+        if (manualItems && manualItems.length) {
+            html += `<h4 style="color:var(--neon-cyan); margin: 15px 0 5px 0; font-size:0.85rem; border-bottom:1px solid #333; padding-bottom:5px;">✏️ நீங்கள் சேர்த்தவை</h4>`;
+            manualItems.forEach(item => { html += manualItemRow(item, type); visibleCount++; });
+        }
+        if (visibleCount === 0) {
+            html = '<div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">பட்டியல் காலியாக உள்ளது.</div>';
+        }
+        return html;
+    }
+
+    let manual = plan.manual || { monthly: [], weekly: [] };
+    if (containerMonthly) containerMonthly.innerHTML = buildSectionHTML(plan.monthly, manual.monthly, 'monthly');
+    if (containerWeekly) containerWeekly.innerHTML = buildSectionHTML(plan.weekly, manual.weekly, 'weekly');
+
+    // Recompute cost estimates excluding cancelled items, including manual item prices
+    function sumCost(categories, manualItems) {
+        let sum = 0;
+        (categories||[]).forEach(cat => cat.items.forEach(item => { if (!removedSet.has(item.id)) sum += (item.price||0); }));
+        (manualItems||[]).forEach(item => sum += (item.price||0));
+        return sum;
+    }
+    let monthlyCost = sumCost(plan.monthly, manual.monthly);
+    let weeklyCost = sumCost(plan.weekly, manual.weekly);
+    document.getElementById('groceryCostEstimateMonthly').innerText = '₹' + monthlyCost;
+    document.getElementById('groceryCostEstimateWeekly').innerText = '₹' + weeklyCost;
+
+    // Clean, professional WhatsApp text — name & qty only, no prices/emojile clutter.
+    let text = "TOBI Grocery List\n\n";
+    text += "Monthly Items:\n";
+    let monthlyLines = [];
+    (plan.monthly||[]).forEach(cat => cat.items.forEach(item => { if (!removedSet.has(item.id)) monthlyLines.push(`- ${item.name} - ${item.qty}`); }));
+    (manual.monthly||[]).forEach(item => monthlyLines.push(`- ${item.name} - ${item.qty}`));
+    text += (monthlyLines.length ? monthlyLines.join('\n') : '- (none)') + "\n\n";
+
+    text += "Weekly Items:\n";
+    let weeklyLines = [];
+    (plan.weekly||[]).forEach(cat => cat.items.forEach(item => { if (!removedSet.has(item.id)) weeklyLines.push(`- ${item.name} - ${item.qty}`); }));
+    (manual.weekly||[]).forEach(item => weeklyLines.push(`- ${item.name} - ${item.qty}`));
+    text += (weeklyLines.length ? weeklyLines.join('\n') : '- (none)');
+
+    whatsappGroceryText = text;
+    if (shareBtn) shareBtn.style.display = (monthlyLines.length || weeklyLines.length) ? 'block' : 'none';
+}
+
+function updateGroceryItemPrice(id, newPrice) {
+    let plan = getGroceryPlan();
+    if (!plan) return;
+    let price = parseFloat(newPrice) || 0;
+    let found = false;
+    ['monthly','weekly'].forEach(type => {
+        (plan[type]||[]).forEach(cat => cat.items.forEach(item => { if (item.id === id) { item.price = price; found = true; } }));
+    });
+    if (found) { saveGroceryPlan(plan); renderGroceryUI(plan); }
+}
+
+function updateManualGroceryItemPrice(type, id, newPrice) {
+    let plan = getGroceryPlan();
+    if (!plan || !plan.manual || !plan.manual[type]) return;
+    let price = parseFloat(newPrice) || 0;
+    let item = plan.manual[type].find(i => i.id === id);
+    if (item) { item.price = price; saveGroceryPlan(plan); renderGroceryUI(plan); }
+}
+
+function toggleRemoveGroceryItem(id) {
+    let plan = getGroceryPlan();
+    if (!plan) return;
+    plan.removed = plan.removed || [];
+    if (!plan.removed.includes(id)) plan.removed.push(id);
+    saveGroceryPlan(plan);
+    renderGroceryUI(plan);
+    triggerDeviceHapticPulse();
+}
+
+function addManualGroceryItem(type) {
+    let nameInput = document.getElementById(type === 'monthly' ? 'manualNameMonthly' : 'manualNameWeekly');
+    let qtyInput = document.getElementById(type === 'monthly' ? 'manualQtyMonthly' : 'manualQtyWeekly');
+    let priceInput = document.getElementById(type === 'monthly' ? 'manualPriceMonthly' : 'manualPriceWeekly');
+    let name = (nameInput.value || '').trim();
+    let qty = (qtyInput.value || '').trim() || '1';
+    let price = parseFloat(priceInput.value) || 0;
+    if (!name) { displayPremiumToastNotification("பொருள் பெயரை உள்ளிடவும்!", "⚠️"); return; }
+
+    let plan = getGroceryPlan();
+    if (!plan) {
+        plan = { generatedDate: getAppToday().toDateString(), monthly: [], weekly: [], totalCost: 0, removed: [], manual: { monthly: [], weekly: [] } };
+    }
+    plan.manual = plan.manual || { monthly: [], weekly: [] };
+    plan.manual[type].push({ id: `manual-${type}-${Date.now()}`, name, qty, price });
+    saveGroceryPlan(plan);
+    renderGroceryUI(plan);
+
+    nameInput.value = ''; qtyInput.value = ''; priceInput.value = '';
+    displayPremiumToastNotification("Item Added!", "✅");
+}
+
+function removeManualGroceryItem(type, id) {
+    let plan = getGroceryPlan();
+    if (!plan || !plan.manual || !plan.manual[type]) return;
+    plan.manual[type] = plan.manual[type].filter(item => item.id !== id);
+    saveGroceryPlan(plan);
+    renderGroceryUI(plan);
 }
 
 function shareGroceryToWhatsApp() {
