@@ -1620,7 +1620,9 @@ async function generateWeeklyExpenseForecast() {
     }
 }
 // --- 1. MORNING BRIEFING ---
-async function playMorningBriefing() {
+function playMorningBriefing() {
+    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); openModalWithHistory('systemSettingsModal', 'flex'); return; }
+    // ... மீதி கோடு அப்படியே இருக்கட்டும் ...
     triggerDeviceHapticPulse();
     displayPremiumToastNotification("TOBI analyzing your day...", "🔊");
 
@@ -1651,6 +1653,8 @@ async function playMorningBriefing() {
 
 // --- 2. ZERO-WASTE AI ---
 async function generateLeftoverRecipe() {
+    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); openModalWithHistory('systemSettingsModal', 'flex'); return; }
+    // ... மீதி கோடு அப்படியே இருக்கட்டும் ...
     let items = document.getElementById('leftoverInput').value.trim();
     if(!items) return displayPremiumToastNotification("பொருட்களை டைப் செய்யவும்!", "❌");
 
@@ -1675,6 +1679,8 @@ async function generateLeftoverRecipe() {
 
 // --- 3. BRAIN DUMP ---
 async function processBrainDump() {
+    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); openModalWithHistory('systemSettingsModal', 'flex'); return; }
+    // ... மீதி கோடு அப்படியே இருக்கட்டும் ...
     let thoughts = document.getElementById('brainDumpInput').value.trim();
     if(!thoughts) return displayPremiumToastNotification("ஏதாவது டைப் செய்யவும்!", "❌");
 
@@ -1732,6 +1738,8 @@ async function calculateREMCycles() {
 
 // --- 5. ROAST MY MONTH ---
 async function roastMyMonth() {
+    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); openModalWithHistory('systemSettingsModal', 'flex'); return; }
+    // ... மீதி கோடு அப்படியே இருக்கட்டும் ...
     triggerDeviceHapticPulse();
     openModalWithHistory('aiEngineModal');
     document.getElementById('aiHeaderTitle').innerText = "🔥 TOBI ROAST";
