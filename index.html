@@ -1104,7 +1104,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <div id="customWorkoutList"></div>
 <div style="border-top:1px dashed var(--glass-border); padding-top:15px; margin-top:15px;">
 <p style="font-size:0.75rem; color:var(--neon-cyan); margin-bottom:8px; font-weight:bold;">+ Add New Exercise to Current Day</p>
-<div class="form-group"><input type="text" id="cwName" class="custom-input" placeholder="Exercise Name (e.g., Pullups)"></div>
+<div class="form-group"><input type="text" id="cwName" class="custom-input" placeholder="Exercise Name "></div>
 <div style="display:flex; gap:10px;"><input type="number" id="cwSets" class="custom-input w-box" placeholder="Sets"><input type="number" id="cwReps" class="custom-input w-box" placeholder="Reps"><input type="number" id="cwWeight" class="custom-input w-box" placeholder="Kg"><button class="btn-universal" style="background:var(--neon-cyan); color:black; padding:6px; flex:1;" onclick="addCustomWorkout()">Add</button></div></div></div>
 </div>
 
@@ -1115,7 +1115,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
             <h3 class="card-title" style="margin:0; color:var(--neon-green);">🛒 TOBI Monthly Grocery AI</h3>
             <button class="water-btn" onclick="generateSmartGrocery()" style="font-size:0.7rem;">🔄 Generate 30-Days</button>
         </div>
-        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Dry/Bulk items bought once a month (soya chunks, groundnut, dal, rice, oil etc.)</p>
+        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Dry/Bulk items bought once a month </p>
         
         <div id="smartGroceryContainerMonthly" style="margin-top:15px;">
             <div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">Tap Generate to plan your monthly budget</div>
@@ -1158,7 +1158,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 </div>
 <div class="app-card" style="border-top:4px solid var(--neon-green); margin-bottom:15px;">
 <div style="display:flex; justify-content:space-between; align-items:center;"><h3 class="card-title" style="margin:0; color:var(--neon-green);">🥦 Smart Grocery AI (Weekly)</h3><button class="water-btn" onclick="generateSmartGrocery()" style="font-size:0.7rem;">🔄 Refresh</button></div>
-<p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Fresh items to buy every week (vegetables, curd, milk, eggs, non-veg 1 day/week):</p>
+<p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Fresh items to buy every week </p>
 <div id="smartGroceryContainerWeekly" style="margin-top:10px;"><div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">Tap Refresh to generate AI grocery list</div></div>
 
 <div style="display:flex; gap:8px; margin-top:12px;">
@@ -1739,7 +1739,8 @@ async function calculateREMCycles() {
         முத்துபாலன் இன்று இரவு ${bedTimeInput}-க்கு தூங்கப் போகிறார். 
         அவரது கடந்த கால தூக்க தரவு: ${sleepHistory}. 
         தூக்க சுழற்சி (Sleep Cycle) அடிப்படையில், அவர் எந்தெந்த நேரங்களில் எழுந்தால் புத்துணர்ச்சியாக இருப்பார் என்று 3 பரிந்துரைகளைத் தமிழில் கொடு. 
-        ஒரு வரியில், அவர் ஏன் அந்த நேரத்தில் எழுந்திருக்க வேண்டும் என்பதையும் குறிப்பிடவும்.
+        மூன்று வரியில், அவர் ஏன் அந்த நேரத்தில் எழுந்திருக்க வேண்டும் என்பதையும் குறிப்பிடவும்.
+        முடிந்த அளவில் அவர் 5.30AM மணிக்கு முன்னேற எழுந்திருக்க வேண்டும்..5.30 AM மணிக்கு புத்துணர்சியாக எழுந்திருக்க வேண்டும் என்றால் இரவில் எப்பொழுது நீங்கள் தூங்க வேண்டும் என்றும் 3 வரியில் கூற வேண்டும்.
     `;
 
     try {
@@ -5588,7 +5589,7 @@ function renderCurrentDay() {
     // 4. Sunday Special Tasks
     if(dayName === 'Sunday') { 
         tagText = 'WEEKEND MAINTENANCE'; 
-        specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-scrub" onchange="handleTaskChange('${todayDateKey}', 't-scrub')"><span><b>சருமப் பராமரிப்பு:</b> Rice Water Face Wash.</span></label></li>
+        specialTasks += `<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-scrub" onchange="handleTaskChange('${todayDateKey}', 't-scrub')"><span><b>சருமப் பராமரிப்பு:</b> எண்ணெய் தடவுதல்.</span></label></li>
         <li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-lip" onchange="handleTaskChange('${todayDateKey}', 't-lip')"><span><b>உதடு பராமரிப்பு:</b> நெய்/தேங்காய் எண்ணெய் மசாஜ்.</span></label></li>
         <li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-nail" onchange="handleTaskChange('${todayDateKey}', 't-nail')"><span><b>சுத்தம்:</b> Nail Grooming.</span></label></li>
         <li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-cheat" onchange="handleTaskChange('${todayDateKey}', 't-cheat')"><span><b>டயட் பிரேக்:</b> Weekly Cheat Meal.</span></label></li>`; 
@@ -5618,7 +5619,7 @@ function renderCurrentDay() {
     
     const card = document.getElementById('dayCard'); 
     if(!card) return; 
-    card.innerHTML = `<div class="day-header"><div><div class="day-number">Today's Protocol</div><div class="day-date">${appToday.getDate()} ${monthNames[appToday.getMonth()]} (${dayName})</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;"><span class="day-tag" style="background:var(--neon-gold); color:#000;">${tagText}</span><span id="glowupPctBadge" class="day-pct-badge">Progress: 0%</span></div></div><ul class="task-list" style="margin-top:12px;">${waterTaskHTML}${faceWashTaskHTML}${specialTasks}<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-g" onchange="handleTaskChange('${todayDateKey}', 't-g')"><span><b>Night Care:</b> Night Opal Face Wash and Brush.</span></label></li></ul>`; 
+    card.innerHTML = `<div class="day-header"><div><div class="day-number">Today's Protocol</div><div class="day-date">${appToday.getDate()} ${monthNames[appToday.getMonth()]} (${dayName})</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;"><span class="day-tag" style="background:var(--neon-gold); color:#000;">${tagText}</span><span id="glowupPctBadge" class="day-pct-badge">Progress: 0%</span></div></div><ul class="task-list" style="margin-top:12px;">${waterTaskHTML}${faceWashTaskHTML}${specialTasks}<li class="task-item"><label class="task-checkbox-side"><input type="checkbox" id="t-g" onchange="handleTaskChange('${todayDateKey}', 't-g')"><span><b>இரவு:</b>  Opal Face Wash and Brush.</span></label></li></ul>`; 
     const savedStates = getSavedCheckboxStates(todayDateKey); 
     for(const tid in savedStates) { 
         const cb = document.getElementById(tid); 
