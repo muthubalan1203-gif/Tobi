@@ -1763,10 +1763,10 @@ async function roastMyMonth() {
     let prompt = `இந்த மாதம் செலவு ₹${expenses.reduce((s,e)=>s+e.amount,0)}, சீட் மீல் ${cheatMealLogs.length} முறை, ஜிம் மிஸ் செய்த நாட்கள் ${getMissedGymDays(30)}. மதுரைக்கார நண்பன் போல பங்கம் செய்யுங்க.`;
     try { let aiResponse = await askGemini(prompt); playAiTyping(aiResponse, document.getElementById('aiTypingText')); } catch(e) { document.getElementById('aiTypingText').innerHTML = "AI Error."; }
 }
-async function analyzeDreamWithAI() {
-    let dreamText = document.getElementById('dreamInput').value.trim();
+async function analyzeDreamWithAI(dreamTextParam, silent) {
+    let dreamText = (dreamTextParam !== undefined && dreamTextParam !== null ? dreamTextParam : document.getElementById('dreamInput').value).trim();
     if (!dreamText) {
-        displayPremiumToastNotification("முதலில் கனவை டைப் செய்யவும்!", "❌");
+        if (!silent) displayPremiumToastNotification("முதலில் கனவை டைப் செய்யவும்!", "❌");
         return;
     }
     
@@ -1777,17 +1777,36 @@ async function analyzeDreamWithAI() {
     document.getElementById('aiActionButtons').innerHTML = ''; // Loading
     
     let prompt = `நான் கண்ட கனவு: "${dreamText}".
+    
+    இன்றைய தேதி: ${todayDate}
 
-    என் ஜாதக விவரம்: பிறந்த தேதி 12-03-2000, நேரம் மாலை 4:10, ஊர் மதுரை. ராசி: ரிஷபம், நட்சத்திரம்: ரோகிணி, லக்னம்: கடகம்.
+    என் முழு ஜாதக விவரம்: பிறந்த தேதி 12-03-2000, நேரம் மாலை 4:10 PM, ஊர் மதுரை. ராசி: ரிஷபம், நட்சத்திரம்: ரோகிணி, லக்னம்: கடகம்.
 
-    நீ ஒரு சிறந்த உளவியலாளர், புராண/இதிகாச அறிஞர் மற்றும் ஜோதிடர் (ஸ்ரீ கிருஷ்ணரின் தத்துவத்தையும் அறிந்தவன்). இந்தக் கனவை முழுமையாக, ஆழமாக பகுப்பாய்வு செய்து முழுவதும் தமிழில்  விளக்கு. கீழ்க்கண்ட எல்லா அம்சங்களையும் தனித்தனி பத்திகளாக தெளிவாக கொடு, 3-4 வரிகளில் சுருக்கிடாதே — முழு விவரமாக எழுது:
+    ராசி கட்டம் (Rasi Chart) கிரக நிலைகள்:
+    - லக்னம் (Ascendant): கடகம் ராசியில் — இதே வீட்டில் ராகு உடன்
+    - சந்திரன் (Moon): ரிஷபம் ராசியில் (நட்சத்திரம் ரோகிணி)
+    - குரு (Jupiter) & சனி (Saturn): மேஷம் ராசியில்
+    - சூரியன், புதன், சுக்கிரன் (Sun, Mercury, Venus): கும்பம் ராசியில்
+    - கேது (Ketu): மகரம் ராசியில்
+    - செவ்வாய் (Mars): மீனம் ராசியில்
+
+    நவாம்சம் (Navamsa Chart) கிரக நிலைகள்:
+    - லக்னம்: கும்பம் ராசியில்
+    - குரு: கடகம் ராசியில்
+    - சூரியன் & சந்திரன்: மிதுனம் ராசியில்
+    - சனி & ராகு: கன்னி ராசியில்
+    - செவ்வாய் & கேது: மீனம் ராசியில்
+    - சுக்கிரன்: விருச்சிகம் ராசியில்
+    - புதன்: தனுசு ராசியில்
+
+    நீ ஒரு சிறந்த உளவியலாளர், புராண/இதிகாச அறிஞர் மற்றும் ஜோதிடர் (ஸ்ரீ கிருஷ்ணரின் தத்துவத்தையும் அறிந்தவன்). இந்தக் கனவை முழுமையாக, ஆழமாக பகுப்பாய்வு செய்து முழுவதும் தமிழில் (Tanglish கலவையாக இருக்கலாம்) விளக்கு. கீழ்க்கண்ட எல்லா அம்சங்களையும் தனித்தனி பத்திகளாக தெளிவாக கொடு, 3-4 வரிகளில் சுருக்கிடாதே — முழு விவரமாக எழுது:
 
     1. 🧠 உளவியல் பகுப்பாய்வு: இந்தக் கனவு எனது ஆழ்மனதின் எந்த எண்ணம், பயம், ஆசை அல்லது unresolved விஷயத்தைக் குறிக்கிறது என்பதை விரிவாக விளக்கு.
     2. 📜 புராண/இதிகாச தொடர்பு: இந்தக் கனவில் வரும் குறியீடுகள் (symbols, நபர்கள், சம்பவங்கள்) எந்த புராண கதை, இதிகாசம் (மகாபாரதம்/ராமாயணம்/பகவத் புராணம் etc.) அல்லது தத்துவத்துடன் ஒத்துப்போகிறது என்று ஒரு சிறு புராணக் கதையையோ குறிப்பையோ சொல்லி விளக்கு.
     3. 🌌 ஏன் இந்த கனவு வந்தது: இப்போதைய என் வாழ்க்கை சூழ்நிலை (ஜிம், படிப்பு TNPSC, வேலை, குடும்பம்) வைத்து ஏன் இப்போது இந்த மாதிரி கனவு வருகிறது என்று காரணம் சொல்லு.
     4. 🔮 பிரபஞ்சம் சொல்ல வருவது என்ன: இந்தக் கனவு மூலமா universe/பிரபஞ்சம் எனக்கு என்ன செய்தி, எச்சரிக்கை அல்லது வழிகாட்டுதலை தர நினைக்குது என்று சொல்லு.
-    5. 🪐 தசா நிலை பொருத்தம்: மேலே கொடுத்த ஜாதக விவரத்தை வைத்து, இப்போதைய தசா/புத்தி காலகட்டம் (Vimshottari Dasa) இந்த கனவோட எப்படி பொருந்துது, தசை சரியா function ஆகுதான்னு அல்லது ஏதாவது கவனிக்கணுமான் சொல்லு.
-    6.இன்று என்னுடைய நாள் எப்படி இருக்கும் என்று என் முழு ஜோதிட பலனை தெளிவாக ஆராய்ந்து எனக்கு பதில் சொல்லு.
+    5. 🪐 தசா நிலை பொருத்தம்: மேலே கொடுத்த முழு ராசி & நவாம்ச கிரக நிலைகளை வைத்து, இப்போதைய தசா/புத்தி காலகட்டம் (Vimshottari Dasa) இந்த கனவோட எப்படி பொருந்துது, தசை சரியா function ஆகுதான்னு அல்லது ஏதாவது கவனிக்கணுமான் சொல்லு.
+    6.    இன்று என்னுடைய நாள் எப்படி இருக்கும் என்று என் முழு ஜோதிட பலனை தெளிவாக ஆராய்ந்து எனக்கு 10 வரிகளில் பதில் சொல்லு.
   
     கடைசியில் ஒரு வரி நடைமுறை ஆலோசனை (practical takeaway) கொடு.`;
     
@@ -4526,7 +4545,53 @@ function updateBodyMetricsEntryVisibility() {
 function deleteWeight(id) { triggerDeviceHapticPulse(); weights = weights.filter(w => w.id !== id); localStorage.setItem('person_weights', JSON.stringify(weights)); renderWeightsCircleAndLists(); updateCEODashboard(); }
 function renderWeightsCircleAndLists() { const container = document.getElementById('weightListContainer'); if(!container) return; container.innerHTML = ''; let currentWt = 62.0; if(weights.length > 0) currentWt = weights[0].val; document.getElementById('weightCurrentStatusDisplay').innerText = `${currentWt.toFixed(1)} kg`; let delta = currentWt - 62.0; if(delta < 0) delta = 0; let scalePct = Math.round((delta / 8.0) * 100); if(scalePct > 100) scalePct = 100; document.getElementById('ringWeightPct').innerHTML = `${scalePct}%<span>Gained</span>`; const circle = document.getElementById('weightProgressCircle'); if(circle) { let circumference = 2 * Math.PI * 42; circle.style.strokeDashoffset = circumference - (scalePct / 100) * circumference; } weights.forEach(w => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = 'var(--neon-purple)'; li.innerHTML = `<div><b>${w.val} kg</b><br><small style="color:var(--text-secondary)">${w.date}</small></div><button class="delete-btn" onclick="deleteWeight(${w.id})">🗑️</button>`; container.appendChild(li); }); updateWeightEntryVisibility(); }
 
-function addAdvancedSleepLog() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const bedtime = document.getElementById('sleepBedtime').value; const wakeup = document.getElementById('sleepWakeup').value; const interruptions = parseInt(document.getElementById('sleepInterruptions').value); const dreamText = document.getElementById('dreamInput').value; if(!bedtime || !wakeup) return displayPremiumToastNotification("Fill Bedtime & Wakeup!", "❌"); let bParts = bedtime.split(':'); let wParts = wakeup.split(':'); let bMin = parseInt(bParts[0]) * 60 + parseInt(bParts[1]); let wMin = parseInt(wParts[0]) * 60 + parseInt(wParts[1]); let diffMin = wMin - bMin; if(diffMin < 0) diffMin += 1440; let totalHours = diffMin / 60; let baseEfficiency = 100 - (interruptions * 12); if(totalHours < 6) baseEfficiency -= (6 - totalHours) * 15; if(totalHours > 9) baseEfficiency -= (totalHours - 9) * 5; if(baseEfficiency < 20) baseEfficiency = 20; let finalScore = Math.round(baseEfficiency); sleepLogs = sleepLogs.filter(s => s.date !== todayStr); sleepLogs.unshift({ id: Date.now(), hours: parseFloat(totalHours.toFixed(1)), bedtime: bedtime, wakeup: wakeup, score: finalScore, interruptions: interruptions, date: todayStr }); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); { let aiData = safeGetItem('ai_sleep_recovery', null); if(aiData && aiData.date === todayStr) { localStorage.removeItem('ai_sleep_recovery'); if(document.getElementById('aiSleepAnalysisBox')) document.getElementById('aiSleepAnalysisBox').style.display = 'none'; } } if(dreamText.trim() !== '') localStorage.setItem('dream_log_' + todayStr, dreamText); document.getElementById('sleepBedtime').value = ''; document.getElementById('sleepWakeup').value = ''; document.getElementById('dreamInput').value = ''; displayPremiumToastNotification("Sleep Cycle Logged!", "😴"); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
+function addAdvancedSleepLog() {
+    let appToday = getAppToday();
+    const todayStr = appToday.toDateString();
+    const bedtime = document.getElementById('sleepBedtime').value;
+    const wakeup = document.getElementById('sleepWakeup').value;
+    const interruptions = parseInt(document.getElementById('sleepInterruptions').value);
+    const dreamText = document.getElementById('dreamInput').value;
+    if (!bedtime || !wakeup) return displayPremiumToastNotification("Fill Bedtime & Wakeup!", "❌");
+    let bParts = bedtime.split(':');
+    let wParts = wakeup.split(':');
+    let bMin = parseInt(bParts[0]) * 60 + parseInt(bParts[1]);
+    let wMin = parseInt(wParts[0]) * 60 + parseInt(wParts[1]);
+    let diffMin = wMin - bMin;
+    if (diffMin < 0) diffMin += 1440;
+    let totalHours = diffMin / 60;
+    let baseEfficiency = 100 - (interruptions * 12);
+    if (totalHours < 6) baseEfficiency -= (6 - totalHours) * 15;
+    if (totalHours > 9) baseEfficiency -= (totalHours - 9) * 5;
+    if (baseEfficiency < 20) baseEfficiency = 20;
+    let finalScore = Math.round(baseEfficiency);
+    sleepLogs = sleepLogs.filter(s => s.date !== todayStr);
+    sleepLogs.unshift({ id: Date.now(), hours: parseFloat(totalHours.toFixed(1)), bedtime: bedtime, wakeup: wakeup, score: finalScore, interruptions: interruptions, date: todayStr });
+    localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs));
+    {
+        let aiData = safeGetItem('ai_sleep_recovery', null);
+        if (aiData && aiData.date === todayStr) {
+            localStorage.removeItem('ai_sleep_recovery');
+            if (document.getElementById('aiSleepAnalysisBox')) document.getElementById('aiSleepAnalysisBox').style.display = 'none';
+        }
+    }
+    if (dreamText.trim() !== '') localStorage.setItem('dream_log_' + todayStr, dreamText);
+
+    // Fields clear pannuvom, but dream analysis-ku munnadiye dreamText-ஐ capture பண்ணிட்டோம்
+    document.getElementById('sleepBedtime').value = '';
+    document.getElementById('sleepWakeup').value = '';
+    document.getElementById('dreamInput').value = '';
+
+    renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard();
+
+    // Same button-லேயே: dream இருந்தா AI analysis modal open ஆகும், இல்லனா simple toast மட்டும்
+    if (dreamText.trim() !== '') {
+        displayPremiumToastNotification("Sleep Cycle Logged! கனவை AI analyze பண்றேன்...", "😴");
+        analyzeDreamWithAI(dreamText, true);
+    } else {
+        displayPremiumToastNotification("Sleep Cycle Logged!", "😴");
+    }
+}
 function deleteSleepLog(id) { triggerDeviceHapticPulse(); sleepLogs = sleepLogs.filter(s => s.id !== id); localStorage.setItem('person_sleep_logs', JSON.stringify(sleepLogs)); renderSleepLogs(); calculateSleepParagraphAnalysis(); updateRecoveryRing(); updateCEODashboard(); }
 function renderSleepLogs() { const container = document.getElementById('sleepListContainer'); if(!container) return; container.innerHTML = ''; sleepLogs.forEach(s => { const li = document.createElement('li'); li.className = 'list-item'; li.style.borderLeftColor = s.score >= 80 ? 'var(--neon-green)' : (s.score >= 55 ? 'var(--neon-gold)' : 'var(--neon-red)'); li.innerHTML = `<div><b>${s.hours} Hours</b> (${s.bedtime} - ${s.wakeup})<br><small style="color:var(--text-secondary)">Efficiency: ${s.score}% • Interrupts: ${s.interruptions}</small></div><button class="delete-btn" onclick="deleteSleepLog(${s.id})">🗑️</button>`; container.appendChild(li); }); renderSleepDebtCalculator(); renderNapLogs(); }
 
