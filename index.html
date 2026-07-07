@@ -1764,21 +1764,34 @@ async function roastMyMonth() {
     try { let aiResponse = await askGemini(prompt); playAiTyping(aiResponse, document.getElementById('aiTypingText')); } catch(e) { document.getElementById('aiTypingText').innerHTML = "AI Error."; }
 }
 async function analyzeDreamWithAI(dreamTextParam, silent) {
-    let dreamText = (dreamTextParam !== undefined && dreamTextParam !== null ? dreamTextParam : document.getElementById('dreamInput').value).trim();
+    let dreamInputElem = document.getElementById('dreamInput');
+    let dreamText = (dreamTextParam !== undefined && dreamTextParam !== null ? dreamTextParam : (dreamInputElem ? dreamInputElem.value : '')).trim();
+    
     if (!dreamText) {
         if (!silent) displayPremiumToastNotification("முதலில் கனவை டைப் செய்யவும்!", "❌");
         return;
     }
-    
-    triggerDeviceHapticPulse();
+
+    // மொபைலில் Haptic சப்போர்ட் இல்லை என்றால் App Freeze ஆகாமல் இருக்க Try-Catch
+    try {
+        if (typeof triggerDeviceHapticPulse === 'function') {
+            triggerDeviceHapticPulse();
+        }
+    } catch (e) {
+        console.log("Haptic Pulse ignored on mobile");
+    }
+
     openModalWithHistory('aiEngineModal');
     document.getElementById('aiHeaderTitle').innerText = "🔮 TOBI DREAM ANALYSIS";
     document.getElementById('aiTypingText').innerHTML = "உங்கள் ஆழ்மனதை ஆராய்கிறேன்...";
     document.getElementById('aiActionButtons').innerHTML = ''; // Loading
     
+    // todayDate variable வேலை செய்யவில்லை என்றாலும் crash ஆகாமல் இருக்க பாதுகாப்பு
+    let currentDate = typeof todayDate !== 'undefined' ? todayDate : new Date().toLocaleDateString('en-GB');
+
     let prompt = `நான் கண்ட கனவு: "${dreamText}".
     
-    இன்றைய தேதி: ${todayDate}
+    இன்றைய தேதி: ${currentDate}
 
     என் முழு ஜாதக விவரம்: பிறந்த தேதி 12-03-2000, நேரம் மாலை 4:10 PM, ஊர் மதுரை. ராசி: ரிஷபம், நட்சத்திரம்: ரோகிணி, லக்னம்: கடகம்.
 
@@ -1803,10 +1816,10 @@ async function analyzeDreamWithAI(dreamTextParam, silent) {
 
     1. 🧠 உளவியல் பகுப்பாய்வு: இந்தக் கனவு எனது ஆழ்மனதின் எந்த எண்ணம், பயம், ஆசை அல்லது unresolved விஷயத்தைக் குறிக்கிறது என்பதை விரிவாக விளக்கு.
     2. 📜 புராண/இதிகாச தொடர்பு: இந்தக் கனவில் வரும் குறியீடுகள் (symbols, நபர்கள், சம்பவங்கள்) எந்த புராண கதை, இதிகாசம் (மகாபாரதம்/ராமாயணம்/பகவத் புராணம் etc.) அல்லது தத்துவத்துடன் ஒத்துப்போகிறது என்று ஒரு சிறு புராணக் கதையையோ குறிப்பையோ சொல்லி விளக்கு.
-    3. 🌌 ஏன் இந்த கனவு வந்தது: இப்போதைய என் வாழ்க்கை சூழ்நிலை (ஜிம், படிப்பு TNPSC, வேலை, குடும்பம்) வைத்து ஏன் இப்போது இந்த மாதிரி கனவு வருகிறது என்று காரணம் சொல்லு.
+    3. 🌌 ஏன் இந்த கனவு வந்தது: இப்போதைய என் வாழ்க்கை சூழ்நிலை வைத்து ஏன் இப்போது இந்த மாதிரி கனவு வருகிறது என்று காரணம் சொல்லு.
     4. 🔮 பிரபஞ்சம் சொல்ல வருவது என்ன: இந்தக் கனவு மூலமா universe/பிரபஞ்சம் எனக்கு என்ன செய்தி, எச்சரிக்கை அல்லது வழிகாட்டுதலை தர நினைக்குது என்று சொல்லு.
     5. 🪐 தசா நிலை பொருத்தம்: மேலே கொடுத்த முழு ராசி & நவாம்ச கிரக நிலைகளை வைத்து, இப்போதைய தசா/புத்தி காலகட்டம் (Vimshottari Dasa) இந்த கனவோட எப்படி பொருந்துது, தசை சரியா function ஆகுதான்னு அல்லது ஏதாவது கவனிக்கணுமான் சொல்லு.
-    6.    இன்று என்னுடைய நாள் எப்படி இருக்கும் என்று என் முழு ஜோதிட பலனை தெளிவாக ஆராய்ந்து எனக்கு 10 வரிகளில் பதில் சொல்லு.
+    6. 📅 இன்றைய ஜோதிட பலன்:  இன்று என்னுடைய நாள் எப்படி இருக்கும் என்று என் முழு ஜோதிட பலனை தெளிவாக ஆராய்ந்து எனக்கு 10 வரிகளில் பதில் சொல்லு.
   
     கடைசியில் ஒரு வரி நடைமுறை ஆலோசனை (practical takeaway) கொடு.`;
     
@@ -1815,7 +1828,9 @@ async function analyzeDreamWithAI(dreamTextParam, silent) {
         playAiTyping(aiResponse, document.getElementById('aiTypingText'));
         document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-purple); color:white;" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`;
     } catch(e) {
-        document.getElementById('aiTypingText').innerHTML = "AI Error. Try again.";
+        // மொபைலில் Error வந்தால் ஸ்கிரீன் Freeze ஆகாமல் இருக்க Error Message மற்றும் Close Button
+        document.getElementById('aiTypingText').innerHTML = `<span style="color:#ff4444;">⚠️ AI Error. மொபைல் நெட்வொர்க் அல்லது API-ஐ சரிபார்க்கவும்.</span>`;
+        document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:#ff4444; color:white; padding: 10px;" onclick="closeModalAction('aiEngineModal')">Close</button>`;
     }
 }
 async function triggerHeatWaveProtocol() {
