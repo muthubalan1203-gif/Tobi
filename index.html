@@ -1776,8 +1776,20 @@ async function analyzeDreamWithAI() {
     document.getElementById('aiTypingText').innerHTML = "உங்கள் ஆழ்மனதை ஆராய்கிறேன்...";
     document.getElementById('aiActionButtons').innerHTML = ''; // Loading
     
-    let prompt = `நான் கண்ட கனவு: "${dreamText}". 
-    நீ ஒரு சிறந்த உளவியலாளர் மற்றும் தத்துவஞானி (Krishna's philosophy). இந்தக் கனவு எனது ஆழ்மனதின் எந்த எண்ணத்தைக் குறிக்கிறது என்பதை உளவியல் ரீதியாகவும், ஒரு சிறு பகவத் கீதை தத்துவத்துடனும் இணைத்து எனக்கு தமிழில் சுருக்கமாக (3-4 வரிகளில்) விளக்கவும்.`;
+    let prompt = `நான் கண்ட கனவு: "${dreamText}".
+
+    என் ஜாதக விவரம்: பிறந்த தேதி 12-03-2000, நேரம் மாலை 4:10, ஊர் மதுரை. ராசி: ரிஷபம், நட்சத்திரம்: ரோகிணி, லக்னம்: கடகம்.
+
+    நீ ஒரு சிறந்த உளவியலாளர், புராண/இதிகாச அறிஞர் மற்றும் ஜோதிடர் (ஸ்ரீ கிருஷ்ணரின் தத்துவத்தையும் அறிந்தவன்). இந்தக் கனவை முழுமையாக, ஆழமாக பகுப்பாய்வு செய்து முழுவதும் தமிழில்  விளக்கு. கீழ்க்கண்ட எல்லா அம்சங்களையும் தனித்தனி பத்திகளாக தெளிவாக கொடு, 3-4 வரிகளில் சுருக்கிடாதே — முழு விவரமாக எழுது:
+
+    1. 🧠 உளவியல் பகுப்பாய்வு: இந்தக் கனவு எனது ஆழ்மனதின் எந்த எண்ணம், பயம், ஆசை அல்லது unresolved விஷயத்தைக் குறிக்கிறது என்பதை விரிவாக விளக்கு.
+    2. 📜 புராண/இதிகாச தொடர்பு: இந்தக் கனவில் வரும் குறியீடுகள் (symbols, நபர்கள், சம்பவங்கள்) எந்த புராண கதை, இதிகாசம் (மகாபாரதம்/ராமாயணம்/பகவத் புராணம் etc.) அல்லது தத்துவத்துடன் ஒத்துப்போகிறது என்று ஒரு சிறு புராணக் கதையையோ குறிப்பையோ சொல்லி விளக்கு.
+    3. 🌌 ஏன் இந்த கனவு வந்தது: இப்போதைய என் வாழ்க்கை சூழ்நிலை (ஜிம், படிப்பு TNPSC, வேலை, குடும்பம்) வைத்து ஏன் இப்போது இந்த மாதிரி கனவு வருகிறது என்று காரணம் சொல்லு.
+    4. 🔮 பிரபஞ்சம் சொல்ல வருவது என்ன: இந்தக் கனவு மூலமா universe/பிரபஞ்சம் எனக்கு என்ன செய்தி, எச்சரிக்கை அல்லது வழிகாட்டுதலை தர நினைக்குது என்று சொல்லு.
+    5. 🪐 தசா நிலை பொருத்தம்: மேலே கொடுத்த ஜாதக விவரத்தை வைத்து, இப்போதைய தசா/புத்தி காலகட்டம் (Vimshottari Dasa) இந்த கனவோட எப்படி பொருந்துது, தசை சரியா function ஆகுதான்னு அல்லது ஏதாவது கவனிக்கணுமான் சொல்லு.
+    6.இன்று என்னுடைய நாள் எப்படி இருக்கும் என்று என் முழு ஜோதிட பலனை தெளிவாக ஆராய்ந்து எனக்கு பதில் சொல்லு.
+  
+    கடைசியில் ஒரு வரி நடைமுறை ஆலோசனை (practical takeaway) கொடு.`;
     
     try {
         let aiResponse = await askGemini(prompt);
@@ -6326,7 +6338,7 @@ function renderGroceryUI(plan) {
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <div style="text-align:right;">
-                        <span class="grocery-qty" style="display:block; font-size:0.75rem;">${item.qty}</span>
+                        <input type="text" value="${item.qty}" onchange="updateGroceryItemQty('${item.id}', this.value)" style="width:52px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--neon-cyan); font-size:0.75rem; padding:2px 4px; text-align:right; margin-bottom:3px;">
                         <div style="display:flex; align-items:center; gap:2px; justify-content:flex-end;">
                             <span style="font-size:0.75rem; color:var(--text-secondary);">₹</span>
                             <input type="number" value="${item.price||0}" onchange="updateGroceryItemPrice('${item.id}', this.value)" style="width:52px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-secondary); font-size:0.75rem; padding:2px 4px;">
@@ -6345,7 +6357,7 @@ function renderGroceryUI(plan) {
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <div style="text-align:right;">
-                        <span class="grocery-qty" style="display:block; font-size:0.75rem;">${item.qty}</span>
+                        <input type="text" value="${item.qty}" onchange="updateManualGroceryItemQty('${type}','${item.id}', this.value)" style="width:52px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--neon-cyan); font-size:0.75rem; padding:2px 4px; text-align:right; margin-bottom:3px;">
                         <div style="display:flex; align-items:center; gap:2px; justify-content:flex-end;">
                             <span style="font-size:0.75rem; color:var(--text-secondary);">₹</span>
                             <input type="number" value="${item.price||0}" onchange="updateManualGroceryItemPrice('${type}','${item.id}', this.value)" style="width:52px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-secondary); font-size:0.75rem; padding:2px 4px;">
@@ -6427,6 +6439,25 @@ function updateManualGroceryItemPrice(type, id, newPrice) {
     let price = parseFloat(newPrice) || 0;
     let item = plan.manual[type].find(i => i.id === id);
     if (item) { item.price = price; saveGroceryPlan(plan); renderGroceryUI(plan); }
+}
+
+function updateGroceryItemQty(id, newQty) {
+    let plan = getGroceryPlan();
+    if (!plan) return;
+    let qty = (newQty || '').trim() || '1';
+    let found = false;
+    ['monthly','weekly'].forEach(type => {
+        (plan[type]||[]).forEach(cat => cat.items.forEach(item => { if (item.id === id) { item.qty = qty; found = true; } }));
+    });
+    if (found) { saveGroceryPlan(plan); renderGroceryUI(plan); }
+}
+
+function updateManualGroceryItemQty(type, id, newQty) {
+    let plan = getGroceryPlan();
+    if (!plan || !plan.manual || !plan.manual[type]) return;
+    let qty = (newQty || '').trim() || '1';
+    let item = plan.manual[type].find(i => i.id === id);
+    if (item) { item.qty = qty; saveGroceryPlan(plan); renderGroceryUI(plan); }
 }
 
 function toggleRemoveGroceryItem(id) {
@@ -6886,6 +6917,10 @@ document.addEventListener("visibilitychange", () => {
     if (isAppVisible) {
         drawNeural();
         checkRemindersPopup();
+        // FIX: interval set panradha mattum illama, immediate-ah check pannurom
+        // munnadi visible aana udane check panala na, 60 sec wait pannama app close pannitta
+        // night review miss aayiduchu. Ipo app open pandra second-ilaye check aagum.
+        checkNightlyPlanningTimer();
         if (!batteryIntervalNightly) batteryIntervalNightly = setInterval(checkNightlyPlanningTimer, 60000);
     } else {
         cancelAnimationFrame(neuralAnimationId);
