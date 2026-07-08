@@ -2576,11 +2576,22 @@ async function askGemini(prompt, imageBase64 = null, imageMimeType = 'image/jpeg
     parts.push({ text: prompt });
 
     try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts }] })
-        });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000); // Mobile data network-ல fetch hang ஆகி box "Loading..." ஆகவே இருக்கிற பிரச்சனையை தவிர்க்க 25s timeout
+        let response;
+        try {
+            response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts }] }),
+                signal: controller.signal
+            });
+        } finally { clearTimeout(timeoutId); }
+
+        if (!response.ok) {
+            console.error("Gemini HTTP Error:", response.status);
+            return `Sorry Muthubalan, Gemini server error (${response.status}). கொஞ்ச நேரம் கழிச்சு try பண்ணுங்க.`;
+        }
 
         const data = await response.json();
 
@@ -2590,9 +2601,12 @@ async function askGemini(prompt, imageBase64 = null, imageMimeType = 'image/jpeg
             return "API Error: " + data.error.message + "\n\nSettings-ல correct API Key add பண்ணுங்க.";
         }
 
-        return data.candidates[0].content.parts[0].text;
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) return "Sorry Muthubalan, AI-கிட்ட இருந்து பதில் வரல (safety filter/empty response). மீண்டும் முயற்சிக்கவும்.";
+        return text;
     } catch (error) {
         console.error("Network Error:", error);
+        if (error.name === 'AbortError') return "⏱️ Network மெதுவா இருக்கு, AI Response Timeout ஆயிடுச்சு. Internet சரி பண்ணி மீண்டும் முயற்சிக்கவும்.";
         return "Sorry Muthubalan, Gemini கூட connect பண்ண முடியல. Internet check செய்யுங்க.";
     }
 }
@@ -7650,6 +7664,19 @@ checkGymAttendanceStatus();
 // 🕉️ JYOTISH INSIGHTS MODULE
 // ==========================================
 const JYOTISH_PROFILE = { rasi:"ரிஷபம் (Rishabam)", nakshatra:"ரோகிணி (Rohini)", lagna:"கடகம் (Kadagam)", dob:"12-03-2000", tob:"4:10 PM", pob:"Madurai, Tamil Nadu" };
+// Device-local API Key மிஸ்ஸிங்-ஆ இருந்தா, box-லேயே direct-ஆ காரணத்தை காட்ட (modal மிஸ் ஆனாலும் phone-ல தெளிவா தெரியும்)
+function apiKeyMissingHTML() {
+    return `⚠️ <b>இந்த Phone/Browser-ல Gemini API Key இல்லை!</b><br><br>PC-ல போட்ட Key இந்த Device-க்கு தானா வராது — localStorage Device-க்கு Device தனித்தனி. ஒவ்வொரு Phone/Browser-லயும் தனியா Settings (⚙️) → API Key section-ல Key-ஐ Paste பண்ணி Save பண்ணணும்.<br><br>அல்லது ஏற்கனவே "☁️ Sync to Cloud" பண்ணிருந்தா, இந்த Device-ல "📥 Restore from Cloud" பண்ணி பாருங்க.`;
+}
+// Sில mobile WebView-க்கு (Android) 'ta-IN' locale support இல்லாம toLocaleString() error/wrong output தரலாம் — safe fallback இப்போ
+const ENGLISH_MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+function safeMonthName(date) {
+    try {
+        const m = date.toLocaleString('ta-IN', { month: 'long' });
+        if (m && m.length > 0) return m;
+    } catch(e) { console.log('ta-IN month locale failed, using fallback:', e.message); }
+    return ENGLISH_MONTH_NAMES[date.getMonth()];
+}
 
 function extractField(raw, key) {
     let m = raw.match(new RegExp(key + ':\\s*([\\s\\S]*?)(?:\\n[A-Z_]+:|$)'));
@@ -7665,6 +7692,7 @@ async function loadDailyAstroBriefing(force) {
     if (!box) return;
     let cached = localStorage.getItem(cacheKey);
     if (cached && !force) { box.innerHTML = cached; return; }
+    if (!GEMINI_API_KEY) { box.innerHTML = apiKeyMissingHTML(); return; }
     box.innerHTML = "⏳ ஏற்றுகிறேன்...";
     const prompt = `நீ ஒரு அனுபவமிக்க தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
 இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu.
@@ -7707,9 +7735,9 @@ async function loadFullDashaTimeline(force) {
     box.style.display = 'block';
     let cached = localStorage.getItem(cacheKey);
     if (cached && !force) { box.innerHTML = cached; return; }
+    if (!GEMINI_API_KEY) { box.innerHTML = apiKeyMissingHTML(); return; }
     box.innerHTML = "⏳ கணக்கிடுகிறேன்...";
-    const prompt = `நீ ஒரு Vedic Jyotish நிபுணர். ஜாதகரின் நட்சத்திரம் ரோகிணி (Chandra Nakshatra),பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob},ஊர் ${JYOTISH_PROFILE.pob}.
-இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu. தற்போது Chandra Maha Dasa, Budha Bhukti நடக்கிறது (approx மார்ச் 2026 முதல் ஆகஸ்ட் 2027 வரை).
+    const prompt = `நீ ஒரு Vedic Jyotish நிபுணர். அடிப்படை: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.ி (Chandra Nakshatra), தற்போது Chandra Maha Dasa, Budha Bhukti நடக்கிறது (approx மார்ச் 2026 முதல் ஆகஸ்ட் 2027 வரை).
 Vimshottari Dasa system படி, Chandra Maha Dasa (10 வருடம்) க்கு பிறகு வரும் அடுத்த Maha Dasa-க்களின் வரிசையையும் (Mars 7yrs, Rahu 18yrs, Jupiter 16yrs, Saturn 19yrs, Mercury 17yrs, Ketu 7yrs, Venus 20yrs, Sun 6yrs), தோராயமான தொடக்க வருடங்களையும் ஒரு தெளிவான bullet list-ஆ தமிழில் தா. கடைசியில் ஒரு வரி disclaimer சேர் - "இவை தோராயமான கணக்கீடுகள், துல்லியமான தேதிக்கு ஜாதகர் ஒரு நிபுணரை அணுகவும்."`;
     try {
         let res = await askGemini(prompt);
@@ -7728,9 +7756,9 @@ async function loadWeeklyGocharaSadeSati(force) {
     if (!box) return;
     let cached = localStorage.getItem(weekKey);
     if (cached && !force) { box.innerHTML = cached; return; }
+    if (!GEMINI_API_KEY) { box.innerHTML = apiKeyMissingHTML(); return; }
     box.innerHTML = "⏳ ஏற்றுகிறேன்...";
-    const prompt = `நீ ஒரு தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
-இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu.
+    const prompt = `நீ ஒரு தமிழ் ஜோதிடர். ஜாதக விவரம்:  ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
 இந்த வாரத்திற்கான (${getIsoDateStr(monday)} முதல்) Gochara (கிரக பெயர்ச்சி) பலன்களையும், தற்போது சனி பெயர்ச்சி Sade Sati நிலையையும் சுருக்கமா தமிழில் எழுது.
 STRICT FORMAT-ல மட்டும் தா:
 SADE_SATI: [YES/NO + ஒரு வரி விளக்கம்]
@@ -7753,10 +7781,10 @@ async function findMuhurtham(presetPurpose) {
     const box = document.getElementById('muhurthamResultBox');
     if (!box) return;
     box.style.display = 'block';
+    if (!GEMINI_API_KEY) { box.innerHTML = apiKeyMissingHTML(); return; }
     box.innerHTML = "⏳ நல்ல நாள் தேடுகிறேன்...";
     const appToday = getAppToday();
     const prompt = `நீ ஒரு தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
-இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu.
 காரியம்: "${purpose}". இன்றைய தேதி: ${getIsoDateStr(appToday)}.
 அடுத்த 30 நாட்களுக்குள் இந்த காரியத்திற்கு ஏற்ற 2-3 நல்ல தேதிகளை (traditional Jyotish principles அடிப்படையில், guidance மட்டும்) பரிந்துரை செய். ஒவ்வொரு தேதிக்கும் ஏன் நல்லதுனு ஒரு வரி காரணம் தா. தமிழில் சுருக்கமா, bullet points-ஆ.`;
     try {
@@ -7773,8 +7801,9 @@ async function loadPoojaVratList(force) {
     if (!box) return;
     let cached = localStorage.getItem(monthKey);
     if (cached && !force) { box.innerHTML = cached; return; }
+    if (!GEMINI_API_KEY) { box.innerHTML = apiKeyMissingHTML(); return; }
     box.innerHTML = "⏳ ஏற்றுகிறேன்...";
-    const monthName = appToday.toLocaleString('ta-IN', { month: 'long' });
+    const monthName = safeMonthName(appToday);
     const prompt = `நீ ஒரு தமிழ் பஞ்சாங்க நிபுணர். ரோகிணி நட்சத்திரம், ரிஷப ராசிக்காரருக்கு இந்த மாதம் (${monthName} ${appToday.getFullYear()}) வரும் முக்கியமான Ekadashi, Pradosham, Amavasai, Pournami, மற்றும் முக்கிய பண்டிகை தேதிகளை பட்டியலிடு. ஒவ்வொன்றுக்கும் தோராய தேதி மற்றும் ஒரு வரி முக்கியத்துவம் தமிழில் தா. Bullet points-ஆ மட்டும் தா, markdown formatting வேண்டாம்.`;
     try {
         let res = await askGemini(prompt);
@@ -7793,7 +7822,7 @@ async function loadPoojaVratDatesStructured(force) {
         if (cached) { checkPoojaVratTodayNotification(); return; }
     }
     if (!GEMINI_API_KEY) return; // API key இல்லனா silent-ஆ skip, banner button மூலம் பின்னாடி try பண்ணலாம்
-    const monthName = appToday.toLocaleString('ta-IN', { month: 'long' });
+    const monthName = safeMonthName(appToday);
     const prompt = `நீ ஒரு தமிழ் பஞ்சாங்க நிபுணர். இந்த மாதம் (${monthName} ${appToday.getFullYear()}) வரும் Ekadashi, Pradosham, Amavasai, Pournami, மற்றும் முக்கிய பண்டிகை நாட்களை பட்டியலிடு.
 STRICT FORMAT-ல மட்டும் பதில் தா — தலைப்பு/intro/வேறு எந்த வரியும் சேர்க்காதே. ஒவ்வொரு நாளும் ஒரு தனி வரியில், இந்த format-ல மட்டும்:
 YYYY-MM-DD | நாள் பெயர் | ஒரு வரி முக்கியத்துவம்`;
@@ -7854,10 +7883,10 @@ async function loadTodayMantraSuggestion(force) {
     if (!box) return;
     let cached = localStorage.getItem(cacheKey);
     if (cached && !force) { box.innerHTML = cached; return; }
+    if (!GEMINI_API_KEY) { box.innerHTML = apiKeyMissingHTML(); return; }
     box.innerHTML = "⏳ இன்றைய மந்திரம் தேடுகிறேன்...";
     const todayName = daysOfWeek[appToday.getDay()];
     const prompt = `நீ ஒரு தமிழ் ஜோதிட/ஆன்மீக நிபுணர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
-இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu.
 இன்று ${todayName}. இன்றைய கிழமைக்கும், நட்சத்திரத்திற்கும் ஏற்ற ஒரு மந்திரம்/ஸ்லோகத்தை பரிந்துரை செய்.
 STRICT FORMAT-ல மட்டும் பதில் தா (வேறு எதுவும் சேர்க்காதே):
 MANTRAM: [மந்திரம் பெயர் மற்றும் தேவதை]
