@@ -746,6 +746,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <button id="tab-sleep" class="tab-btn" onclick="switchPage('sleep')">😴 Sleep</button>
 <button id="tab-notes" class="tab-btn" onclick="switchPage('notes')">📝 Reminders</button>
 <button id="tab-calendar" class="tab-btn" onclick="switchPage('calendar')">📅 Calendar</button>
+<button id="tab-jyotish" class="tab-btn" onclick="switchPage('jyotish')">🕉️ Jyotish</button>
 </div>
 <div class="main-content">
 <!-- GLOW UP PAGE -->
@@ -1515,6 +1516,106 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 </div>
 </div>
 
+<!-- JYOTISH PAGE -->
+<div id="page-jyotish" class="page">
+<div class="page-banner" style="background:linear-gradient(135deg,#7c3aed,#a855f7); padding:15px; border-radius:16px; margin-bottom:15px; font-weight:900; text-align:center;">🕉️ JYOTISH INSIGHTS</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-purple);">
+  <h3 class="card-title">👤 Birth Profile</h3>
+  <p style="font-size:0.78rem; color:var(--text-secondary); line-height:1.6;">
+    ராசி: <b style="color:white;">ரிஷபம் (Rishabam)</b> &nbsp;|&nbsp; நட்சத்திரம்: <b style="color:white;">ரோகிணி (Rohini)</b><br>
+    லக்னம்: <b style="color:white;">கடகம் (Kadagam)</b> &nbsp;|&nbsp; பிறந்த தேதி: <b style="color:white;">12-03-2000, 4:10 PM, Madurai</b>
+  </p>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-gold);">
+  <h3 class="card-title">🌅 இன்றைய Astro Briefing</h3>
+  <p style="font-size:0.7rem; color:var(--text-secondary); margin-top:-8px;">பஞ்சாங்கம் • ராசி பலன் • சந்திராஷ்டமம் • Activity Tip</p>
+  <div id="astroBriefingBox" style="font-size:0.8rem; color:var(--text-secondary); margin:10px 0;">இன்னும் பார்க்கல. கீழே பட்டன் தட்டுங்க.</div>
+  <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="loadDailyAstroBriefing(false)">🔮 இன்றைய பஞ்சாங்கம் பார்</button>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-cyan);">
+  <h3 class="card-title">⏳ தசா-புத்தி நிலை</h3>
+  <p id="dashaCountdownText" style="font-size:0.82rem; color:var(--text-primary); line-height:1.6;"></p>
+  <div id="dashaTimelineBox" style="font-size:0.78rem; color:var(--text-secondary); margin:10px 0; display:none; white-space:pre-wrap; line-height:1.6;"></div>
+  <button class="btn-universal" style="background:var(--neon-cyan); color:black;" onclick="loadFullDashaTimeline(false)">📜 முழு தசா காலவரிசை பார்</button>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-red);">
+  <h3 class="card-title">🪐 வார Gochara &amp; Sade Sati</h3>
+  <div id="gocharaBox" style="font-size:0.8rem; color:var(--text-secondary); margin:10px 0;">இன்னும் பார்க்கல.</div>
+  <button class="btn-universal" style="background:var(--neon-red); color:white;" onclick="loadWeeklyGocharaSadeSati(false)">🪐 வார நிலை பார்</button>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-green);">
+  <h3 class="card-title">📅 முகூர்த்தம் கண்டுபிடி</h3>
+  <div class="form-group"><label>எந்த காரியத்திற்கு?</label><textarea id="muhurthamPurposeInput" class="form-control" rows="2" placeholder="எ.கா: புதிய வேலை தொடங்க, வீடு வாங்க..."></textarea></div>
+  <div style="display:flex; gap:8px;">
+    <button class="btn-universal" style="background:var(--neon-green); color:black; flex:1; font-size:0.8rem;" onclick="findMuhurtham()">🔍 நல்ல நாள் தேடு</button>
+    <button class="btn-universal" style="background:transparent; border:1px solid var(--neon-purple); color:var(--neon-purple); flex:1; font-size:0.72rem;" onclick="findMuhurtham('TNPSC Group IV Government Exam study plan / exam date')">🎯 TNPSC-க்கு நல்ல நாள்</button>
+  </div>
+  <div id="muhurthamResultBox" style="font-size:0.78rem; color:var(--text-secondary); margin-top:10px; display:none; white-space:pre-wrap; line-height:1.6;"></div>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-gold);">
+  <h3 class="card-title">🪔 இந்த மாத Pooja/Vrat நாட்கள்</h3>
+  <div id="poojaVratBox" style="font-size:0.78rem; color:var(--text-secondary); margin:10px 0;">இன்னும் பார்க்கல.</div>
+  <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="loadPoojaVratList(false)">📿 இந்த மாத விரத நாட்கள் பார்</button>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-purple);">
+  <h3 class="card-title">🧘 மந்திர ஜபம் Counter</h3>
+  <div style="text-align:center; margin:14px 0;">
+    <div id="japamCountText" style="font-size:1.6rem; font-weight:900; color:var(--neon-purple);">0 / 108</div>
+    <div style="background:rgba(255,255,255,0.04); height:6px; border-radius:3px; margin:8px 0;"><div id="japamFill" style="background:var(--neon-purple); height:100%; width:0%; border-radius:3px; transition:0.3s;"></div></div>
+  </div>
+  <div style="display:flex; gap:8px;">
+    <button class="btn-universal" style="background:var(--neon-purple); color:white; flex:2;" onclick="incrementJapam()">+1 ஜபம்</button>
+    <button class="btn-universal" style="background:transparent; border:1px solid var(--glass-border); color:var(--text-secondary); flex:1; font-size:0.72rem;" onclick="resetJapamToday()">Reset</button>
+  </div>
+  <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+    <input type="number" id="japamTargetInput" class="form-control" placeholder="Target (e.g 108)" style="flex:1;">
+    <button class="btn-universal" style="background:var(--neon-cyan); color:black; font-size:0.72rem; padding:8px 12px;" onclick="setJapamTarget()">Set</button>
+  </div>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-cyan);">
+  <h3 class="card-title">🗺️ ராசி Chart</h3>
+  <p style="font-size:0.66rem; color:var(--text-secondary); margin-top:-8px;">ஒவ்வொரு வீட்டிலும் கிரகங்களை type பண்ணுங்க</p>
+  <div id="rasiChartGrid"></div>
+  <button class="btn-universal" style="background:var(--neon-cyan); color:black; margin-top:10px;" onclick="saveChart('rasi')">💾 ராசி Chart Save</button>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-cyan);">
+  <h3 class="card-title">🗺️ நவாம்சம் Chart</h3>
+  <div id="navamsaChartGrid"></div>
+  <button class="btn-universal" style="background:var(--neon-cyan); color:black; margin-top:10px;" onclick="saveChart('navamsa')">💾 நவாம்சம் Chart Save</button>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-gold);">
+  <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="saveChartsToHistory()">🗂️ இப்போதைய இரண்டு Charts-ஐயும் History-ல Save பண்</button>
+  <h3 class="card-title" style="margin-top:16px;">📂 Chart History</h3>
+  <div id="chartHistoryList"></div>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-green);">
+  <h3 class="card-title">📞 குடும்பத்தினருடன் Connect</h3>
+  <p style="font-size:0.8rem; margin-bottom:10px;">இன்று அம்மா/அப்பாகிட்ட பேசினீங்களா? <span id="familyCallStatus" style="font-weight:700;"></span></p>
+  <button id="familyCallBtn" class="btn-universal" style="background:var(--neon-green); color:black;" onclick="toggleFamilyCallDone()">இன்று பேசினேன் ✅</button>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-red); margin-bottom:20px;">
+  <h3 class="card-title">🎯 இன்றைய Top 3 Priority</h3>
+  <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;"><input type="checkbox" id="priorityCheck1" onchange="toggleTop3Done(0)"><input type="text" id="priorityInput1" class="form-control" placeholder="Priority 1" style="flex:1;" onchange="saveTop3Priorities()"></div>
+  <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;"><input type="checkbox" id="priorityCheck2" onchange="toggleTop3Done(1)"><input type="text" id="priorityInput2" class="form-control" placeholder="Priority 2" style="flex:1;" onchange="saveTop3Priorities()"></div>
+  <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><input type="checkbox" id="priorityCheck3" onchange="toggleTop3Done(2)"><input type="text" id="priorityInput3" class="form-control" placeholder="Priority 3" style="flex:1;" onchange="saveTop3Priorities()"></div>
+  <button class="btn-universal" style="background:var(--neon-red); color:white;" onclick="saveTop3Priorities()">💾 Save Priorities</button>
+</div>
+
+</div>
+<!-- END JYOTISH PAGE -->
+
 <!-- MODALS -->
 <div id="aiEngineModal" class="ai-modal-overlay">
 <div class="ai-console-box">
@@ -1949,28 +2050,30 @@ async function checkDailyWisdom() {
     if (!localStorage.getItem('daily_wisdom_shown_' + todayStr)) {
         const prompt = "கிருஷ்ணரின் உபதேசங்களை (Bhagavad Gita quotes) பற்றி ஒரு சிறிய, ஊக்கமளிக்கும் தத்துவத்தை தமிழில் கொடு. ஒரு வரியில் இருக்கட்டும்.";
         
-        setTimeout(async () => {
-            triggerDeviceHapticPulse();
-            openModalWithHistory('aiEngineModal');
-            document.getElementById('aiHeaderTitle').innerText = "🌞 கிருஷ்ணரின் உபதேசம்"; // முதலில் தலைப்பை மட்டும் வைப்போம்
-            document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-gold); color:black;" onclick="closeModalAction('aiEngineModal')">நன்றி கிருஷ்ணா!</button>`;
-            
-            // 1. கிருஷ்ணரின் உபதேசத்தை AI மூலம் பெறுதல்
-            let krishnasWisdom = await askGemini(prompt);
-            
-            // 2. கிருஷ்ணரின் உபதேசத்தை மட்டும் முதலில் டைப் செய்தல்
-            let wisdomMsg = `கிருஷ்ணரின் உபதேசம்:\n\n" ${krishnasWisdom} "`;
-            
-            // playAiTyping முடிந்ததுமே "Good Morning Muthu" என்று சேர்க்க ஒரு சிறிய மாற்றம்
-            playAiTyping(wisdomMsg, document.getElementById('aiTypingText'));
-            
-            // 3. உபதேசம் டைப் ஆன பிறகு 3 விநாடிகள் கழித்து தலைப்பை மாற்றி மெசேஜை நிறைவு செய்தல்
-            setTimeout(() => {
-                document.getElementById('aiHeaderTitle').innerText = "🌞 Good Morning, Muthu!";
-                document.getElementById('aiTypingText').innerHTML += `\n\n------------------\nGood Morning Muthu🌅😘! உன் நாளை சிறப்பானதாகத் தொடங்கு! 🔥`;
-            }, 3000); 
-            
-            localStorage.setItem('daily_wisdom_shown_' + todayStr, 'true');
+        setTimeout(() => {
+            enqueueAiModal(async () => {
+                triggerDeviceHapticPulse();
+                openModalWithHistory('aiEngineModal');
+                document.getElementById('aiHeaderTitle').innerText = "🌞 கிருஷ்ணரின் உபதேசம்"; // முதலில் தலைப்பை மட்டும் வைப்போம்
+                document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-gold); color:black;" onclick="closeModalAction('aiEngineModal')">நன்றி கிருஷ்ணா!</button>`;
+
+                // 1. கிருஷ்ணரின் உபதேசத்தை AI மூலம் பெறுதல்
+                let krishnasWisdom = await askGemini(prompt);
+
+                // 2. கிருஷ்ணரின் உபதேசத்தை மட்டும் முதலில் டைப் செய்தல்
+                let wisdomMsg = `கிருஷ்ணரின் உபதேசம்:\n\n" ${krishnasWisdom} "`;
+
+                // playAiTyping முடிந்ததுமே "Good Morning Muthu" என்று சேர்க்க ஒரு சிறிய மாற்றம்
+                playAiTyping(wisdomMsg, document.getElementById('aiTypingText'));
+
+                // 3. உபதேசம் டைப் ஆன பிறகு 3 விநாடிகள் கழித்து தலைப்பை மாற்றி மெசேஜை நிறைவு செய்தல்
+                setTimeout(() => {
+                    document.getElementById('aiHeaderTitle').innerText = "🌞 Good Morning, Muthu!";
+                    document.getElementById('aiTypingText').innerHTML += `\n\n------------------\nGood Morning Muthu🌅😘! உன் நாளை சிறப்பானதாகத் தொடங்கு! 🔥`;
+                }, 3000);
+
+                localStorage.setItem('daily_wisdom_shown_' + todayStr, 'true');
+            });
         }, 3000);
     }
 }
@@ -2617,7 +2720,37 @@ function initVoiceCommand() { const SpeechRecognition = window.SpeechRecognition
 function verifyGymLocation() { if(navigator.geolocation) { navigator.geolocation.getCurrentPosition((pos) => { let appToday = getAppToday(); if(!localStorage.getItem('gym_checkin_' + appToday.toDateString())) { displayPremiumToastNotification("GPS Verified: Gym Arrived.", "📍"); localStorage.setItem('gym_checkin_' + appToday.toDateString(), 'true'); } }, (err) => { console.log("GPS skipped"); }); } }
 window.addEventListener('popstate', (e) => { const modals = document.querySelectorAll('.universal-modal, .ai-modal-overlay'); let modalClosed = false; modals.forEach(m => { if(m.style.display === 'flex' || m.style.display === 'block') { m.style.display = 'none'; modalClosed = true; } }); if(modalClosed) { history.pushState({app_running:true}, ""); } });
 function openModalWithHistory(modalId, displayType='flex') { document.querySelectorAll('.universal-modal, .ai-modal-overlay').forEach(m => m.style.display = 'none'); history.pushState({modalOpen:true}, ""); document.getElementById(modalId).style.display = displayType; }
-function closeModalAction(modalId) { document.getElementById(modalId).style.display = 'none'; if(history.state && history.state.modalOpen) { history.back(); } }
+
+// ==========================================
+// 🎬 AI MODAL QUEUE — ஒரு கார்டு close ஆனா தான் அடுத்தது வரும்
+// (Morning-ல Reminder + Krishna Quote ரெண்டும் ஒரே நேரத்தில் collide ஆகி,
+//  ஒண்ணு மட்டும் தான் தெரியும்னு இருந்த bug-க்கு fix)
+// ==========================================
+window.aiModalQueue = [];
+window.aiModalQueueBusy = false;
+
+function enqueueAiModal(taskFn) {
+    window.aiModalQueue.push(taskFn);
+    processAiModalQueue();
+}
+
+function processAiModalQueue() {
+    if (window.aiModalQueueBusy) return; // ஏற்கனவே ஒரு கார்டு காட்டிட்டு இருக்கு, wait பண்ணு
+    const existingModal = document.getElementById('aiEngineModal');
+    if (existingModal && (existingModal.style.display === 'flex' || existingModal.style.display === 'block')) return;
+    if (window.aiModalQueue.length === 0) return;
+
+    const nextTask = window.aiModalQueue.shift();
+    window.aiModalQueueBusy = true;
+    nextTask();
+}
+
+// aiEngineModal close ஆன உடனே, queue-ல இருக்கிற அடுத்த கார்டை காட்டும்
+function onAiModalClosed() {
+    window.aiModalQueueBusy = false;
+    setTimeout(processAiModalQueue, 400); // சின்ன gap கொடுத்து அடுத்த கார்டை காட்டுறோம்
+}
+function closeModalAction(modalId) { document.getElementById(modalId).style.display = 'none'; if(history.state && history.state.modalOpen) { history.back(); } if(modalId === 'aiEngineModal') { onAiModalClosed(); } }
 // FIX: t-dresswash (Saturday) + t-dressiron (Sunday) added to reset list
 function checkAndResetDailyTasks() {
     let appToday = getAppToday();
@@ -2652,7 +2785,7 @@ function triggerDeviceHapticPulse() { if("vibrate" in navigator) navigator.vibra
 function displayPremiumToastNotification(msgText, iconToken='🔥') { const toast = document.getElementById('premiumAppToast'); document.getElementById('toastIconElement').innerText = iconToken; document.getElementById('toastMessageText').innerText = msgText; triggerDeviceHapticPulse(); toast.classList.add('active-toast'); setTimeout(() => { toast.classList.remove('active-toast'); }, 4200); }
 
 // Page order for swipe direction detection
-const PAGE_ORDER = ['glowup','gym','diet','expense','sleep','notes','calendar'];
+const PAGE_ORDER = ['glowup','gym','diet','expense','sleep','notes','calendar','jyotish'];
 let currentPageId = 'glowup';
 let isPageTransitioning = false;
 
@@ -3039,11 +3172,13 @@ function logGymMood(mood, elem) {
         
         // அரை விநாடி கழித்து AI Modal ஓபன் ஆகும்
         setTimeout(() => {
-            triggerDeviceHapticPulse();
-            openModalWithHistory('aiEngineModal');
-            document.getElementById('aiHeaderTitle').innerText = "🦚 TOBI-யின் தத்துவம்";
-            document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-gold); color:black;" onclick="closeModalAction('aiEngineModal')">உணர்ந்தேன் (Understood)</button>`;
-            playAiTyping(`" ${randomQuote} "\n\n- TOBI (Your Philosophical Anchor)`, document.getElementById('aiTypingText'));
+            enqueueAiModal(() => {
+                triggerDeviceHapticPulse();
+                openModalWithHistory('aiEngineModal');
+                document.getElementById('aiHeaderTitle').innerText = "🦚 TOBI-யின் தத்துவம்";
+                document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-gold); color:black;" onclick="closeModalAction('aiEngineModal')">உணர்ந்தேன் (Understood)</button>`;
+                playAiTyping(`" ${randomQuote} "\n\n- TOBI (Your Philosophical Anchor)`, document.getElementById('aiTypingText'));
+            });
         }, 500); 
     }
 }
@@ -4919,22 +5054,22 @@ function checkRemindersPopup() {
     });
     if (activeAlerts.length > 0) {
         setTimeout(() => {
-            const anyModalOpen = document.getElementById('aiEngineModal');
-            if (anyModalOpen && (anyModalOpen.style.display === 'flex' || anyModalOpen.style.display === 'block')) return;
-            alertKeys.forEach(k => sessionStorage.setItem(k, 'shown'));
-            triggerDeviceHapticPulse();
-            openModalWithHistory('aiEngineModal');
-            document.getElementById('aiHeaderTitle').innerText = "⏰ REMINDER ALERT";
-            document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`;
-            let aiReport = "🔔 MUTHUBALAN, ATTENTION PLEASE!\n=========================\n\n";
-            activeAlerts.forEach(a => aiReport += "⚡ " + a + "\n\n");
-            aiReport += "குறிப்பு: Reminders பக்கத்தில் ✅ Complete செய்யும் வரை\nஆப் திறக்கும் ஒவ்வொரு முறையும் ஒரு முறை மட்டும் வரும்.";
-            playAiTyping(aiReport, document.getElementById('aiTypingText'));
+            enqueueAiModal(() => {
+                alertKeys.forEach(k => sessionStorage.setItem(k, 'shown'));
+                triggerDeviceHapticPulse();
+                openModalWithHistory('aiEngineModal');
+                document.getElementById('aiHeaderTitle').innerText = "⏰ REMINDER ALERT";
+                document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Acknowledge</button>`;
+                let aiReport = "🔔 MUTHUBALAN, ATTENTION PLEASE!\n=========================\n\n";
+                activeAlerts.forEach(a => aiReport += "⚡ " + a + "\n\n");
+                aiReport += "குறிப்பு: Reminders பக்கத்தில் ✅ Complete செய்யும் வரை\nஆப் திறக்கும் ஒவ்வொரு முறையும் ஒரு முறை மட்டும் வரும்.";
+                playAiTyping(aiReport, document.getElementById('aiTypingText'));
+            });
         }, 1500);
     }
 }
 
-function checkSundayAudit() { let appToday = getAppToday(); const realNow = new Date(); if(appToday.getDay() === 0) { let btn = document.getElementById('sundayAuditBtn'); if(btn) btn.style.display = 'block'; if(realNow.getHours() >= 18) { const weekKey = 'weekly_ai_audit_' + getIsoDateStr(appToday); if(!localStorage.getItem(weekKey)) { runWeeklyAudit(); localStorage.setItem(weekKey, 'true'); } } } }
+function checkSundayAudit() { let appToday = getAppToday(); const realNow = new Date(); if(appToday.getDay() === 0) { let btn = document.getElementById('sundayAuditBtn'); if(btn) btn.style.display = 'block'; if(realNow.getHours() >= 18) { const weekKey = 'weekly_ai_audit_' + getIsoDateStr(appToday); if(!localStorage.getItem(weekKey)) { enqueueAiModal(() => runWeeklyAudit()); localStorage.setItem(weekKey, 'true'); } } } }
 
 async function runWeeklyAudit() {
     // வாராந்திர டேட்டாவைச் சேகரித்தல்
@@ -5635,13 +5770,9 @@ function checkNightlyPlanningTimer() {
     let now = new Date(); 
     let todayDateStr = appToday.toDateString(); 
     // >= 21 nu change panniruken (9 PM mela eppo open pannalum varum)
-    if(now.getHours() >= 21 && !localStorage.getItem('night_review_done_' + todayDateStr)) { 
-        // Check if a modal is already open
-        const existingModal = document.getElementById('aiEngineModal');
-        if(existingModal && (existingModal.style.display === 'flex' || existingModal.style.display === 'block')) {
-            return; // Modal already open, skip
-        }
-        triggerNightlyStrictReview(); 
+    if(now.getHours() >= 21 && !localStorage.getItem('night_review_done_' + todayDateStr) && !window.nightlyReviewQueued) { 
+        window.nightlyReviewQueued = true;
+        enqueueAiModal(() => triggerNightlyStrictReview());
     } 
 }
 
@@ -7490,6 +7621,333 @@ updateStreakDisplay = function() {
 window.addEventListener('resize', () => { resizeNeural(); resizeConfetti(); });
 
 checkGymAttendanceStatus();
+
+// ==========================================
+// 🕉️ JYOTISH INSIGHTS MODULE
+// ==========================================
+const JYOTISH_PROFILE = { rasi:"ரிஷபம் (Rishabam)", nakshatra:"ரோகிணி (Rohini)", lagna:"கடகம் (Kadagam)", dob:"12-03-2000", tob:"4:10 PM", pob:"Madurai, Tamil Nadu" };
+
+function extractField(raw, key) {
+    let m = raw.match(new RegExp(key + ':\\s*([\\s\\S]*?)(?:\\n[A-Z_]+:|$)'));
+    return m ? m[1].trim() : '';
+}
+
+// ---- 1. Daily Astro Briefing (Panchangam + Rasi Palan + Chandrashtama + Activity tip) ----
+async function loadDailyAstroBriefing(force) {
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
+    const cacheKey = 'astro_briefing_' + todayStr;
+    const box = document.getElementById('astroBriefingBox');
+    if (!box) return;
+    let cached = localStorage.getItem(cacheKey);
+    if (cached && !force) { box.innerHTML = cached; return; }
+    box.innerHTML = "⏳ ஏற்றுகிறேன்...";
+    const prompt = `நீ ஒரு அனுபவமிக்க தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
+இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu.
+கீழ்க்கண்ட STRICT FORMAT-ல மட்டும் பதில் தா (வேறு எதுவும் சேர்க்காதே):
+PANCHANGAM: [இன்றைய திதி, ராகு காலம் (தோராயமான நேரம்), எமகண்டம் (தோராயமான நேரம்) - ஒரு வரியில்]
+RASI_PALAN: [இன்றைய ரிஷப ராசி பலன் - 2-3 வரிகளில், தமிழில்]
+ACTIVITY_TIP: [இன்று ரோகிணி நட்சத்திரத்திற்கு ஏற்ற ஒரு activity suggestion - ஒரு வரியில்]
+CHANDRASHTAMA: [YES அல்லது NO மட்டும்]`;
+    try {
+        let res = await askGemini(prompt);
+        const panch = extractField(res, 'PANCHANGAM');
+        const rasi = extractField(res, 'RASI_PALAN');
+        const tip = extractField(res, 'ACTIVITY_TIP');
+        const isChandrashtama = /YES/i.test(extractField(res, 'CHANDRASHTAMA'));
+        const html = `<div style="font-size:0.8rem; line-height:1.7;">
+            <p><b>🪔 பஞ்சாங்கம்:</b> ${panch || 'தகவல் இல்லை'}</p>
+            <p><b>🌙 ராசி பலன்:</b> ${rasi || 'தகவல் இல்லை'}</p>
+            <p><b>✅ இன்றைய Tip:</b> ${tip || 'தகவல் இல்லை'}</p>
+            ${isChandrashtama ? '<p style="color:var(--neon-red); font-weight:700;">⚠️ இன்று சந்திராஷ்டமம் — முக்கிய காரியங்களை தவிர்க்கவும்.</p>' : ''}
+        </div>`;
+        localStorage.setItem(cacheKey, html);
+        box.innerHTML = html;
+    } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
+}
+
+// ---- 2. Dasha-Bhukti countdown (computed) + Full timeline (AI, cached) ----
+function renderDashaCountdown() {
+    const box = document.getElementById('dashaCountdownText');
+    if (!box) return;
+    const bhuktiEnd = new Date('2027-08-31');
+    const today = getAppToday();
+    const diffDays = Math.max(0, Math.ceil((bhuktiEnd - today) / 86400000));
+    box.innerHTML = `நடப்பு: <b style="color:var(--neon-cyan);">சந்திர தசை → புத புத்தி</b><br>இன்னும் <b style="color:var(--neon-gold);">${diffDays}</b> நாட்கள் மீதம் (தோராயமாக ஆகஸ்ட் 2027 வரை)`;
+}
+
+async function loadFullDashaTimeline(force) {
+    const cacheKey = 'dasha_full_timeline_v1';
+    const box = document.getElementById('dashaTimelineBox');
+    if (!box) return;
+    box.style.display = 'block';
+    let cached = localStorage.getItem(cacheKey);
+    if (cached && !force) { box.innerHTML = cached; return; }
+    box.innerHTML = "⏳ கணக்கிடுகிறேன்...";
+    const prompt = `நீ ஒரு Vedic Jyotish நிபுணர். ஜாதகரின் நட்சத்திரம் ரோகிணி (Chandra Nakshatra), தற்போது Chandra Maha Dasa, Budha Bhukti நடக்கிறது (approx மார்ச் 2026 முதல் ஆகஸ்ட் 2027 வரை).
+Vimshottari Dasa system படி, Chandra Maha Dasa (10 வருடம்) க்கு பிறகு வரும் அடுத்த Maha Dasa-க்களின் வரிசையையும் (Mars 7yrs, Rahu 18yrs, Jupiter 16yrs, Saturn 19yrs, Mercury 17yrs, Ketu 7yrs, Venus 20yrs, Sun 6yrs), தோராயமான தொடக்க வருடங்களையும் ஒரு தெளிவான bullet list-ஆ தமிழில் தா. கடைசியில் ஒரு வரி disclaimer சேர் - "இவை தோராயமான கணக்கீடுகள், துல்லியமான தேதிக்கு ஜாதகர் ஒரு நிபுணரை அணுகவும்."`;
+    try {
+        let res = await askGemini(prompt);
+        box.innerHTML = res;
+        localStorage.setItem(cacheKey, res);
+    } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
+}
+
+// ---- 3. Weekly Gochara & Sade Sati (AI, cached per week) ----
+async function loadWeeklyGocharaSadeSati(force) {
+    const appToday = getAppToday();
+    const monday = new Date(appToday);
+    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    const weekKey = 'astro_gochara_' + getIsoDateStr(monday);
+    const box = document.getElementById('gocharaBox');
+    if (!box) return;
+    let cached = localStorage.getItem(weekKey);
+    if (cached && !force) { box.innerHTML = cached; return; }
+    box.innerHTML = "⏳ ஏற்றுகிறேன்...";
+    const prompt = `நீ ஒரு தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}.
+இந்த வாரத்திற்கான (${getIsoDateStr(monday)} முதல்) Gochara (கிரக பெயர்ச்சி) பலன்களையும், தற்போது சனி பெயர்ச்சி Sade Sati நிலையையும் சுருக்கமா தமிழில் எழுது.
+STRICT FORMAT-ல மட்டும் தா:
+SADE_SATI: [YES/NO + ஒரு வரி விளக்கம்]
+GOCHARA_SUMMARY: [இந்த வார கிரக பெயர்ச்சி பாதிப்பு - 3-4 வரிகளில்]`;
+    try {
+        let res = await askGemini(prompt);
+        const sadeSati = extractField(res, 'SADE_SATI');
+        const gochara = extractField(res, 'GOCHARA_SUMMARY');
+        const html = `<div style="font-size:0.8rem; line-height:1.7;"><p><b>🪐 Sade Sati:</b> ${sadeSati || 'தகவல் இல்லை'}</p><p><b>🌌 இந்த வார Gochara:</b> ${gochara || 'தகவல் இல்லை'}</p></div>`;
+        localStorage.setItem(weekKey, html);
+        box.innerHTML = html;
+    } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
+}
+
+// ---- 4. Muhurtham finder ----
+async function findMuhurtham(presetPurpose) {
+    const purposeInput = document.getElementById('muhurthamPurposeInput');
+    const purpose = presetPurpose || (purposeInput ? purposeInput.value.trim() : '');
+    if (!purpose) { displayPremiumToastNotification("என்ன காரியம்னு type பண்ணுங்க!", "❌"); return; }
+    const box = document.getElementById('muhurthamResultBox');
+    if (!box) return;
+    box.style.display = 'block';
+    box.innerHTML = "⏳ நல்ல நாள் தேடுகிறேன்...";
+    const appToday = getAppToday();
+    const prompt = `நீ ஒரு தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}.
+காரியம்: "${purpose}". இன்றைய தேதி: ${getIsoDateStr(appToday)}.
+அடுத்த 30 நாட்களுக்குள் இந்த காரியத்திற்கு ஏற்ற 2-3 நல்ல தேதிகளை (traditional Jyotish principles அடிப்படையில், guidance மட்டும்) பரிந்துரை செய். ஒவ்வொரு தேதிக்கும் ஏன் நல்லதுனு ஒரு வரி காரணம் தா. தமிழில் சுருக்கமா, bullet points-ஆ.`;
+    try {
+        let res = await askGemini(prompt);
+        box.innerHTML = res;
+    } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
+}
+
+// ---- 5. Pooja/Vrat monthly list (AI, cached per month) ----
+async function loadPoojaVratList(force) {
+    const appToday = getAppToday();
+    const monthKey = 'pooja_vrat_' + appToday.getFullYear() + '_' + (appToday.getMonth() + 1);
+    const box = document.getElementById('poojaVratBox');
+    if (!box) return;
+    let cached = localStorage.getItem(monthKey);
+    if (cached && !force) { box.innerHTML = cached; return; }
+    box.innerHTML = "⏳ ஏற்றுகிறேன்...";
+    const monthName = appToday.toLocaleString('ta-IN', { month: 'long' });
+    const prompt = `நீ ஒரு தமிழ் பஞ்சாங்க நிபுணர். ரோகிணி நட்சத்திரம், ரிஷப ராசிக்காரருக்கு இந்த மாதம் (${monthName} ${appToday.getFullYear()}) வரும் முக்கியமான Ekadashi, Pradosham, Amavasai, Pournami, மற்றும் முக்கிய பண்டிகை தேதிகளை பட்டியலிடு. ஒவ்வொன்றுக்கும் தோராய தேதி மற்றும் ஒரு வரி முக்கியத்துவம் தமிழில் தா. Bullet points-ஆ மட்டும் தா, markdown formatting வேண்டாம்.`;
+    try {
+        let res = await askGemini(prompt);
+        const html = `<div style="white-space:pre-wrap;">${res}</div>`;
+        localStorage.setItem(monthKey, html);
+        box.innerHTML = html;
+    } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
+}
+
+// ---- 6. Mantra Japam Counter ----
+function getJapamToday() { return parseInt(localStorage.getItem('japam_count_' + getAppToday().toDateString()) || '0'); }
+function incrementJapam() {
+    const key = 'japam_count_' + getAppToday().toDateString();
+    localStorage.setItem(key, getJapamToday() + 1);
+    triggerDeviceHapticPulse();
+    renderJapamCounter();
+}
+function resetJapamToday() {
+    localStorage.setItem('japam_count_' + getAppToday().toDateString(), '0');
+    renderJapamCounter();
+}
+function setJapamTarget() {
+    const input = document.getElementById('japamTargetInput');
+    const val = parseInt(input.value);
+    if (val > 0) { localStorage.setItem('japam_target', val); input.value = ''; renderJapamCounter(); displayPremiumToastNotification("Japam Target Updated!", "🧘"); }
+}
+function renderJapamCounter() {
+    const countEl = document.getElementById('japamCountText');
+    const fillEl = document.getElementById('japamFill');
+    if (!countEl) return;
+    const count = getJapamToday();
+    const target = parseInt(localStorage.getItem('japam_target') || '108');
+    countEl.innerText = count + ' / ' + target;
+    fillEl.style.width = Math.min(100, (count / target) * 100) + '%';
+}
+
+// ---- 7. Rasi & Navamsa Chart Builder (South Indian fixed layout) ----
+// Muthubalan birth chart - default pre-filled positions (used only if no saved chart exists yet)
+const DEFAULT_RASI_CHART_DATA = {
+    '1': 'குரு, சனி',
+    '2': 'சந்திரன்',
+    '4': 'லக்னம், ராகு',
+    '10': 'கேது',
+    '11': 'சூரியன், புதன், சுக்கிரன்',
+    '12': 'செவ்வாய்'
+};
+const DEFAULT_NAVAMSA_CHART_DATA = {
+    '3': 'சூரியன், சந்திரன்',
+    '4': 'குரு',
+    '6': 'சனி, ராகு',
+    '8': 'சுக்கிரன்',
+    '9': 'புதன்',
+    '11': 'லக்னம்',
+    '12': 'செவ்வாய், கேது'
+};
+const RASI_SIGNS_GRID = [
+    { sign:'மீனம்', house:12, r:1, c:1 }, { sign:'மேஷம்', house:1, r:1, c:2 }, { sign:'ரிஷபம்', house:2, r:1, c:3 }, { sign:'மிதுனம்', house:3, r:1, c:4 },
+    { sign:'கும்பம்', house:11, r:2, c:1 }, { sign:'கடகம்', house:4, r:2, c:4 },
+    { sign:'மகரம்', house:10, r:3, c:1 }, { sign:'சிம்மம்', house:5, r:3, c:4 },
+    { sign:'தனுசு', house:9, r:4, c:1 }, { sign:'விருச்சிகம்', house:8, r:4, c:2 }, { sign:'துலாம்', house:7, r:4, c:3 }, { sign:'கன்னி', house:6, r:4, c:4 }
+];
+function renderChartGrid(containerId, kind) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const data = safeGetItem('jyotish_chart_' + kind, kind === 'rasi' ? DEFAULT_RASI_CHART_DATA : DEFAULT_NAVAMSA_CHART_DATA);
+    let html = `<div style="display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,58px); gap:3px; background:rgba(255,255,255,0.05); padding:4px; border-radius:10px;">`;
+    RASI_SIGNS_GRID.forEach(cell => {
+        html += `<div style="grid-row:${cell.r}; grid-column:${cell.c}; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:6px; padding:3px; overflow:hidden;">
+            <div style="color:var(--neon-gold); font-weight:700; font-size:0.58rem;">${cell.sign}</div>
+            <textarea data-house="${cell.house}" data-kind="${kind}" style="width:100%; height:32px; background:transparent; border:none; color:white; font-size:0.6rem; resize:none; outline:none;" placeholder="கிரகங்கள்">${data[cell.house] || ''}</textarea>
+        </div>`;
+    });
+    html += `<div style="grid-row:2/4; grid-column:2/4; display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--neon-cyan); font-size:0.75rem; text-align:center;">${kind === 'rasi' ? 'ராசி' : 'நவாம்சம்'} Chart</div>`;
+    html += `</div>`;
+    container.innerHTML = html;
+}
+function saveChart(kind) {
+    const container = document.getElementById(kind === 'rasi' ? 'rasiChartGrid' : 'navamsaChartGrid');
+    if (!container) return;
+    const data = {};
+    container.querySelectorAll('textarea[data-house]').forEach(t => { data[t.dataset.house] = t.value.trim(); });
+    safeSetItem('jyotish_chart_' + kind, data);
+    displayPremiumToastNotification((kind === 'rasi' ? 'ராசி' : 'நவாம்சம்') + " Chart Saved!", "💾");
+}
+function saveChartsToHistory() {
+    const rasiContainer = document.getElementById('rasiChartGrid');
+    const navamsaContainer = document.getElementById('navamsaChartGrid');
+    const rasi = {}; if (rasiContainer) rasiContainer.querySelectorAll('textarea[data-house]').forEach(t => { rasi[t.dataset.house] = t.value.trim(); });
+    const navamsa = {}; if (navamsaContainer) navamsaContainer.querySelectorAll('textarea[data-house]').forEach(t => { navamsa[t.dataset.house] = t.value.trim(); });
+    let history = safeGetItem('jyotish_chart_history', []);
+    history.unshift({ ts: Date.now(), dateLabel: getAppToday().toLocaleDateString(), rasi, navamsa });
+    if (history.length > 10) history = history.slice(0, 10);
+    safeSetItem('jyotish_chart_history', history);
+    renderChartHistory();
+    displayPremiumToastNotification("Chart History-ல Save ஆனது!", "🗂️");
+}
+function renderChartHistory() {
+    const list = document.getElementById('chartHistoryList');
+    if (!list) return;
+    let history = safeGetItem('jyotish_chart_history', []);
+    if (history.length === 0) { list.innerHTML = '<p style="font-size:0.72rem; color:var(--text-secondary);">இன்னும் History இல்லை.</p>'; return; }
+    list.innerHTML = history.map((h, i) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); padding:8px 10px; border-radius:8px; margin-bottom:6px;">
+            <span style="font-size:0.75rem;">📅 ${h.dateLabel}</span>
+            <div style="display:flex; gap:6px;">
+                <button class="btn-universal" style="padding:4px 10px; font-size:0.65rem; background:var(--neon-cyan); color:black;" onclick="loadChartFromHistory(${i})">View</button>
+                <button class="btn-universal" style="padding:4px 10px; font-size:0.65rem; background:var(--neon-red); color:white;" onclick="deleteChartHistory(${i})">🗑️</button>
+            </div>
+        </div>`).join('');
+}
+function loadChartFromHistory(idx) {
+    let history = safeGetItem('jyotish_chart_history', []);
+    const h = history[idx]; if (!h) return;
+    safeSetItem('jyotish_chart_rasi', h.rasi);
+    safeSetItem('jyotish_chart_navamsa', h.navamsa);
+    renderChartGrid('rasiChartGrid', 'rasi');
+    renderChartGrid('navamsaChartGrid', 'navamsa');
+    displayPremiumToastNotification("Chart History-ல் இருந்து Load ஆனது!", "📂");
+}
+function deleteChartHistory(idx) {
+    let history = safeGetItem('jyotish_chart_history', []);
+    history.splice(idx, 1);
+    safeSetItem('jyotish_chart_history', history);
+    renderChartHistory();
+}
+
+// ---- 8. Family Call reminder ----
+function isFamilyCallDoneToday() { return localStorage.getItem('family_call_done_' + getAppToday().toDateString()) === 'true'; }
+function toggleFamilyCallDone() {
+    const key = 'family_call_done_' + getAppToday().toDateString();
+    const willBeDone = !isFamilyCallDoneToday();
+    localStorage.setItem(key, willBeDone ? 'true' : 'false');
+    renderFamilyCallWidget();
+    if (willBeDone) displayPremiumToastNotification("Nice! குடும்பத்தினரிடம் பேசினீங்க 💚", "📞");
+}
+function renderFamilyCallWidget() {
+    const statusBox = document.getElementById('familyCallStatus');
+    const btn = document.getElementById('familyCallBtn');
+    if (!statusBox || !btn) return;
+    const done = isFamilyCallDoneToday();
+    statusBox.innerHTML = done ? '✅ இன்று பேசியாச்சு!' : '❌ இன்னும் பேசலை';
+    statusBox.style.color = done ? 'var(--neon-green)' : 'var(--neon-red)';
+    btn.innerText = done ? '↩️ Undo' : 'இன்று பேசினேன் ✅';
+}
+function checkFamilyCallReminder() {
+    const now = new Date();
+    if (now.getHours() >= 20 && !isFamilyCallDoneToday()) {
+        const sessionKey = 'family_call_nudge_' + getAppToday().toDateString();
+        if (!sessionStorage.getItem(sessionKey)) {
+            sessionStorage.setItem(sessionKey, 'shown');
+            setTimeout(() => displayPremiumToastNotification("💚 இன்னிக்கு அம்மா/அப்பாகிட்ட பேசினீங்களா?", "📞"), 4000);
+        }
+    }
+}
+
+// ---- 9. Top-3 Priority widget ----
+function getTop3Priorities() { return safeGetItem('top3_priority_' + getAppToday().toDateString(), ['', '', '']); }
+function saveTop3Priorities() {
+    const vals = [1, 2, 3].map(i => { const el = document.getElementById('priorityInput' + i); return el ? el.value.trim() : ''; });
+    safeSetItem('top3_priority_' + getAppToday().toDateString(), vals);
+    displayPremiumToastNotification("Top 3 Priorities Saved!", "🎯");
+}
+function toggleTop3Done(idx) {
+    let doneArr = safeGetItem('top3_done_' + getAppToday().toDateString(), [false, false, false]);
+    doneArr[idx] = !doneArr[idx];
+    safeSetItem('top3_done_' + getAppToday().toDateString(), doneArr);
+}
+function renderTop3Priorities() {
+    const vals = getTop3Priorities();
+    const doneArr = safeGetItem('top3_done_' + getAppToday().toDateString(), [false, false, false]);
+    for (let i = 0; i < 3; i++) {
+        const input = document.getElementById('priorityInput' + (i + 1));
+        if (input) input.value = vals[i] || '';
+        const cb = document.getElementById('priorityCheck' + (i + 1));
+        if (cb) cb.checked = !!doneArr[i];
+    }
+}
+
+// ---- Init all Jyotish widgets (non-AI parts only — AI cards load on button tap to save API quota) ----
+function initJyotishModule() {
+    renderDashaCountdown();
+    renderJapamCounter();
+    renderFamilyCallWidget();
+    renderTop3Priorities();
+    renderChartGrid('rasiChartGrid', 'rasi');
+    renderChartGrid('navamsaChartGrid', 'navamsa');
+    renderChartHistory();
+    checkFamilyCallReminder();
+    // AI cards: show cached content silently if already fetched today/this week/this month
+    let appToday = getAppToday();
+    const briefingCache = localStorage.getItem('astro_briefing_' + appToday.toDateString());
+    if (briefingCache) document.getElementById('astroBriefingBox').innerHTML = briefingCache;
+    const monday = new Date(appToday); monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    const gocharaCache = localStorage.getItem('astro_gochara_' + getIsoDateStr(monday));
+    if (gocharaCache) document.getElementById('gocharaBox').innerHTML = gocharaCache;
+    const poojaCache = localStorage.getItem('pooja_vrat_' + appToday.getFullYear() + '_' + (appToday.getMonth() + 1));
+    if (poojaCache) document.getElementById('poojaVratBox').innerHTML = poojaCache;
+}
+initJyotishModule();
+
 
 
 </script>
