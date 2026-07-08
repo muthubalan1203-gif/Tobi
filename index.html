@@ -1560,57 +1560,80 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 
 <div class="app-card" style="border-top:4px solid var(--neon-gold);">
   <h3 class="card-title">🪔 இந்த மாத Pooja/Vrat நாட்கள்</h3>
+  <div id="poojaVratTodayBanner" style="display:none; font-size:0.8rem; line-height:1.6; background:rgba(245,158,11,0.15); border:1px solid var(--neon-gold); border-radius:10px; padding:10px 12px; margin-bottom:10px; color:var(--text-primary);"></div>
+  <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
+    <span style="font-size:0.76rem; color:var(--text-primary); font-weight:700;">🔔 Ekadashi/Pradosham Push Reminder</span>
+    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
+        <input type="checkbox" id="poojaVratReminderToggle" onchange="togglePoojaVratReminder(this.checked)" style="opacity:0; width:0; height:0;">
+        <span id="poojaVratReminderSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="poojaVratReminderKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
+    </label>
+  </div>
+  <p style="font-size:0.65rem; color:var(--text-secondary); margin:-4px 0 10px;">ஆன் பண்ணா, Ekadashi/Pradosham/Amavasai/Pournami போன்ற விரத நாள் வரும்போது தானா Push Notification வரும் 🙏</p>
   <div id="poojaVratBox" style="font-size:0.78rem; color:var(--text-secondary); margin:10px 0;">இன்னும் பார்க்கல.</div>
   <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="loadPoojaVratList(false)">📿 இந்த மாத விரத நாட்கள் பார்</button>
 </div>
 
 <div class="app-card" style="border-top:4px solid var(--neon-purple);">
   <h3 class="card-title">🧘 மந்திர ஜபம் Counter</h3>
+  <div id="todayMantraBox" style="font-size:0.78rem; color:var(--text-secondary); margin:10px 0; line-height:1.6;">இன்று எந்த மந்திரம் ஜபிக்கணும்-னு AI-கிட்ட கேளுங்க 👇</div>
+  <button class="btn-universal" style="background:var(--neon-purple); color:white; font-size:0.74rem; margin-bottom:14px;" onclick="loadTodayMantraSuggestion(false)">🕉️ இன்றைய மந்திரம் என்ன? (AI)</button>
   <div style="text-align:center; margin:14px 0;">
     <div id="japamCountText" style="font-size:1.6rem; font-weight:900; color:var(--neon-purple);">0 / 108</div>
     <div style="background:rgba(255,255,255,0.04); height:6px; border-radius:3px; margin:8px 0;"><div id="japamFill" style="background:var(--neon-purple); height:100%; width:0%; border-radius:3px; transition:0.3s;"></div></div>
   </div>
   <div style="display:flex; gap:8px;">
-    <button class="btn-universal" style="background:var(--neon-purple); color:white; flex:2;" onclick="incrementJapam()">+1 ஜபம்</button>
+    <button class="btn-universal" style="background:var(--neon-purple); color:white; flex:2;" onclick="incrementJapam()">+1 ஜபம் 🔔</button>
     <button class="btn-universal" style="background:transparent; border:1px solid var(--glass-border); color:var(--text-secondary); flex:1; font-size:0.72rem;" onclick="resetJapamToday()">Reset</button>
   </div>
   <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
     <input type="number" id="japamTargetInput" class="form-control" placeholder="Target (e.g 108)" style="flex:1;">
     <button class="btn-universal" style="background:var(--neon-cyan); color:black; font-size:0.72rem; padding:8px 12px;" onclick="setJapamTarget()">Set</button>
   </div>
+  <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--glass-border);">
+    <p style="font-size:0.68rem; color:var(--text-secondary); margin-bottom:8px;">👁️‍🗨️ கண் மூடி ஜபம் பண்ணணும்னா — Auto Mode ஆன் பண்ணுங்க, ஒவ்வொரு X வினாடிக்கும் தானா beep வரும்:</p>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input type="number" step="0.5" id="autoJapamSecondsInput" class="form-control" placeholder="1 ஜபத்திற்கு வினாடி (AI கணக்கிடும்)" style="flex:1;">
+      <button id="autoJapamToggleBtn" class="btn-universal" style="background:var(--neon-gold); color:black; font-size:0.72rem; padding:8px 12px; white-space:nowrap;" onclick="toggleAutoJapam()">🎧 Auto Start</button>
+    </div>
+    <div id="autoJapamStatus" style="font-size:0.72rem; color:var(--neon-gold); margin-top:8px; display:none;">🎧 Auto Japam ஓடிக்கிட்டு இருக்கு… ஒவ்வொரு <span id="autoJapamIntervalText">3</span> வினாடிக்கும் ஒரு beep. கண்ணை மூடி ஜபிக்கலாம் 🙏 (Screen Wake Lock ஆன்)</div>
+    <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:8px 12px; margin-top:10px;">
+      <span style="font-size:0.7rem; color:var(--text-primary); font-weight:700;">🔊 27/54/81-க்கு Voice Milestone</span>
+      <label class="switch" style="position:relative; display:inline-block; width:36px; height:20px;">
+        <input type="checkbox" id="japamVoiceMilestoneToggle" checked onchange="toggleJapamVoiceMilestone(this.checked)" style="opacity:0; width:0; height:0;">
+        <span id="japamVoiceMilestoneSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:20px; transition:0.2s;"><span id="japamVoiceMilestoneKnob" style="position:absolute; height:14px; width:14px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
+      </label>
+    </div>
+    <p style="font-size:0.62rem; color:var(--text-secondary); margin:6px 0 0;">ஆன் பண்ணா, Auto Japam ஓடும்போது ஒவ்வொரு 27/54/81/108...-க்கும் beep-க்கு பதிலா எண்ணிக்கையை voice-ஆ சொல்லும்.</p>
+  </div>
 </div>
 
 <div class="app-card" style="border-top:4px solid var(--neon-cyan);">
   <h3 class="card-title">🗺️ ராசி Chart</h3>
-  <p style="font-size:0.66rem; color:var(--text-secondary); margin-top:-8px;">ஒவ்வொரு வீட்டிலும் கிரகங்களை type பண்ணுங்க</p>
+  <p id="rasiChartHint" style="font-size:0.66rem; color:var(--text-secondary); margin-top:-8px;">ஒவ்வொரு வீட்டிலும் கிரகங்களை type பண்ணுங்க — கீழே "Save & Lock" பண்ணினதும் இது Permanent-ஆகி, Edit பண்ண முடியாது</p>
   <div id="rasiChartGrid"></div>
-  <button class="btn-universal" style="background:var(--neon-cyan); color:black; margin-top:10px;" onclick="saveChart('rasi')">💾 ராசி Chart Save</button>
 </div>
 
 <div class="app-card" style="border-top:4px solid var(--neon-cyan);">
   <h3 class="card-title">🗺️ நவாம்சம் Chart</h3>
   <div id="navamsaChartGrid"></div>
-  <button class="btn-universal" style="background:var(--neon-cyan); color:black; margin-top:10px;" onclick="saveChart('navamsa')">💾 நவாம்சம் Chart Save</button>
 </div>
 
-<div class="app-card" style="border-top:4px solid var(--neon-gold);">
-  <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="saveChartsToHistory()">🗂️ இப்போதைய இரண்டு Charts-ஐயும் History-ல Save பண்</button>
+<div class="app-card" style="border-top:4px solid var(--neon-gold);" id="chartLockCard">
+  <button id="chartLockBtn" class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="lockAndSaveCharts()">🔒 இரண்டு Charts-ஐயும் Save &amp; Lock பண்ணு</button>
+  <p id="chartLockedNote" style="font-size:0.72rem; color:var(--neon-green); margin-top:10px; display:none;">🔒 Chart Locked ஆகிடுச்சு — இனி Edit பண்ண முடியாது. கீழே Full Analysis பாருங்க.</p>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-purple);">
+  <h3 class="card-title">🔮 முழு ஜாதக பலன் பகுப்பாய்வு (AI)</h3>
+  <p style="font-size:0.66rem; color:var(--text-secondary); margin-top:-8px;">ராசி &amp; நவாம்சம் Chart இரண்டையும் வச்சு AI முழுமையான பலன் சொல்லும்</p>
+  <div id="fullChartAnalysisBox" style="font-size:0.8rem; color:var(--text-secondary); margin:10px 0; white-space:pre-wrap; line-height:1.7;">முதலில் மேலே Charts-ஐ Save &amp; Lock பண்ணுங்க.</div>
+  <button id="fullChartAnalysisBtn" class="btn-universal" style="background:var(--neon-purple); color:white; display:none;" onclick="loadFullChartAnalysis(true)">🔄 மறுபடியும் Analysis பார்</button>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-gold); margin-bottom:20px;">
+  <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="saveChartsToHistory()">🗂️ இப்போதைய Charts-ஐ History-ல Save பண்</button>
   <h3 class="card-title" style="margin-top:16px;">📂 Chart History</h3>
   <div id="chartHistoryList"></div>
-</div>
-
-<div class="app-card" style="border-top:4px solid var(--neon-green);">
-  <h3 class="card-title">📞 குடும்பத்தினருடன் Connect</h3>
-  <p style="font-size:0.8rem; margin-bottom:10px;">இன்று அம்மா/அப்பாகிட்ட பேசினீங்களா? <span id="familyCallStatus" style="font-weight:700;"></span></p>
-  <button id="familyCallBtn" class="btn-universal" style="background:var(--neon-green); color:black;" onclick="toggleFamilyCallDone()">இன்று பேசினேன் ✅</button>
-</div>
-
-<div class="app-card" style="border-top:4px solid var(--neon-red); margin-bottom:20px;">
-  <h3 class="card-title">🎯 இன்றைய Top 3 Priority</h3>
-  <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;"><input type="checkbox" id="priorityCheck1" onchange="toggleTop3Done(0)"><input type="text" id="priorityInput1" class="form-control" placeholder="Priority 1" style="flex:1;" onchange="saveTop3Priorities()"></div>
-  <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;"><input type="checkbox" id="priorityCheck2" onchange="toggleTop3Done(1)"><input type="text" id="priorityInput2" class="form-control" placeholder="Priority 2" style="flex:1;" onchange="saveTop3Priorities()"></div>
-  <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><input type="checkbox" id="priorityCheck3" onchange="toggleTop3Done(2)"><input type="text" id="priorityInput3" class="form-control" placeholder="Priority 3" style="flex:1;" onchange="saveTop3Priorities()"></div>
-  <button class="btn-universal" style="background:var(--neon-red); color:white;" onclick="saveTop3Priorities()">💾 Save Priorities</button>
 </div>
 
 </div>
@@ -3670,7 +3693,7 @@ function initAdvancedSystemFeatures() {
     if (fallEnabled) enableFallDetectListener();
 
     // Re-request wake lock automatically if page becomes visible again while enabled
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') requestWakeLockIfOnGymPage(); });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { requestWakeLockIfOnGymPage(); if (typeof autoJapamInterval !== 'undefined' && autoJapamInterval) requestJapamWakeLock(); } });
 }
 
 // YouTube லிங்க் உருவாக்கும் குறியீடுகள் நீக்கப்பட்ட புதிய Function
@@ -7111,6 +7134,7 @@ function scheduleSmartNotifications() {
         if(h === 17 && m === 30) sendPushNotif("🍌 Snack time! Banana + peanuts for energy.", "diet");
         if(h === 18 && m === 0) sendPushNotif("💪 Gym time! Check your Adaptive Workout AI.", "gym");
         if(h === 21 && m === 0) sendPushNotif("😴 Wind down time. Log your sleep data.", "sleep");
+        if(h === 6 && m === 0) checkPoojaVratTodayNotification(); // Ekadashi/Pradosham/special day daily check
     }, 60000);
 }
 function sendPushNotif(body, tag) {
@@ -7684,7 +7708,8 @@ async function loadFullDashaTimeline(force) {
     let cached = localStorage.getItem(cacheKey);
     if (cached && !force) { box.innerHTML = cached; return; }
     box.innerHTML = "⏳ கணக்கிடுகிறேன்...";
-    const prompt = `நீ ஒரு Vedic Jyotish நிபுணர். ஜாதகரின் நட்சத்திரம் ரோகிணி (Chandra Nakshatra), தற்போது Chandra Maha Dasa, Budha Bhukti நடக்கிறது (approx மார்ச் 2026 முதல் ஆகஸ்ட் 2027 வரை).
+    const prompt = `நீ ஒரு Vedic Jyotish நிபுணர். ஜாதகரின் நட்சத்திரம் ரோகிணி (Chandra Nakshatra),பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob},ஊர் ${JYOTISH_PROFILE.pob}.
+இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu. தற்போது Chandra Maha Dasa, Budha Bhukti நடக்கிறது (approx மார்ச் 2026 முதல் ஆகஸ்ட் 2027 வரை).
 Vimshottari Dasa system படி, Chandra Maha Dasa (10 வருடம்) க்கு பிறகு வரும் அடுத்த Maha Dasa-க்களின் வரிசையையும் (Mars 7yrs, Rahu 18yrs, Jupiter 16yrs, Saturn 19yrs, Mercury 17yrs, Ketu 7yrs, Venus 20yrs, Sun 6yrs), தோராயமான தொடக்க வருடங்களையும் ஒரு தெளிவான bullet list-ஆ தமிழில் தா. கடைசியில் ஒரு வரி disclaimer சேர் - "இவை தோராயமான கணக்கீடுகள், துல்லியமான தேதிக்கு ஜாதகர் ஒரு நிபுணரை அணுகவும்."`;
     try {
         let res = await askGemini(prompt);
@@ -7704,7 +7729,8 @@ async function loadWeeklyGocharaSadeSati(force) {
     let cached = localStorage.getItem(weekKey);
     if (cached && !force) { box.innerHTML = cached; return; }
     box.innerHTML = "⏳ ஏற்றுகிறேன்...";
-    const prompt = `நீ ஒரு தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}.
+    const prompt = `நீ ஒரு தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
+இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu.
 இந்த வாரத்திற்கான (${getIsoDateStr(monday)} முதல்) Gochara (கிரக பெயர்ச்சி) பலன்களையும், தற்போது சனி பெயர்ச்சி Sade Sati நிலையையும் சுருக்கமா தமிழில் எழுது.
 STRICT FORMAT-ல மட்டும் தா:
 SADE_SATI: [YES/NO + ஒரு வரி விளக்கம்]
@@ -7729,7 +7755,8 @@ async function findMuhurtham(presetPurpose) {
     box.style.display = 'block';
     box.innerHTML = "⏳ நல்ல நாள் தேடுகிறேன்...";
     const appToday = getAppToday();
-    const prompt = `நீ ஒரு தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}.
+    const prompt = `நீ ஒரு தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
+இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu.
 காரியம்: "${purpose}". இன்றைய தேதி: ${getIsoDateStr(appToday)}.
 அடுத்த 30 நாட்களுக்குள் இந்த காரியத்திற்கு ஏற்ற 2-3 நல்ல தேதிகளை (traditional Jyotish principles அடிப்படையில், guidance மட்டும்) பரிந்துரை செய். ஒவ்வொரு தேதிக்கும் ஏன் நல்லதுனு ஒரு வரி காரணம் தா. தமிழில் சுருக்கமா, bullet points-ஆ.`;
     try {
@@ -7757,17 +7784,195 @@ async function loadPoojaVratList(force) {
     } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
 }
 
-// ---- 6. Mantra Japam Counter ----
+// ---- 5b. Pooja/Vrat Push Notification — Ekadashi/Pradosham/special days-க்கு structured தேதி list (AI, cached per month) + daily auto-check ----
+async function loadPoojaVratDatesStructured(force) {
+    const appToday = getAppToday();
+    const monthKey = 'pooja_vrat_dates_' + appToday.getFullYear() + '_' + (appToday.getMonth() + 1);
+    if (!force) {
+        const cached = localStorage.getItem(monthKey);
+        if (cached) { checkPoojaVratTodayNotification(); return; }
+    }
+    if (!GEMINI_API_KEY) return; // API key இல்லனா silent-ஆ skip, banner button மூலம் பின்னாடி try பண்ணலாம்
+    const monthName = appToday.toLocaleString('ta-IN', { month: 'long' });
+    const prompt = `நீ ஒரு தமிழ் பஞ்சாங்க நிபுணர். இந்த மாதம் (${monthName} ${appToday.getFullYear()}) வரும் Ekadashi, Pradosham, Amavasai, Pournami, மற்றும் முக்கிய பண்டிகை நாட்களை பட்டியலிடு.
+STRICT FORMAT-ல மட்டும் பதில் தா — தலைப்பு/intro/வேறு எந்த வரியும் சேர்க்காதே. ஒவ்வொரு நாளும் ஒரு தனி வரியில், இந்த format-ல மட்டும்:
+YYYY-MM-DD | நாள் பெயர் | ஒரு வரி முக்கியத்துவம்`;
+    try {
+        let res = await askGemini(prompt);
+        const lines = res.split('\n').map(l => l.trim()).filter(Boolean);
+        const dates = [];
+        lines.forEach(line => {
+            const m = line.match(/^(\d{4}-\d{2}-\d{2})\s*\|\s*([^|]+)\|\s*(.+)$/);
+            if (m) dates.push({ date: m[1].trim(), name: m[2].trim(), note: m[3].trim() });
+        });
+        if (dates.length) localStorage.setItem(monthKey, JSON.stringify(dates));
+        checkPoojaVratTodayNotification();
+    } catch(e) { console.log('Pooja/Vrat date fetch failed:', e.message); }
+}
+function checkPoojaVratTodayNotification() {
+    const enabled = localStorage.getItem('pooja_vrat_reminder_enabled') === 'true';
+    const appToday = getAppToday();
+    const todayISO = getIsoDateStr(appToday);
+    const monthKey = 'pooja_vrat_dates_' + appToday.getFullYear() + '_' + (appToday.getMonth() + 1);
+    const raw = localStorage.getItem(monthKey);
+    if (!raw) { if (enabled) loadPoojaVratDatesStructured(false); return; }
+    let dates = [];
+    try { dates = JSON.parse(raw); } catch(e) { dates = []; }
+    const todayEntries = dates.filter(d => d.date === todayISO);
+    const bannerEl = document.getElementById('poojaVratTodayBanner');
+    if (bannerEl) {
+        if (todayEntries.length) {
+            bannerEl.style.display = 'block';
+            bannerEl.innerHTML = todayEntries.map(e => `🪔 <b>இன்று ${e.name}!</b> ${e.note}`).join('<br>');
+        } else { bannerEl.style.display = 'none'; }
+    }
+    if (!enabled || !todayEntries.length) return;
+    const notifiedKey = 'pooja_vrat_notified_' + todayISO;
+    if (localStorage.getItem(notifiedKey)) return;
+    todayEntries.forEach(e => {
+        sendPushNotif(`🪔 இன்று ${e.name}! ${e.note}`, 'pooja-vrat-' + e.date);
+        displayPremiumToastNotification(`இன்று ${e.name}! 🙏`, "🪔");
+    });
+    localStorage.setItem(notifiedKey, 'true');
+}
+function togglePoojaVratReminder(enabled) {
+    localStorage.setItem('pooja_vrat_reminder_enabled', enabled ? 'true' : 'false');
+    updateToggleVisual('poojaVratReminderSlider', 'poojaVratReminderKnob', enabled);
+    if (enabled) {
+        displayPremiumToastNotification("Pooja/Vrat Day Reminder ஆன்!", "🪔");
+        loadPoojaVratDatesStructured(false);
+    } else {
+        displayPremiumToastNotification("Pooja/Vrat Day Reminder ஆஃப்.", "⏹️");
+    }
+}
+
+// ---- 6. Mantra Japam Counter (+ AI today's mantra suggestion, cached per day) ----
+async function loadTodayMantraSuggestion(force) {
+    const appToday = getAppToday();
+    const cacheKey = 'japam_mantra_' + appToday.toDateString();
+    const box = document.getElementById('todayMantraBox');
+    if (!box) return;
+    let cached = localStorage.getItem(cacheKey);
+    if (cached && !force) { box.innerHTML = cached; return; }
+    box.innerHTML = "⏳ இன்றைய மந்திரம் தேடுகிறேன்...";
+    const todayName = daysOfWeek[appToday.getDay()];
+    const prompt = `நீ ஒரு தமிழ் ஜோதிட/ஆன்மீக நிபுணர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
+இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu.
+இன்று ${todayName}. இன்றைய கிழமைக்கும், நட்சத்திரத்திற்கும் ஏற்ற ஒரு மந்திரம்/ஸ்லோகத்தை பரிந்துரை செய்.
+STRICT FORMAT-ல மட்டும் பதில் தா (வேறு எதுவும் சேர்க்காதே):
+MANTRAM: [மந்திரம் பெயர் மற்றும் தேவதை]
+JABAM_COUNT: [பரிந்துரைக்கப்படும் ஜப எண்ணிக்கை, எண்ணாக மட்டும், e.g 108]
+SECONDS_PER_JABAM: [இந்த மந்திரத்தை நிதானமா ஒரு தடவை சொல்ல சராசரியா எத்தனை வினாடிகள் ஆகும் என்பதை எண்ணாக மட்டும் தா, e.g 3]
+REASON: [இன்று ஏன் இது ஏற்றது - ஒரு வரியில் தமிழில்]`;
+    try {
+        let res = await askGemini(prompt);
+        const mantram = extractField(res, 'MANTRAM');
+        const countTxt = extractField(res, 'JABAM_COUNT');
+        const secondsTxt = extractField(res, 'SECONDS_PER_JABAM');
+        const reason = extractField(res, 'REASON');
+        const html = `<p><b>🕉️ இன்றைய மந்திரம்:</b> ${mantram || 'தகவல் இல்லை'}</p><p><b>🔢 பரிந்துரை எண்ணிக்கை:</b> ${countTxt || '108'}</p><p><b>⏱️ ஒரு ஜபத்திற்கு:</b> ${secondsTxt || '3'} வினாடி</p><p><b>💡 காரணம்:</b> ${reason || ''}</p>`;
+        localStorage.setItem(cacheKey, html);
+        box.innerHTML = html;
+        const suggestedCount = parseInt((countTxt || '').match(/\d+/)?.[0]);
+        if (suggestedCount > 0) { localStorage.setItem('japam_target', suggestedCount); renderJapamCounter(); }
+        const suggestedSeconds = parseFloat((secondsTxt || '').match(/[\d.]+/)?.[0]);
+        if (suggestedSeconds > 0) {
+            localStorage.setItem('japam_seconds_per_count', suggestedSeconds);
+            const secInput = document.getElementById('autoJapamSecondsInput');
+            if (secInput) secInput.value = suggestedSeconds;
+        }
+    } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
+}
 function getJapamToday() { return parseInt(localStorage.getItem('japam_count_' + getAppToday().toDateString()) || '0'); }
 function incrementJapam() {
     const key = 'japam_count_' + getAppToday().toDateString();
-    localStorage.setItem(key, getJapamToday() + 1);
+    const newCount = getJapamToday() + 1;
+    localStorage.setItem(key, newCount);
     triggerDeviceHapticPulse();
+    // Auto Japam ஓடிக்கிட்டு இருக்கும்போது 27/54/81/108...-க்கு voice milestone (beep-க்கு பதிலா எண்ணிக்கை voice-ஆ சொல்லும்); இல்லனா normal beep
+    const isVoiceMilestone = autoJapamInterval && newCount % 27 === 0 && localStorage.getItem('japam_voice_milestone_enabled') !== 'false';
+    if (isVoiceMilestone) { speakJapamMilestone(newCount); }
+    else { playTone(880, 'sine', 0.09, 1.6); } // ஜபம் ஒவ்வொரு தடவையும் beep
+    const target = parseInt(localStorage.getItem('japam_target') || '108');
+    if (newCount === target) {
+        playTone(1200, 'triangle', 0.25, 1.8); // Target முடிந்ததும் தனி sound
+        displayPremiumToastNotification("இன்றைய Japam Target முடிச்சாச்சு! 🙏", "🕉️");
+    }
     renderJapamCounter();
 }
+// Auto Japam Voice Milestone — 27/54/81-க்கு beep மட்டும் இல்லாம voice-ஆ எண்ணிக்கை சொல்லும்
+function speakJapamMilestone(count) {
+    if (!('speechSynthesis' in window)) { playTone(880, 'sine', 0.09, 1.6); return; }
+    try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(String(count));
+        utterance.lang = 'ta-IN'; utterance.rate = 0.85; utterance.pitch = 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const tamilVoice = voices.find(v => v.lang.includes('ta') || v.lang.includes('hi'));
+        if (tamilVoice) utterance.voice = tamilVoice;
+        window.speechSynthesis.speak(utterance);
+    } catch(e) { playTone(880, 'sine', 0.09, 1.6); }
+}
+function toggleJapamVoiceMilestone(enabled) {
+    localStorage.setItem('japam_voice_milestone_enabled', enabled ? 'true' : 'false');
+    updateToggleVisual('japamVoiceMilestoneSlider', 'japamVoiceMilestoneKnob', enabled);
+    displayPremiumToastNotification(enabled ? "Voice Milestone ஆன்!" : "Voice Milestone ஆஃப்.", enabled ? "🔊" : "⏹️");
+}
 function resetJapamToday() {
+    stopAutoJapam();
     localStorage.setItem('japam_count_' + getAppToday().toDateString(), '0');
     renderJapamCounter();
+}
+// ---- Hands-free Auto Japam mode (கண் மூடி ஜபிக்க — AI கணக்கிட்ட வினாடிக்கு ஒரு beep) ----
+let autoJapamInterval = null;
+function getAutoJapamSeconds() {
+    const input = document.getElementById('autoJapamSecondsInput');
+    const fromInput = input && input.value ? parseFloat(input.value) : NaN;
+    const fromStorage = parseFloat(localStorage.getItem('japam_seconds_per_count') || '3');
+    const val = fromInput > 0 ? fromInput : fromStorage;
+    return val > 0 ? val : 3;
+}
+function toggleAutoJapam() {
+    if (autoJapamInterval) { stopAutoJapam(); return; }
+    startAutoJapam();
+}
+function startAutoJapam() {
+    const seconds = getAutoJapamSeconds();
+    localStorage.setItem('japam_seconds_per_count', seconds);
+    const btn = document.getElementById('autoJapamToggleBtn');
+    const statusEl = document.getElementById('autoJapamStatus');
+    const intervalTextEl = document.getElementById('autoJapamIntervalText');
+    if (intervalTextEl) intervalTextEl.innerText = seconds;
+    if (statusEl) statusEl.style.display = 'block';
+    if (btn) { btn.innerText = '⏸️ Auto Stop'; btn.style.background = 'var(--neon-red)'; btn.style.color = 'white'; }
+    triggerDeviceHapticPulse();
+    playTone(700, 'sine', 0.12, 1.5); // Start confirmation tone
+    requestJapamWakeLock(); // FIX: screen lock ஆகி tab background போனா setInterval throttle/skip ஆகாம Wake Lock வச்சி accurate-ஆ வைக்கிறோம்
+    autoJapamInterval = setInterval(() => {
+        incrementJapam(); // ஒவ்வொரு tick-லும் beep/voice + count + target-reach தானா handle ஆகும்
+        const target = parseInt(localStorage.getItem('japam_target') || '108');
+        if (getJapamToday() >= target) stopAutoJapam();
+    }, seconds * 1000);
+}
+function stopAutoJapam() {
+    if (autoJapamInterval) { clearInterval(autoJapamInterval); autoJapamInterval = null; }
+    const btn = document.getElementById('autoJapamToggleBtn');
+    const statusEl = document.getElementById('autoJapamStatus');
+    if (btn) { btn.innerText = '🎧 Auto Start'; btn.style.background = 'var(--neon-gold)'; btn.style.color = 'black'; }
+    if (statusEl) statusEl.style.display = 'none';
+    releaseJapamWakeLock();
+}
+// ---- Auto Japam Wake Lock — screen lock ஆகி tab background போனா timer skip/slow ஆகாம accurate-ஆ வைக்க ----
+let japamWakeLock = null;
+async function requestJapamWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+        japamWakeLock = await navigator.wakeLock.request('screen');
+        japamWakeLock.addEventListener('release', () => { japamWakeLock = null; });
+    } catch (err) { console.log('Japam WakeLock failed:', err.message); }
+}
+function releaseJapamWakeLock() {
+    if (japamWakeLock) { japamWakeLock.release().catch(() => {}); japamWakeLock = null; }
 }
 function setJapamTarget() {
     const input = document.getElementById('japamTargetInput');
@@ -7809,34 +8014,92 @@ const RASI_SIGNS_GRID = [
     { sign:'மகரம்', house:10, r:3, c:1 }, { sign:'சிம்மம்', house:5, r:3, c:4 },
     { sign:'தனுசு', house:9, r:4, c:1 }, { sign:'விருச்சிகம்', house:8, r:4, c:2 }, { sign:'துலாம்', house:7, r:4, c:3 }, { sign:'கன்னி', house:6, r:4, c:4 }
 ];
+function isChartLocked() { return localStorage.getItem('jyotish_chart_locked') === 'true'; }
+function getRasiSignName(house) { const m = RASI_SIGNS_GRID.find(c => String(c.house) === String(house)); return m ? m.sign : house; }
 function renderChartGrid(containerId, kind) {
     const container = document.getElementById(containerId);
     if (!container) return;
+    const locked = isChartLocked();
     const data = safeGetItem('jyotish_chart_' + kind, kind === 'rasi' ? DEFAULT_RASI_CHART_DATA : DEFAULT_NAVAMSA_CHART_DATA);
     let html = `<div style="display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,58px); gap:3px; background:rgba(255,255,255,0.05); padding:4px; border-radius:10px;">`;
     RASI_SIGNS_GRID.forEach(cell => {
+        const val = data[cell.house] || '';
+        const inner = locked
+            ? `<div style="width:100%; min-height:32px; color:white; font-size:0.6rem; word-break:break-word;">${val}</div>`
+            : `<textarea data-house="${cell.house}" data-kind="${kind}" style="width:100%; height:32px; background:transparent; border:none; color:white; font-size:0.6rem; resize:none; outline:none;" placeholder="கிரகங்கள்">${val}</textarea>`;
         html += `<div style="grid-row:${cell.r}; grid-column:${cell.c}; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:6px; padding:3px; overflow:hidden;">
             <div style="color:var(--neon-gold); font-weight:700; font-size:0.58rem;">${cell.sign}</div>
-            <textarea data-house="${cell.house}" data-kind="${kind}" style="width:100%; height:32px; background:transparent; border:none; color:white; font-size:0.6rem; resize:none; outline:none;" placeholder="கிரகங்கள்">${data[cell.house] || ''}</textarea>
+            ${inner}
         </div>`;
     });
-    html += `<div style="grid-row:2/4; grid-column:2/4; display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--neon-cyan); font-size:0.75rem; text-align:center;">${kind === 'rasi' ? 'ராசி' : 'நவாம்சம்'} Chart</div>`;
+    html += `<div style="grid-row:2/4; grid-column:2/4; display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--neon-cyan); font-size:0.75rem; text-align:center;">${kind === 'rasi' ? 'ராசி' : 'நவாம்சம்'} Chart${locked ? ' 🔒' : ''}</div>`;
     html += `</div>`;
     container.innerHTML = html;
 }
-function saveChart(kind) {
-    const container = document.getElementById(kind === 'rasi' ? 'rasiChartGrid' : 'navamsaChartGrid');
-    if (!container) return;
-    const data = {};
-    container.querySelectorAll('textarea[data-house]').forEach(t => { data[t.dataset.house] = t.value.trim(); });
-    safeSetItem('jyotish_chart_' + kind, data);
-    displayPremiumToastNotification((kind === 'rasi' ? 'ராசி' : 'நவாம்சம்') + " Chart Saved!", "💾");
+function updateChartLockUI() {
+    const locked = isChartLocked();
+    const btn = document.getElementById('chartLockBtn');
+    const note = document.getElementById('chartLockedNote');
+    const hint = document.getElementById('rasiChartHint');
+    const analysisBtn = document.getElementById('fullChartAnalysisBtn');
+    if (btn) btn.style.display = locked ? 'none' : 'block';
+    if (note) note.style.display = locked ? 'block' : 'none';
+    if (hint) hint.style.display = locked ? 'none' : 'block';
+    if (analysisBtn) analysisBtn.style.display = locked ? 'block' : 'none';
 }
-function saveChartsToHistory() {
+function lockAndSaveCharts() {
+    if (isChartLocked()) return;
     const rasiContainer = document.getElementById('rasiChartGrid');
     const navamsaContainer = document.getElementById('navamsaChartGrid');
     const rasi = {}; if (rasiContainer) rasiContainer.querySelectorAll('textarea[data-house]').forEach(t => { rasi[t.dataset.house] = t.value.trim(); });
     const navamsa = {}; if (navamsaContainer) navamsaContainer.querySelectorAll('textarea[data-house]').forEach(t => { navamsa[t.dataset.house] = t.value.trim(); });
+    const confirmed = confirm("⚠️ இது ஒரே ஒரு தடவை மட்டும் Save ஆகும். Save பண்ணின பிறகு இந்த Chart-ஐ திரும்ப Edit பண்ண முடியாது. நல்லா check பண்ணிட்டீங்களா?");
+    if (!confirmed) return;
+    safeSetItem('jyotish_chart_rasi', rasi);
+    safeSetItem('jyotish_chart_navamsa', navamsa);
+    localStorage.setItem('jyotish_chart_locked', 'true');
+    renderChartGrid('rasiChartGrid', 'rasi');
+    renderChartGrid('navamsaChartGrid', 'navamsa');
+    updateChartLockUI();
+    triggerDeviceHapticPulse();
+    playTone(700, 'sine', 0.15, 1.5);
+    displayPremiumToastNotification("Chart Save & Lock ஆனது! 🔒", "💾");
+    loadFullChartAnalysis(true);
+}
+async function loadFullChartAnalysis(force) {
+    const box = document.getElementById('fullChartAnalysisBox');
+    if (!box) return;
+    if (!isChartLocked()) { box.innerHTML = "முதலில் மேலே Charts-ஐ Save & Lock பண்ணுங்க."; return; }
+    const cacheKey = 'jyotish_full_chart_analysis_v1';
+    let cached = localStorage.getItem(cacheKey);
+    if (cached && !force) { box.innerHTML = cached; return; }
+    box.innerHTML = "⏳ உங்க முழு ஜாதகத்தையும் பகுப்பாய்வு செய்கிறேன்...";
+    const rasi = safeGetItem('jyotish_chart_rasi', {});
+    const navamsa = safeGetItem('jyotish_chart_navamsa', {});
+    const rasiLines = Object.keys(rasi).filter(h => rasi[h]).map(h => `${getRasiSignName(h)}: ${rasi[h]}`).join(' | ');
+    const navamsaLines = Object.keys(navamsa).filter(h => navamsa[h]).map(h => `${getRasiSignName(h)}: ${navamsa[h]}`).join(' | ');
+    const prompt = `நீ ஒரு அனுபவமிக்க Vedic Jyotish நிபுணர். இதோ ஜாதகரின் முழு ஜாதக விவரம்:
+அடிப்படை: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
+ராசி Chart கிரக நிலைகள் (ராசி: கிரகங்கள்): ${rasiLines || 'தகவல் இல்லை'}
+நவாம்சம் Chart கிரக நிலைகள் (ராசி: கிரகங்கள்): ${navamsaLines || 'தகவல் இல்லை'}
+இந்த தகவல்களை மட்டும் வைத்து ஒரு முழுமையான ஜாதக பலன் பகுப்பாய்வை (Full Horoscope Analysis) தமிழில் கொடு. கீழ்க்கண்ட பிரிவுகளாக, தலைப்புகளுடன் தா, ஒவ்வொரு பிரிவும் 2-3 வரிகளுக்கு மிகாமல்:
+1. 🧭 ஆளுமை & குணாதிசயம்
+2. 💼 தொழில் & வாழ்க்கை பாதை
+3. 💰 பொருளாதாரம்
+4. ❤️ திருமணம் & உறவுகள்
+5. 🏥 ஆரோக்கியம்
+6. 🙏 பரிகாரங்கள் (2-3 practical remedies)
+கடைசியில் ஒரு வரி disclaimer சேர்: "இவை traditional Jyotish principles அடிப்படையிலான பொது வழிகாட்டுதல்கள் மட்டும்."`;
+    try {
+        let res = await askGemini(prompt);
+        box.innerHTML = res;
+        localStorage.setItem(cacheKey, res);
+    } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
+}
+function saveChartsToHistory() {
+    if (!isChartLocked()) { displayPremiumToastNotification("முதலில் Chart-ஐ Save & Lock பண்ணுங்க!", "🔒"); return; }
+    const rasi = safeGetItem('jyotish_chart_rasi', DEFAULT_RASI_CHART_DATA);
+    const navamsa = safeGetItem('jyotish_chart_navamsa', DEFAULT_NAVAMSA_CHART_DATA);
     let history = safeGetItem('jyotish_chart_history', []);
     history.unshift({ ts: Date.now(), dateLabel: getAppToday().toLocaleDateString(), rasi, navamsa });
     if (history.length > 10) history = history.slice(0, 10);
@@ -7859,12 +8122,14 @@ function renderChartHistory() {
         </div>`).join('');
 }
 function loadChartFromHistory(idx) {
+    if (!isChartLocked()) { displayPremiumToastNotification("முதலில் Chart-ஐ Save & Lock பண்ணுங்க!", "🔒"); return; }
     let history = safeGetItem('jyotish_chart_history', []);
     const h = history[idx]; if (!h) return;
     safeSetItem('jyotish_chart_rasi', h.rasi);
     safeSetItem('jyotish_chart_navamsa', h.navamsa);
     renderChartGrid('rasiChartGrid', 'rasi');
     renderChartGrid('navamsaChartGrid', 'navamsa');
+    loadFullChartAnalysis(true);
     displayPremiumToastNotification("Chart History-ல் இருந்து Load ஆனது!", "📂");
 }
 function deleteChartHistory(idx) {
@@ -7874,68 +8139,14 @@ function deleteChartHistory(idx) {
     renderChartHistory();
 }
 
-// ---- 8. Family Call reminder ----
-function isFamilyCallDoneToday() { return localStorage.getItem('family_call_done_' + getAppToday().toDateString()) === 'true'; }
-function toggleFamilyCallDone() {
-    const key = 'family_call_done_' + getAppToday().toDateString();
-    const willBeDone = !isFamilyCallDoneToday();
-    localStorage.setItem(key, willBeDone ? 'true' : 'false');
-    renderFamilyCallWidget();
-    if (willBeDone) displayPremiumToastNotification("Nice! குடும்பத்தினரிடம் பேசினீங்க 💚", "📞");
-}
-function renderFamilyCallWidget() {
-    const statusBox = document.getElementById('familyCallStatus');
-    const btn = document.getElementById('familyCallBtn');
-    if (!statusBox || !btn) return;
-    const done = isFamilyCallDoneToday();
-    statusBox.innerHTML = done ? '✅ இன்று பேசியாச்சு!' : '❌ இன்னும் பேசலை';
-    statusBox.style.color = done ? 'var(--neon-green)' : 'var(--neon-red)';
-    btn.innerText = done ? '↩️ Undo' : 'இன்று பேசினேன் ✅';
-}
-function checkFamilyCallReminder() {
-    const now = new Date();
-    if (now.getHours() >= 20 && !isFamilyCallDoneToday()) {
-        const sessionKey = 'family_call_nudge_' + getAppToday().toDateString();
-        if (!sessionStorage.getItem(sessionKey)) {
-            sessionStorage.setItem(sessionKey, 'shown');
-            setTimeout(() => displayPremiumToastNotification("💚 இன்னிக்கு அம்மா/அப்பாகிட்ட பேசினீங்களா?", "📞"), 4000);
-        }
-    }
-}
-
-// ---- 9. Top-3 Priority widget ----
-function getTop3Priorities() { return safeGetItem('top3_priority_' + getAppToday().toDateString(), ['', '', '']); }
-function saveTop3Priorities() {
-    const vals = [1, 2, 3].map(i => { const el = document.getElementById('priorityInput' + i); return el ? el.value.trim() : ''; });
-    safeSetItem('top3_priority_' + getAppToday().toDateString(), vals);
-    displayPremiumToastNotification("Top 3 Priorities Saved!", "🎯");
-}
-function toggleTop3Done(idx) {
-    let doneArr = safeGetItem('top3_done_' + getAppToday().toDateString(), [false, false, false]);
-    doneArr[idx] = !doneArr[idx];
-    safeSetItem('top3_done_' + getAppToday().toDateString(), doneArr);
-}
-function renderTop3Priorities() {
-    const vals = getTop3Priorities();
-    const doneArr = safeGetItem('top3_done_' + getAppToday().toDateString(), [false, false, false]);
-    for (let i = 0; i < 3; i++) {
-        const input = document.getElementById('priorityInput' + (i + 1));
-        if (input) input.value = vals[i] || '';
-        const cb = document.getElementById('priorityCheck' + (i + 1));
-        if (cb) cb.checked = !!doneArr[i];
-    }
-}
-
-// ---- Init all Jyotish widgets (non-AI parts only — AI cards load on button tap to save API quota) ----
+// ---- Init all Jyotish widgets (non-AI parts only — AI cards load on button tap / cache to save API quota) ----
 function initJyotishModule() {
     renderDashaCountdown();
     renderJapamCounter();
-    renderFamilyCallWidget();
-    renderTop3Priorities();
     renderChartGrid('rasiChartGrid', 'rasi');
     renderChartGrid('navamsaChartGrid', 'navamsa');
     renderChartHistory();
-    checkFamilyCallReminder();
+    updateChartLockUI();
     // AI cards: show cached content silently if already fetched today/this week/this month
     let appToday = getAppToday();
     const briefingCache = localStorage.getItem('astro_briefing_' + appToday.toDateString());
@@ -7945,6 +8156,23 @@ function initJyotishModule() {
     if (gocharaCache) document.getElementById('gocharaBox').innerHTML = gocharaCache;
     const poojaCache = localStorage.getItem('pooja_vrat_' + appToday.getFullYear() + '_' + (appToday.getMonth() + 1));
     if (poojaCache) document.getElementById('poojaVratBox').innerHTML = poojaCache;
+    // Pooja/Vrat Push Reminder toggle state + Voice Milestone toggle state
+    const poojaReminderEnabled = localStorage.getItem('pooja_vrat_reminder_enabled') === 'true';
+    const poojaToggleEl = document.getElementById('poojaVratReminderToggle');
+    if (poojaToggleEl) poojaToggleEl.checked = poojaReminderEnabled;
+    updateToggleVisual('poojaVratReminderSlider', 'poojaVratReminderKnob', poojaReminderEnabled);
+    checkPoojaVratTodayNotification(); // cache இருந்தா banner+notify காட்டும்; இல்லனா reminder ON-ஆ இருந்தா silent-ஆ fetch பண்ணும்
+    const voiceMilestoneEnabled = localStorage.getItem('japam_voice_milestone_enabled') !== 'false';
+    const voiceToggleEl = document.getElementById('japamVoiceMilestoneToggle');
+    if (voiceToggleEl) voiceToggleEl.checked = voiceMilestoneEnabled;
+    updateToggleVisual('japamVoiceMilestoneSlider', 'japamVoiceMilestoneKnob', voiceMilestoneEnabled);
+    const mantraCache = localStorage.getItem('japam_mantra_' + appToday.toDateString());
+    if (mantraCache) document.getElementById('todayMantraBox').innerHTML = mantraCache;
+    if (isChartLocked()) {
+        const analysisCache = localStorage.getItem('jyotish_full_chart_analysis_v1');
+        if (analysisCache) document.getElementById('fullChartAnalysisBox').innerHTML = analysisCache;
+        else loadFullChartAnalysis(false);
+    }
 }
 initJyotishModule();
 
