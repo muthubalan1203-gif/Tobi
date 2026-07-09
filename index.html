@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
@@ -629,7 +629,6 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 #fakeNotifBanner .fn-body { font-size: 0.78rem; color: #e5e7eb; margin-top: 3px; line-height: 1.35; }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <base target="_blank">
     <link rel="manifest" href="manifest.json">
 </head>
@@ -1272,6 +1271,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 
 <div class="app-card" style="border-top:4px solid var(--neon-indigo);">
 <h3 class="card-title">💰 Add Expense Details</h3>
+<button class="btn-universal" style="background:var(--neon-green); color:black; margin-bottom:15px; width:100%;" onclick="syncBankSMS()">🔄 Sync Bank SMS (Auto Add)</button>
 <div class="form-group"><label>Amount (₹):</label><input type="number" id="expAmount" class="form-control" placeholder="Enter Amount" inputmode="numeric"></div>
 <div class="form-group"><label>Description:</label><input type="text" id="expDesc" class="form-control" placeholder="e.g. Fuel, Diet Eggs, Gym fees"></div>
 <div class="form-group"><label>Category Tag:</label><select id="expCategory" class="form-control" style="background:#000; color:white;"><option value="Food">🍔 Food</option><option value="Gym Diet">💪 Gym Diet</option><option value="Travel">🚗 Travel</option><option value="Personal Care">🧴 Personal Care</option><option value="Others">📦 Others</option></select></div>
@@ -1778,6 +1778,63 @@ async function generateWeeklyExpenseForecast() {
         document.getElementById('aiActionButtons').innerHTML = `<button class="ai-btn-close" style="background:var(--neon-red);" onclick="closeModalAction('aiEngineModal')">Close</button>`;
     }
 }
+// Bank SMS-ஐ Google Sheet-ல் இருந்து எடுத்து App-ல் சேர்க்கும் Function
+async function syncBankSMS() {
+    // இங்கே உங்களின் Google Apps Script URL-ஐ மட்டும் போடவும் (கடைசியில் ?amount=... வேண்டாம்)
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxsIZflF9SmK_Pehy9iy6V6QIgHpoXONygq3_5pC6PFOeoWCUReuYI0mxOUQQawqFfu/exec';
+
+    try {
+        displayPremiumToastNotification("வங்கி மெசேஜ்களைச் சரிபார்க்கிறேன்...", "🔄");
+        
+        const response = await fetch(scriptUrl);
+        const data = await response.json();
+        
+        let addedCount = 0;
+
+        // Google Sheet-ல் உள்ள ஒவ்வொரு வரியையும் படிக்கிறோம்
+        data.forEach(row => {
+            let smsText = String(row[1]); // இதுதான் நமது முழு SMS
+            
+            // SMS-ல் இருந்து Rs. அல்லது INR தொகையை மட்டும் தனியாகப் பிரித்தெடுத்தல் (Regex)
+            let match = smsText.match(/(?:Rs\.?|INR)\s*(\d+(?:\.\d+)?)/i);
+            
+            if (match) {
+                let amount = parseFloat(match[1]);
+                
+                // ஏற்கனவே இந்த செலவு App-ல் பதிவாகியுள்ளதா என்று செக் செய்வது (Duplicate-ஐ தவிர்க்க)
+                let isDuplicate = expenses.some(e => e.amount === amount && e.desc === "Bank Auto Expense 📱");
+                
+                if (!isDuplicate && amount > 0) {
+                    let appToday = getAppToday(); // உங்கள் App-இன் Date Function
+                    
+                    // செலவை Expenses லிஸ்டில் சேர்ப்பது
+                    expenses.unshift({ 
+                        id: Date.now() + Math.random(), 
+                        amount: amount, 
+                        desc: "Bank Auto Expense 📱", 
+                        category: "Others", 
+                        paymentMode: "GPay / UPI", 
+                        date: appToday.toISOString() 
+                    });
+                    addedCount++;
+                }
+            }
+        });
+
+        if (addedCount > 0) {
+            localStorage.setItem('person_expenses', JSON.stringify(expenses));
+            renderExpenses(); // Expense UI-ஐ புதுப்பிக்க
+            updateCEODashboard(); // CEO Dashboard-ஐ புதுப்பிக்க
+            displayPremiumToastNotification(`${addedCount} புதிய செலவுகள் சேர்க்கப்பட்டன!`, "✅");
+        } else {
+            displayPremiumToastNotification("புதிய செலவுகள் ஏதுமில்லை.", "👍");
+        }
+
+    } catch (error) {
+        console.error("SMS Sync Error:", error);
+        displayPremiumToastNotification("Sync தோல்வியடைந்தது. Internet-ஐச் சரிபார்க்கவும்.", "❌");
+    }
+}
 // --- 1. MORNING BRIEFING ---
 async function playMorningBriefing() {
     if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); openModalWithHistory('systemSettingsModal', 'flex'); return; }
@@ -2086,6 +2143,21 @@ function replenishElectrolytes() {
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(triggerHeatWaveProtocol, 2000);
 });
+
+// ===== LAZY LOAD jsPDF (PDF export bodhu mattum load aagum, app open speed-a affect pannadhu) =====
+let _jsPDFLoadPromise = null;
+function ensureJsPDFLoaded() {
+    if (window.jspdf) return Promise.resolve();
+    if (_jsPDFLoadPromise) return _jsPDFLoadPromise;
+    _jsPDFLoadPromise = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+        s.onload = () => resolve();
+        s.onerror = () => { _jsPDFLoadPromise = null; reject(new Error('jsPDF load failed - net check pannunga')); };
+        document.head.appendChild(s);
+    });
+    return _jsPDFLoadPromise;
+}
 async function checkDailyWisdom() {
     let appToday = getAppToday();
     let todayStr = appToday.toDateString();
@@ -5252,8 +5324,9 @@ function renderMonthlyCalendar() { const gridContainer = document.getElementById
 function prevMonth() { calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1); renderMonthlyCalendar(); }
 function nextMonth() { calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1); renderMonthlyCalendar(); }
 
-function downloadWeeklyArchive() {
+async function downloadWeeklyArchive() {
     triggerDeviceHapticPulse(); 
+    try { await ensureJsPDFLoaded(); } catch(e) { displayPremiumToastNotification("PDF library load aagala, net check pannunga!", "⚠️"); return; }
     const { jsPDF } = window.jspdf; 
     const doc = new jsPDF();
 
@@ -5399,8 +5472,9 @@ function downloadWeeklyArchive() {
     doc.save(`Muthubalan_Weekly_Detailed_Report.pdf`);
     displayPremiumToastNotification("Detailed Weekly Report Downloaded!", "🗄️");
 }
-function downloadMonthlyArchive() {
+async function downloadMonthlyArchive() {
     triggerDeviceHapticPulse(); 
+    try { await ensureJsPDFLoaded(); } catch(e) { displayPremiumToastNotification("PDF library load aagala, net check pannunga!", "⚠️"); return; }
     const { jsPDF } = window.jspdf; 
     const doc = new jsPDF();
 
@@ -5541,7 +5615,7 @@ function downloadMonthlyArchive() {
     doc.save(`Muthubalan_Monthly_Detailed_Report_${monthNames[month]}_${year}.pdf`);
     displayPremiumToastNotification("Detailed Monthly Report Downloaded!", "🗄️");
 }
-function downloadYearlyArchive() { triggerDeviceHapticPulse(); const { jsPDF } = window.jspdf; const doc = new jsPDF(); let now = getAppToday(); let year = now.getFullYear(); doc.setFillColor(10, 14, 28); doc.rect(0, 0, 220, 40, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(22); doc.setFont("helvetica", "bold"); doc.text("MUTHUBALAN PRO ELITE", 14, 20); doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text(`Yearly Archive • ${now.toLocaleDateString()}`, 14, 30); doc.setTextColor(0, 0, 0); doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.text(`YEARLY HISTORY FOR ${year}`, 14, 50); doc.line(14, 53, 195, 53); doc.setFontSize(10); doc.setFont("helvetica", "normal"); let mSum = expenses.reduce((sum, e) => { if(new Date(e.date).getFullYear() === year) return sum + e.amount; return sum; }, 0); let sSum = savings.reduce((sum, s) => { if(s.date.includes(year)) return sum + s.amount; return sum; }, 0); doc.text(`Total Expenses: INR ${mSum}`, 14, 65); doc.text(`Total Savings: INR ${sSum}`, 14, 75); doc.text(`Weight Logs: ${weights.length} entries`, 14, 85); doc.text(`Meal Entries: ${mealLogs.length} entries`, 14, 95); doc.text(`Sleep Logs: ${sleepLogs.length} entries`, 14, 105); doc.save(`Muthubalan_Yearly_Archive_${year}.pdf`); displayPremiumToastNotification("Yearly Archive Downloaded!", "🗄️"); }
+async function downloadYearlyArchive() { triggerDeviceHapticPulse(); try { await ensureJsPDFLoaded(); } catch(e) { displayPremiumToastNotification("PDF library load aagala, net check pannunga!", "⚠️"); return; } const { jsPDF } = window.jspdf; const doc = new jsPDF(); let now = getAppToday(); let year = now.getFullYear(); doc.setFillColor(10, 14, 28); doc.rect(0, 0, 220, 40, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(22); doc.setFont("helvetica", "bold"); doc.text("MUTHUBALAN PRO ELITE", 14, 20); doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text(`Yearly Archive • ${now.toLocaleDateString()}`, 14, 30); doc.setTextColor(0, 0, 0); doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.text(`YEARLY HISTORY FOR ${year}`, 14, 50); doc.line(14, 53, 195, 53); doc.setFontSize(10); doc.setFont("helvetica", "normal"); let mSum = expenses.reduce((sum, e) => { if(new Date(e.date).getFullYear() === year) return sum + e.amount; return sum; }, 0); let sSum = savings.reduce((sum, s) => { if(s.date.includes(year)) return sum + s.amount; return sum; }, 0); doc.text(`Total Expenses: INR ${mSum}`, 14, 65); doc.text(`Total Savings: INR ${sSum}`, 14, 75); doc.text(`Weight Logs: ${weights.length} entries`, 14, 85); doc.text(`Meal Entries: ${mealLogs.length} entries`, 14, 95); doc.text(`Sleep Logs: ${sleepLogs.length} entries`, 14, 105); doc.save(`Muthubalan_Yearly_Archive_${year}.pdf`); displayPremiumToastNotification("Yearly Archive Downloaded!", "🗄️"); }
 
 // FEATURE: AI Food Health Analysis for Nightly Review — Inniku saapta food-la unhealthy items find pannitu, healthy alternative suggest pannum
 async function getFoodHealthAnalysisAI(todayMeals) {
