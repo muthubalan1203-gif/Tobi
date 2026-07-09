@@ -746,6 +746,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <button id="tab-notes" class="tab-btn" onclick="switchPage('notes')">📝 Reminders</button>
 <button id="tab-calendar" class="tab-btn" onclick="switchPage('calendar')">📅 Calendar</button>
 <button id="tab-jyotish" class="tab-btn" onclick="switchPage('jyotish')">🕉️ Jyotish</button>
+<button id="tab-settings" class="tab-btn" onclick="switchPage('settings')">⚙️ Settings</button>
 </div>
 <div class="main-content">
 <!-- GLOW UP PAGE -->
@@ -851,17 +852,6 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 </div>
 
 
-<div class="app-card" style="border-top:4px solid var(--neon-cyan); margin-top:16px;">
-<h3 class="card-title" style="color:var(--neon-cyan);">🫁 Wim Hof Breath Protocol</h3>
-<p style="font-size:0.75rem; color:var(--text-secondary);">Pre-Cold Shower / Morning Activation:</p>
-<div class="breath-circle" id="breathCircle"><div class="breath-text" id="breathInstruction">Tap Start</div><div class="breath-timer-display" id="breathCountdown" style="display:none;"></div></div>
-<div style="text-align:center; font-size:0.8rem; color:var(--text-secondary); margin-bottom:12px;" id="breathRoundDisplay">Breath: 0 / 15</div>
-<div class="form-row">
-<button class="btn-universal" style="background:var(--neon-cyan); color:black;" id="breathStartBtn" onclick="startWimHof()">▶️ Start Protocol</button>
-<button class="btn-universal" style="background:transparent; border:1px solid var(--neon-red); color:var(--neon-red); display:none;" id="breathStopBtn" onclick="stopWimHof()">⏹ Stop</button></div>
-<div style="margin-top:12px; font-size:0.75rem; color:var(--text-secondary); background:rgba(0,0,0,0.2); padding:10px; border-radius:10px;"><b>Protocol:</b> Inhale (4s) → Hold (4s) → Exhale (4s). Repeat 15 Cycles.</div>
-</div>
-
 <div class="app-card" style="background:linear-gradient(145deg,#0b1021,#0a0e1c); border-color:rgba(99,102,241,0.15);">
 <div class="weight-progress-box">
 <div class="progress-ring-container">
@@ -876,22 +866,6 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="completeCurrentDay()">இன்றைய இலக்குகளை முடித்துவிட்டேன் →</button>
 <button id="sundayAuditBtn" class="btn-universal" style="background:var(--neon-purple); color:white; display:none; margin-top:15px;" onclick="runWeeklyAudit()">📊 இந்த வார டாஸ்க்குகளை முடித்துவிட்டேன்</button>
 </div>
-
-<div class="app-card" style="border-top:5px solid var(--neon-orange); margin-top:16px;">
-<h3 class="card-title" style="color:var(--neon-orange);">🚶 Steps Tracker</h3>
-<div class="form-row" style="margin-bottom:12px;">
-<div class="form-group" style="flex:1;"><label>இன்று நடந்த Steps:</label><input type="number" id="stepsInput" class="form-control" placeholder="எ.கா. 6000" style="background:#000; border-color:rgba(255,255,255,0.05); text-align:center; font-weight:700; color:white;"></div>
-</div>
-<button class="btn-universal" style="background:var(--neon-orange); color:black;" onclick="logStepsCardio()">📥 Steps Log பண்ணு</button>
-<div style="display:flex; justify-content:space-around; margin-top:14px; text-align:center;">
-<div><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">BURN / DISTANCE</div><div id="cardioBurnDisplay" style="font-weight:900; color:var(--neon-green); font-size:1rem; margin-top:4px;">0 Kcal 🔥 | 0.00 km</div></div>
-</div>
-<div id="stepsBenefitText" style="margin-top:12px; font-size:0.8rem; color:var(--text-secondary); background:rgba(0,0,0,0.2); padding:10px; border-radius:10px;">இன்னும் steps log பண்ணல.</div>
-<div id="stepsWeightGainAdvice" style="margin-top:8px; font-size:0.78rem; color:var(--neon-gold); background:rgba(0,0,0,0.2); padding:10px; border-radius:10px;"></div>
-<ul id="cardioLogList" class="task-list" style="margin-top:12px;"></ul>
-</div>
-
-
 
 <div class="app-card" style="border-top:5px solid var(--neon-cyan); margin-top:16px;">
 <h3 class="card-title" style="color:var(--neon-cyan);">🧴 சருமம் மற்றும் தலைமுடி பராமரிப்பு</h3>
@@ -996,6 +970,21 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <h3 class="card-title" style="color:var(--neon-gold);">🏆 Personal Records</h3>
 <p style="font-size:0.72rem; color:var(--text-secondary); margin-top:-8px;">Dynamic Builder-la weight log panna, automatic-a PR track aagum.</p>
 <ul class="list-container" id="prTrackerListContainer" style="max-height:180px;"><li class="list-item" style="justify-content:center; color:var(--text-secondary); font-size:0.78rem;">No PRs yet. Log weighted exercises below.</li></ul>
+</div>
+
+<!-- 🚶 Steps Tracker (Glow Up-ல் இருந்து இங்கு மாற்றப்பட்டது — Body Metrics-க்கு அருகில்) -->
+<div class="app-card" style="border-top:5px solid var(--neon-orange);">
+<h3 class="card-title" style="color:var(--neon-orange);">🚶 Steps Tracker</h3>
+<div class="form-row" style="margin-bottom:12px;">
+<div class="form-group" style="flex:1;"><label>இன்று நடந்த Steps:</label><input type="number" id="stepsInput" class="form-control" placeholder="எ.கா. 6000" style="background:#000; border-color:rgba(255,255,255,0.05); text-align:center; font-weight:700; color:white;"></div>
+</div>
+<button class="btn-universal" style="background:var(--neon-orange); color:black;" onclick="logStepsCardio()">📥 Steps Log பண்ணு</button>
+<div style="display:flex; justify-content:space-around; margin-top:14px; text-align:center;">
+<div><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">BURN / DISTANCE</div><div id="cardioBurnDisplay" style="font-weight:900; color:var(--neon-green); font-size:1rem; margin-top:4px;">0 Kcal 🔥 | 0.00 km</div></div>
+</div>
+<div id="stepsBenefitText" style="margin-top:12px; font-size:0.8rem; color:var(--text-secondary); background:rgba(0,0,0,0.2); padding:10px; border-radius:10px;">இன்னும் steps log பண்ணல.</div>
+<div id="stepsWeightGainAdvice" style="margin-top:8px; font-size:0.78rem; color:var(--neon-gold); background:rgba(0,0,0,0.2); padding:10px; border-radius:10px;"></div>
+<ul id="cardioLogList" class="task-list" style="margin-top:12px;"></ul>
 </div>
 
 <div class="page-banner" style="background:linear-gradient(135deg,#ef4444,#7f1d1d); margin-bottom:15px; padding:15px; border-radius:16px; font-weight:900; text-align:center; text-shadow:0 1px 4px #000;">🏋️‍♂️ ANABOLIC BULKING ENGINE</div>
@@ -1110,31 +1099,57 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 
 <!-- DIET PAGE -->
 <div id="page-diet" class="page">
+    <div class="page-banner" style="background:linear-gradient(135deg,#f59e0b,#78350f); padding:15px; border-radius:16px; margin-bottom:15px; font-weight:900; text-align:center;">🍎 TOBI MEAL AI & DIET</div>
+    <!-- ☀️ MADURAI BIO-HACKING HEAT ALERT -->
+    <div class="madurai-heat-alert" id="maduraiHeatAlertBox">
+        <h4 style="margin:0 0 8px 0; color:var(--neon-red); font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.2rem;">☀️</span> MADURAI HEAT ALERT: <span id="maduraiTempDisplay">--°C</span>
+        </h4>
+        <p id="maduraiDietSuggestion" style="margin:0; font-size:0.75rem; color:white; line-height:1.5; font-weight:bold;"></p>
+    </div>
+
+    <!-- 🛒🥦 UNIFIED GROCERY AI (Monthly Grocery AI + Weekly Grocery AI கார்டுகள் ஒண்ணா merge பண்ணப்பட்டது — ஒரே AI call, ஒரே Refresh button, இரண்டு sub-sections) -->
     <div class="app-card" style="border-top:4px solid var(--neon-green); margin-bottom:15px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 class="card-title" style="margin:0; color:var(--neon-green);">🛒 TOBI Monthly Grocery AI</h3>
-            <button class="water-btn" onclick="generateSmartGrocery()" style="font-size:0.7rem;">🔄 Generate 30-Days</button>
+            <h3 class="card-title" style="margin:0; color:var(--neon-green);">🛒 TOBI Grocery AI</h3>
+            <button class="water-btn" onclick="generateSmartGrocery()" style="font-size:0.7rem;">🔄 Generate Plan</button>
         </div>
-        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Dry/Bulk items bought once a month </p>
-        
-        <div id="smartGroceryContainerMonthly" style="margin-top:15px;">
-            <div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">Tap Generate to plan your monthly budget</div>
-        </div>
+        <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">ஒரே தட்டில் Monthly (dry/bulk) + Weekly (fresh) மளிகை திட்டம்</p>
 
-        <div style="display:flex; gap:8px; margin-top:12px;">
-            <input type="text" id="manualNameMonthly" class="custom-input" placeholder="பொருள் பெயர்" style="flex:2;">
-            <input type="text" id="manualQtyMonthly" class="custom-input" placeholder="அளவு" style="flex:1;">
-            <input type="number" id="manualPriceMonthly" class="custom-input" placeholder="₹ (optional)" style="flex:1;">
-            <button class="water-btn" style="font-size:0.7rem;" onclick="addManualGroceryItem('monthly')">+ சேர்</button>
-        </div>
-        
-        <div style="border-top:1px dashed var(--glass-border); margin-top:12px; padding-top:12px;">
-            <div style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:700;">
+        <div style="border-top:1px dashed var(--glass-border); margin-top:14px; padding-top:12px;">
+            <div style="font-size:0.8rem; font-weight:800; color:var(--neon-gold); margin-bottom:6px;">📅 Monthly (Dry/Bulk — மாதம் ஒருமுறை)</div>
+            <div id="smartGroceryContainerMonthly">
+                <div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">Tap Generate to plan your monthly budget</div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+                <input type="text" id="manualNameMonthly" class="custom-input" placeholder="பொருள் பெயர்" style="flex:2;">
+                <input type="text" id="manualQtyMonthly" class="custom-input" placeholder="அளவு" style="flex:1;">
+                <input type="number" id="manualPriceMonthly" class="custom-input" placeholder="₹ (optional)" style="flex:1;">
+                <button class="water-btn" style="font-size:0.7rem;" onclick="addManualGroceryItem('monthly')">+ சேர்</button>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:700; margin-top:12px;">
                 <span style="color:var(--text-secondary);">Est. Monthly Cost:</span>
                 <span id="groceryCostEstimateMonthly" style="color:var(--neon-gold);">₹0</span>
             </div>
         </div>
-        
+
+        <div style="border-top:1px dashed var(--glass-border); margin-top:16px; padding-top:12px;">
+            <div style="font-size:0.8rem; font-weight:800; color:var(--neon-cyan); margin-bottom:6px;">🥦 Weekly (Fresh — வாரம் ஒருமுறை)</div>
+            <div id="smartGroceryContainerWeekly">
+                <div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">Tap Generate to see this week's fresh list</div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+                <input type="text" id="manualNameWeekly" class="custom-input" placeholder="பொருள் பெயர்" style="flex:2;">
+                <input type="text" id="manualQtyWeekly" class="custom-input" placeholder="அளவு" style="flex:1;">
+                <input type="number" id="manualPriceWeekly" class="custom-input" placeholder="₹ (optional)" style="flex:1;">
+                <button class="water-btn" style="font-size:0.7rem;" onclick="addManualGroceryItem('weekly')">+ சேர்</button>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:700; margin-top:12px;">
+                <span style="color:var(--text-secondary);">Est. Weekly Cost:</span>
+                <span id="groceryCostEstimateWeekly" style="color:var(--neon-gold);">₹0</span>
+            </div>
+        </div>
+
         <button id="whatsappShareBtn" class="btn-universal" onclick="shareGroceryToWhatsApp()" style="display:none; margin-top: 15px; background-color: #25D366; color: white;">
             📲 Share to WhatsApp
         </button>
@@ -1148,27 +1163,6 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
         </div>
         <button class="btn-universal" style="background:var(--neon-orange); color:black;" onclick="generateLeftoverRecipe()">🍳 ரெசிபி உருவாக்கு</button>
     </div>
-<div class="page-banner" style="background:linear-gradient(135deg,#f59e0b,#78350f); padding:15px; border-radius:16px; margin-bottom:15px; font-weight:900; text-align:center;">🍎 TOBI MEAL AI & DIET</div>
-<!-- ☀️ MADURAI BIO-HACKING HEAT ALERT -->
-<div class="madurai-heat-alert" id="maduraiHeatAlertBox">
-    <h4 style="margin:0 0 8px 0; color:var(--neon-red); font-size:0.9rem; display:flex; align-items:center; gap:8px;">
-        <span style="font-size:1.2rem;">☀️</span> MADURAI HEAT ALERT: <span id="maduraiTempDisplay">--°C</span>
-    </h4>
-    <p id="maduraiDietSuggestion" style="margin:0; font-size:0.75rem; color:white; line-height:1.5; font-weight:bold;"></p>
-</div>
-<div class="app-card" style="border-top:4px solid var(--neon-green); margin-bottom:15px;">
-<div style="display:flex; justify-content:space-between; align-items:center;"><h3 class="card-title" style="margin:0; color:var(--neon-green);">🥦 Smart Grocery AI (Weekly)</h3><button class="water-btn" onclick="generateSmartGrocery()" style="font-size:0.7rem;">🔄 Refresh</button></div>
-<p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Fresh items to buy every week </p>
-<div id="smartGroceryContainerWeekly" style="margin-top:10px;"><div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:0.85rem;">Tap Refresh to generate AI grocery list</div></div>
-
-<div style="display:flex; gap:8px; margin-top:12px;">
-    <input type="text" id="manualNameWeekly" class="custom-input" placeholder="பொருள் பெயர்" style="flex:2;">
-    <input type="text" id="manualQtyWeekly" class="custom-input" placeholder="அளவு" style="flex:1;">
-    <input type="number" id="manualPriceWeekly" class="custom-input" placeholder="₹ (optional)" style="flex:1;">
-    <button class="water-btn" style="font-size:0.7rem;" onclick="addManualGroceryItem('weekly')">+ சேர்</button>
-</div>
-
-<div style="border-top:1px dashed var(--glass-border); margin-top:12px; padding-top:12px;"><div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700;"><span style="color:var(--text-secondary);">Est. Weekly Cost:</span><span id="groceryCostEstimateWeekly" style="color:var(--neon-gold);">₹0</span></div></div></div>
 
 <div class="macros-dashboard">
 <div style="font-size:0.75rem; font-weight:800; color:#fff; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.3px;">Today's Accumulated Macros</div>
@@ -1364,6 +1358,18 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
         </div>
     </div>
 
+    <!-- 🫁 Wim Hof Breath Protocol (Glow Up-ல் இருந்து இங்கு மாற்றப்பட்டது — Recovery/Breathing category) -->
+    <div class="app-card" style="border-top:4px solid var(--neon-cyan); margin-top:16px;">
+    <h3 class="card-title" style="color:var(--neon-cyan);">🫁 Wim Hof Breath Protocol</h3>
+    <p style="font-size:0.75rem; color:var(--text-secondary);">Pre-Cold Shower / Morning Activation:</p>
+    <div class="breath-circle" id="breathCircle"><div class="breath-text" id="breathInstruction">Tap Start</div><div class="breath-timer-display" id="breathCountdown" style="display:none;"></div></div>
+    <div style="text-align:center; font-size:0.8rem; color:var(--text-secondary); margin-bottom:12px;" id="breathRoundDisplay">Breath: 0 / 15</div>
+    <div class="form-row">
+    <button class="btn-universal" style="background:var(--neon-cyan); color:black;" id="breathStartBtn" onclick="startWimHof()">▶️ Start Protocol</button>
+    <button class="btn-universal" style="background:transparent; border:1px solid var(--neon-red); color:var(--neon-red); display:none;" id="breathStopBtn" onclick="stopWimHof()">⏹ Stop</button></div>
+    <div style="margin-top:12px; font-size:0.75rem; color:var(--text-secondary); background:rgba(0,0,0,0.2); padding:10px; border-radius:10px;"><b>Protocol:</b> Inhale (4s) → Hold (4s) → Exhale (4s). Repeat 15 Cycles.</div>
+    </div>
+
     <!-- ⏰ NEW: REM Cycle Calculator -->
     <div class="app-card" style="border-top:4px solid var(--neon-cyan); margin-top:16px;">
         <h3 class="card-title" style="color:var(--neon-cyan);">⏰ 90-Min REM Cycle Calculator</h3>
@@ -1449,71 +1455,6 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <div class="calendar-header"><button class="cal-nav-btn" onclick="prevMonth()">◄</button><div class="cal-month-lbl" id="calendarMonthYearLbl">Month 2026</div><button class="cal-nav-btn" onclick="nextMonth()">►</button></div>
 <div class="calendar-weekdays"><div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div></div>
 <div class="calendar-grid" id="calendarGridContainer"></div></div>
-
-<div class="app-card" style="border-top:4px solid var(--neon-gold); margin-top:15px;">
-<h3 class="card-title" style="color:var(--neon-gold);">🗄️ Master Data Archives</h3>
-    <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:15px;">Download your history and progress logs.</p>
-    
-    <div style="display:flex; flex-direction:column; gap:10px;">
-        <button class="btn-universal" style="background:var(--neon-cyan); color:black;" onclick="downloadWeeklyArchive()">📥 Download Weekly Report</button>
-        <button class="btn-universal" style="background:var(--neon-purple); color:white;" onclick="downloadMonthlyArchive()">📥 Download Monthly Report</button>
-        <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="downloadYearlyArchive()">📥 Download Yearly Archive</button>
-        <button class="btn-universal" style="background:var(--neon-red); color:white; margin-top:15px; box-shadow: 0 0 15px rgba(239,68,68,0.4);" onclick="roastMyMonth()">🔥 TOBI: Roast My Month (கலாய்க்க)</button>
-        <!-- புதிய பட்டன் இங்கே சேர்க்கப்படுகிறது -->
-        <button class="btn-universal" style="background:var(--neon-purple); color:white; margin-top:10px;" onclick="runMonthlyAudit()">📊 Monthly AI Meeting</button>
-        <button class="btn-universal" style="background:var(--neon-gold); color:black; margin-top:10px;" onclick="runWeeklyAIReview()">🗓️ Weekly AI Review Chat</button>
-    </div>
-
-<div class="app-card" style="border-top:4px solid var(--neon-cyan); margin-top:15px;">
-<h3 class="card-title" style="color:var(--neon-cyan);">☁️ Cloud Backup Sync</h3>
-<div class="cloud-sync-status" id="cloudSyncStatus"><div class="cloud-dot offline" id="cloudStatusDot"></div><div><div style="font-size:0.85rem; font-weight:800; color:var(--text-primary);">Sync Status</div><div style="font-size:0.75rem; color:var(--text-secondary);" id="cloudStatusText">Local Mode (Offline)</div></div></div>
-<p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">Securely backup your data to cloud. Access from any device.</p>
-<p id="lastSyncTimeDisplay" style="font-size:0.72rem; color:var(--neon-gold); margin-bottom:12px; font-weight:700;">🕒 Last Synced: Never</p>
-<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); border-radius:12px; padding:10px 14px; margin-bottom:12px;">
-    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">🔁 Auto Daily Backup</span>
-    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
-        <input type="checkbox" id="autoDailyBackupToggle" onchange="toggleAutoDailyBackup(this.checked)" style="opacity:0; width:0; height:0;">
-        <span id="autoDailyBackupSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="autoDailyBackupKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
-    </label>
-</div>
-<div style="display:flex; flex-direction:column; gap:10px;"><button class="btn-universal" style="background:var(--neon-cyan); color:black; font-size:0.9rem;" onclick="syncToCloud()">☁️ Sync to Cloud Now</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-purple); color:var(--neon-purple); font-size:0.9rem;" onclick="restoreFromCloud()">📥 Restore from Cloud</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-cyan); color:var(--neon-cyan); font-size:0.8rem;" onclick="restoreFromLocalFile()">📂 Restore from Local File</button></div>
-<div id="cloudSyncLog" style="margin-top:12px; font-size:0.75rem; color:var(--text-secondary); display:none;"></div></div></div>
-
-<div class="app-card" style="border-top:4px solid var(--neon-purple); margin-top:15px;">
-<h3 class="card-title" style="color:var(--neon-purple);">⚙️ Advanced System Features</h3>
-
-<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
-    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">💪 Wake Lock (Gym Page)</span>
-    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
-        <input type="checkbox" id="wakeLockToggle" onchange="toggleWakeLockFeature(this.checked)" style="opacity:0; width:0; height:0;">
-        <span id="wakeLockSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="wakeLockKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
-    </label>
-</div>
-
-<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
-    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">📳 Shake-to-Log Water</span>
-    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
-        <input type="checkbox" id="shakeToLogToggle" onchange="toggleShakeToLog(this.checked)" style="opacity:0; width:0; height:0;">
-        <span id="shakeToLogSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="shakeToLogKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
-    </label>
-</div>
-
-<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
-    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">🚨 Fall/Impact Detection</span>
-    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
-        <input type="checkbox" id="fallDetectToggle" onchange="toggleFallDetection(this.checked)" style="opacity:0; width:0; height:0;">
-        <span id="fallDetectSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="fallDetectKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
-    </label>
-</div>
-
-<p id="batteryStatusText" style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:10px;">🔋 Battery status: checking...</p>
-
-<div style="display:flex; flex-direction:column; gap:8px;">
-<button class="btn-universal" style="background:transparent; border:1px solid var(--neon-cyan); color:var(--neon-cyan); font-size:0.8rem;" onclick="exportDataAsCSV()">📄 Export All Data as CSV</button>
-<button class="btn-universal" style="background:transparent; border:1px solid var(--neon-gold); color:var(--neon-gold); font-size:0.8rem;" onclick="showAppDiagnostics()">🩺 App Diagnostics / Self-Check</button>
-</div>
-<div id="appDiagnosticsLog" style="margin-top:10px; font-size:0.72rem; color:var(--text-secondary); display:none; white-space:pre-wrap;"></div>
-</div>
 </div>
 
 <!-- JYOTISH PAGE -->
@@ -1658,6 +1599,83 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 
 </div>
 <!-- END JYOTISH PAGE -->
+
+<!-- SETTINGS PAGE (புதிதாக உருவாக்கப்பட்டது — Calendar page-ல் இருந்திருந்த Data Archives/Cloud Sync/System Features எல்லாம் இங்கு மாற்றப்பட்டது, Calendar page தூய்மையாக calendar grid மட்டும் காட்டும்) -->
+<div id="page-settings" class="page">
+<div class="page-banner" style="background:linear-gradient(135deg,#7c3aed,#4c1d95); padding:15px; border-radius:16px; margin-bottom:15px; font-weight:900; text-align:center;">⚙️ SETTINGS & DATA</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-gold);">
+<h3 class="card-title" style="color:var(--neon-gold);">🗄️ Master Data Archives</h3>
+    <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:15px;">Download your history and progress logs.</p>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn-universal" style="background:var(--neon-cyan); color:black;" onclick="downloadWeeklyArchive()">📥 Download Weekly Report</button>
+        <button class="btn-universal" style="background:var(--neon-purple); color:white;" onclick="downloadMonthlyArchive()">📥 Download Monthly Report</button>
+        <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="downloadYearlyArchive()">📥 Download Yearly Archive</button>
+    </div>
+
+    <!-- 🤖 AI Reports & Reviews (Roast/Monthly Meeting/Weekly Review — ஒரே category-ஆ இங்கு grouping பண்ணப்பட்டது) -->
+    <div style="border-top:1px dashed var(--glass-border); margin-top:16px; padding-top:12px;">
+        <div style="font-size:0.8rem; font-weight:800; color:var(--neon-purple); margin-bottom:8px;">🤖 AI Reports & Reviews</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn-universal" style="background:var(--neon-purple); color:white;" onclick="runMonthlyAudit()">📊 Monthly AI Meeting</button>
+            <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="runWeeklyAIReview()">🗓️ Weekly AI Review Chat</button>
+            <button class="btn-universal" style="background:var(--neon-red); color:white; box-shadow: 0 0 15px rgba(239,68,68,0.4);" onclick="roastMyMonth()">🔥 TOBI: Roast My Month (கலாய்க்க)</button>
+        </div>
+    </div>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-cyan); margin-top:15px;">
+<h3 class="card-title" style="color:var(--neon-cyan);">☁️ Cloud Backup Sync</h3>
+<div class="cloud-sync-status" id="cloudSyncStatus"><div class="cloud-dot offline" id="cloudStatusDot"></div><div><div style="font-size:0.85rem; font-weight:800; color:var(--text-primary);">Sync Status</div><div style="font-size:0.75rem; color:var(--text-secondary);" id="cloudStatusText">Local Mode (Offline)</div></div></div>
+<p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">Securely backup your data to cloud. Access from any device.</p>
+<p id="lastSyncTimeDisplay" style="font-size:0.72rem; color:var(--neon-gold); margin-bottom:12px; font-weight:700;">🕒 Last Synced: Never</p>
+<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border:1px solid var(--glass-border); border-radius:12px; padding:10px 14px; margin-bottom:12px;">
+    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">🔁 Auto Daily Backup</span>
+    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
+        <input type="checkbox" id="autoDailyBackupToggle" onchange="toggleAutoDailyBackup(this.checked)" style="opacity:0; width:0; height:0;">
+        <span id="autoDailyBackupSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="autoDailyBackupKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
+    </label>
+</div>
+<div style="display:flex; flex-direction:column; gap:10px;"><button class="btn-universal" style="background:var(--neon-cyan); color:black; font-size:0.9rem;" onclick="syncToCloud()">☁️ Sync to Cloud Now</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-purple); color:var(--neon-purple); font-size:0.9rem;" onclick="restoreFromCloud()">📥 Restore from Cloud</button><button class="btn-universal" style="background:transparent; border:1px solid var(--neon-cyan); color:var(--neon-cyan); font-size:0.8rem;" onclick="restoreFromLocalFile()">📂 Restore from Local File</button></div>
+<div id="cloudSyncLog" style="margin-top:12px; font-size:0.75rem; color:var(--text-secondary); display:none;"></div></div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-purple); margin-top:15px;">
+<h3 class="card-title" style="color:var(--neon-purple);">⚙️ Advanced System Features</h3>
+
+<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
+    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">💪 Wake Lock (Gym Page)</span>
+    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
+        <input type="checkbox" id="wakeLockToggle" onchange="toggleWakeLockFeature(this.checked)" style="opacity:0; width:0; height:0;">
+        <span id="wakeLockSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="wakeLockKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
+    </label>
+</div>
+
+<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
+    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">📳 Shake-to-Log Water</span>
+    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
+        <input type="checkbox" id="shakeToLogToggle" onchange="toggleShakeToLog(this.checked)" style="opacity:0; width:0; height:0;">
+        <span id="shakeToLogSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="shakeToLogKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
+    </label>
+</div>
+
+<div style="display:flex; align-items:center; justify-content:space-between; background:rgba(0,0,0,0.25); border-radius:12px; padding:10px 14px; margin-bottom:10px;">
+    <span style="font-size:0.78rem; color:var(--text-primary); font-weight:700;">🚨 Fall/Impact Detection</span>
+    <label class="switch" style="position:relative; display:inline-block; width:40px; height:22px;">
+        <input type="checkbox" id="fallDetectToggle" onchange="toggleFallDetection(this.checked)" style="opacity:0; width:0; height:0;">
+        <span id="fallDetectSlider" style="position:absolute; cursor:pointer; inset:0; background:rgba(255,255,255,0.15); border-radius:22px; transition:0.2s;"><span id="fallDetectKnob" style="position:absolute; height:16px; width:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s;"></span></span>
+    </label>
+</div>
+
+<p id="batteryStatusText" style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:10px;">🔋 Battery status: checking...</p>
+
+<div style="display:flex; flex-direction:column; gap:8px;">
+<button class="btn-universal" style="background:transparent; border:1px solid var(--neon-cyan); color:var(--neon-cyan); font-size:0.8rem;" onclick="exportDataAsCSV()">📄 Export All Data as CSV</button>
+<button class="btn-universal" style="background:transparent; border:1px solid var(--neon-gold); color:var(--neon-gold); font-size:0.8rem;" onclick="showAppDiagnostics()">🩺 App Diagnostics / Self-Check</button>
+</div>
+<div id="appDiagnosticsLog" style="margin-top:10px; font-size:0.72rem; color:var(--text-secondary); display:none; white-space:pre-wrap;"></div>
+</div>
+</div>
+<!-- END SETTINGS PAGE -->
 
 <!-- MODALS -->
 <div id="aiEngineModal" class="ai-modal-overlay">
@@ -2914,7 +2932,7 @@ function triggerDeviceHapticPulse() { if("vibrate" in navigator) navigator.vibra
 function displayPremiumToastNotification(msgText, iconToken='🔥') { const toast = document.getElementById('premiumAppToast'); document.getElementById('toastIconElement').innerText = iconToken; document.getElementById('toastMessageText').innerText = msgText; triggerDeviceHapticPulse(); toast.classList.add('active-toast'); setTimeout(() => { toast.classList.remove('active-toast'); }, 4200); }
 
 // Page order for swipe direction detection
-const PAGE_ORDER = ['glowup','gym','diet','expense','sleep','notes','calendar','jyotish'];
+const PAGE_ORDER = ['glowup','gym','diet','expense','sleep','notes','calendar','jyotish','settings'];
 let currentPageId = 'glowup';
 let isPageTransitioning = false;
 
