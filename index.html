@@ -7812,41 +7812,94 @@ async function checkRahuKalamMorningNotification() {
 }
 
 // ---- 1. Daily Astro Briefing (Panchangam + Rasi Palan + Chandrashtama + Activity tip) ----
+// 1. RapidAPI-ல் இருந்து இன்றைய தகவல்களைப் பெறும் புதிய Function
+async function getTodayAstroData() {
+    const url = 'https://astroask-vedic-western-astrology-api.p.rapidapi.com/api/v1/kundali';
+    
+    // இன்றைய தேதியை API-க்கு ஏற்றபடி மாற்றுதல் (YYYY-MM-DDTHH:MM:SS)
+    let today = new Date();
+    let dateString = today.getFullYear() + '-' + 
+                     String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                     String(today.getDate()).padStart(2, '0') + 'T' + 
+                     String(today.getHours()).padStart(2, '0') + ':' + 
+                     String(today.getMinutes()).padStart(2, '0') + ':00';
+
+    const options = {
+        method: 'POST',
+        headers: {
+            'x-rapidapi-key': '60a491e1eemshafdce40f81a79dap1dd08djsndfb1e17d8b75',
+            'x-rapidapi-host': 'astroask-vedic-western-astrology-api.p.rapidapi.com',
+            'Content-Type': 'application/json',
+            'X-RapidAPI-Key': '60a491e1eemshafdce40f81a79dap1dd08djsndfb1e17d8b75',
+            'X-API-Key': '60a491e1eemshafdce40f81a79dap1dd08djsndfb1e17d8b75'
+        },
+        // JSON.stringify மற்றும் இன்றைய தேதி, மதுரை Location சேர்க்கப்பட்டுள்ளது
+        body: JSON.stringify({
+            date: dateString, 
+            lat: 9.92, 
+            lng: 78.11 
+        })
+    };
+
+    try {
+        const response = await fetch(url, options);
+        // .text() என்பதற்குப் பதிலாக .json() பயன்படுத்த வேண்டும்
+        const result = await response.json(); 
+        return result;
+    } catch (error) {
+        console.error("API Error:", error);
+        return null;
+    }
+}
+
+// 2. உங்களின் பழைய Function-ஐ இப்படி மாற்றுங்கள்
 async function loadDailyAstroBriefing(force) {
     let appToday = getAppToday();
     let todayStr = appToday.toDateString();
     const cacheKey = 'astro_briefing_' + todayStr;
     const box = document.getElementById('astroBriefingBox');
+    
     if (!box) return;
     let cached = localStorage.getItem(cacheKey);
     if (cached && !force) { box.innerHTML = cached; return; }
     if (!GEMINI_API_KEY) { box.innerHTML = apiKeyMissingHTML(); return; }
-    box.innerHTML = "⏳ ஏற்றுகிறேன்...";
-    const prompt = const prompt = `நீ ஒரு அனுபவமிக்க தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob}.
-இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu.
+    
+    box.innerHTML = "⏳ துல்லியமான ஜோதிட தகவல்களை ஏற்றுகிறேன்...";
 
-கீழ்க்கண்ட STRICT FORMAT-ல மட்டும் பதில் தா:
-PANCHANGAM: [இன்றைய திதி, ராகு காலம், எமகண்டம் - ஒரு வரியில்]
-RASI_PALAN:ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ஊர்: Madurai, Tamil Nadu ராசி பலன் - 5-6 வரிகளில், தமிழில்]
-ACTIVITY_TIP: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ஊர்: Madurai, Tamil Nadu நட்சத்திரத்திற்கு ஏற்ற ஒரு activity suggestion - ஒரு வரியில்]
-CHANDRASHTAMA: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ஊர்: Madurai, Tamil Nadu [YES அல்லது NO மட்டும்]`;
+    // API-ஐ அழைத்து இன்றைய கிரக நிலைகளை வாங்குதல்
+    const apiData = await getTodayAstroData();
+
+    // AI-க்கு அனுப்பப்படும் Prompt
+    const prompt = `நீ ஒரு அனுபவமிக்க தமிழ் ஜோதிடர். 
+    இன்றைய துல்லியமான கிரக நிலைகள் (JSON): ${JSON.stringify(apiData)}
+    பயனரின் ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}.
+
+    மேற்கண்ட துல்லியமான தகவல்களை வைத்து, பயனரின் சொந்த ராசி மற்றும் நட்சத்திரத்திற்கு ஏற்ப கீழ்க்கண்ட STRICT FORMAT-ல மட்டும் தமிழில் பதில் தா:
+    PANCHANGAM: [இன்றைய திதி, ராகு காலம், எமகண்டம்]
+    RASI_PALAN: [இன்றைய ${JYOTISH_PROFILE.rasi} ராசி பலன் - 5-6 வரிகளில்]
+    ACTIVITY_TIP: [இன்று ${JYOTISH_PROFILE.nakshatra} நட்சத்திரத்திற்கு ஏற்ற ஒரு குறிப்பு]
+    CHANDRASHTAMA: [பயனரின் ராசிக்கு இன்று சந்திராஷ்டமம் உள்ளதா? YES அல்லது NO மட்டும்]`;
+
     try {
         let res = await askGemini(prompt);
         const panch = extractField(res, 'PANCHANGAM');
         const rasi = extractField(res, 'RASI_PALAN');
         const tip = extractField(res, 'ACTIVITY_TIP');
         const isChandrashtama = /YES/i.test(extractField(res, 'CHANDRASHTAMA'));
+        
         const html = `<div style="font-size:0.8rem; line-height:1.7;">
             <p><b>🪔 பஞ்சாங்கம்:</b> ${panch || 'தகவல் இல்லை'}</p>
             <p><b>🌙 ராசி பலன்:</b> ${rasi || 'தகவல் இல்லை'}</p>
             <p><b>✅ இன்றைய Tip:</b> ${tip || 'தகவல் இல்லை'}</p>
             ${isChandrashtama ? '<p style="color:var(--neon-red); font-weight:700;">⚠️ இன்று சந்திராஷ்டமம் — முக்கிய காரியங்களை தவிர்க்கவும்.</p>' : ''}
         </div>`;
+        
         localStorage.setItem(cacheKey, html);
         box.innerHTML = html;
-    } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
+    } catch(e) { 
+        box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; 
+    }
 }
-
 // ---- 2. Dasha-Bhukti countdown (computed) + Full timeline (AI, cached) ----
 function renderDashaCountdown() {
     const box = document.getElementById('dashaCountdownText');
