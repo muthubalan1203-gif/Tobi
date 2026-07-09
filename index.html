@@ -336,8 +336,15 @@ body.theme-sharingan .toast-notification-hub {
 .adaptive-recovery-bar { flex-grow:1; height:8px; background:rgba(255,255,255,0.03); border-radius:4px; overflow:hidden; }
 .adaptive-recovery-fill { height:100%; border-radius:4px; transition:width 0.5s ease; }
 .adaptive-suggestion { background:rgba(0,0,0,0.3); border-radius:12px; padding:12px; margin-top:10px; font-size:0.85rem; border-left:4px solid var(--neon-gold); }
-.grocery-item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px dashed rgba(255,255,255,0.05); font-size:0.85rem; }
+.grocery-item { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px dashed rgba(255,255,255,0.05); font-size:0.85rem; gap:10px; }
 .grocery-qty { background:rgba(255,255,255,0.03); padding:3px 10px; border-radius:8px; font-size:0.75rem; color:var(--neon-cyan); font-weight:700; }
+.grocery-item-name { display:flex; flex-direction:column; flex:1; min-width:0; }
+.grocery-item-name > span:first-child { font-size:0.82rem; color:var(--text-main); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.grocery-item-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.grocery-pill-input { width:42px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:20px; font-size:0.7rem; padding:4px 6px; text-align:center; }
+.grocery-pill-input.qty { color:var(--neon-cyan); }
+.grocery-pill-input.price { color:var(--neon-gold); }
+.grocery-del-btn { width:20px; height:20px; border-radius:50%; border:1px solid rgba(239,68,68,0.35); background:rgba(239,68,68,0.08); color:var(--neon-red); font-size:0.65rem; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; padding:0; }
 .tts-btn { background:rgba(245,158,11,0.1); border:1px solid var(--neon-gold); color:var(--neon-gold); width:auto; padding:8px 14px; font-size:0.75rem; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-top:8px; }
 @keyframes pulse { 0%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(1.2);} 100%{opacity:1;transform:scale(1);} }
 @keyframes premiumPopDown { from{opacity:0;transform:translateY(-5px);} to{opacity:1;transform:translateY(0);} }
@@ -879,9 +886,25 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 </div> <!-- ✅ இந்த இரண்டு DIV-கள் தான் Glowup பேஜை மூடி மற்ற Tabs-ஐ வேலை செய்ய வைக்கும்! -->
 
 <!-- GYM PAGE -->
-
-<!-- GYM PAGE -->
 <div id="page-gym" class="page">
+
+<!-- ஜிம் YES/NO பட்டன்கள் -->
+<div id="gymAttendanceBox" class="app-card" style="border-top:4px solid var(--neon-purple); text-align:center; margin-bottom: 16px; padding: 25px 15px; position: relative; z-index: 10;">
+    <h3 style="color:var(--neon-purple); margin-bottom: 20px;">🏋️‍♂️ Today Gym?</h3>
+    <div style="display:flex; justify-content:center; gap:15px; padding-bottom: 5px;">
+        <button class="btn-universal" style="background:var(--neon-green); color:black; font-weight:bold;" onclick="logGymAttendance(true)">YES, Let's Go!</button>
+        <button class="btn-universal" style="background:#ff4757; color:white; font-weight:bold;" onclick="logGymAttendance(false)">NO, Skip Today</button>
+    </div>
+</div>
+
+<!-- 🏆 Today's Workout Hero Banner - YES கொடுத்த பின் தான் திறக்கும் -->
+<div id="todayWorkoutHero" style="display:none; position:relative; overflow:hidden; border-radius:20px; padding:20px 18px; margin-bottom:16px; background:linear-gradient(135deg, rgba(239,68,68,0.18), rgba(124,58,237,0.18)); border:1px solid rgba(255,255,255,0.08); text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.35);">
+    <div style="position:absolute; top:-30px; right:-30px; width:110px; height:110px; background:radial-gradient(circle, rgba(239,68,68,0.25), transparent 70%); border-radius:50%;"></div>
+    <div style="font-size:0.68rem; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-secondary);">📅 Today's Focus</div>
+    <div id="todayWorkoutHeroTitle" style="font-size:1.35rem; font-weight:900; color:#fff; margin-top:6px; text-shadow:0 2px 8px rgba(0,0,0,0.4);">Monday Routine</div>
+    <div id="todayWorkoutHeroTag" style="display:inline-block; margin-top:10px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:var(--neon-gold); font-weight:800; font-size:0.8rem; padding:6px 16px; border-radius:20px; backdrop-filter:blur(4px);">Chest & Triceps 💥</div>
+</div>
+
 <div class="dashboard-grid" style="margin-bottom:12px;">
 <div class="dash-box" style="border-top:3px solid var(--neon-gold);"><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">WORKOUT STREAK</div><div class="dash-box-val" id="gymStreakDisplay" style="color:var(--neon-red);">🔥 0 Days</div></div>
 <div class="dash-box" style="border-top:3px solid var(--neon-cyan);"><div style="font-size:0.7rem; color:var(--text-secondary); font-weight:700;">DAILY GAIN TARGET</div><div class="dash-box-val" id="gymGainTarget" style="color:var(--neon-cyan); font-size:1.1rem; margin-top:4px;">-- Kcal</div></div>
@@ -968,7 +991,7 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <!-- FEATURE: Personal Record (PR) Tracker -->
 <div class="app-card" style="border-top:4px solid var(--neon-gold);">
 <h3 class="card-title" style="color:var(--neon-gold);">🏆 Personal Records</h3>
-<p style="font-size:0.72rem; color:var(--text-secondary); margin-top:-8px;">Dynamic Builder-la weight log panna, automatic-a PR track aagum.</p>
+<p style="font-size:0.72rem; color:var(--text-secondary); margin-top:-8px;">Weighted exercise log பண்ணும்போது, automatic-a PR track aagum.</p>
 <ul class="list-container" id="prTrackerListContainer" style="max-height:180px;"><li class="list-item" style="justify-content:center; color:var(--text-secondary); font-size:0.78rem;">No PRs yet. Log weighted exercises below.</li></ul>
 </div>
 
@@ -987,114 +1010,13 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <ul id="cardioLogList" class="task-list" style="margin-top:12px;"></ul>
 </div>
 
-<div class="page-banner" style="background:linear-gradient(135deg,#ef4444,#7f1d1d); margin-bottom:15px; padding:15px; border-radius:16px; font-weight:900; text-align:center; text-shadow:0 1px 4px #000;">🏋️‍♂️ ANABOLIC BULKING ENGINE</div>
-<!-- ஜிம் YES/NO பட்டன்கள் ஆரம்பம் -->
-<!-- ஜிம் YES/NO பட்டன்கள் -->
-<div id="gymAttendanceBox" class="app-card" style="border-top:4px solid var(--neon-purple); text-align:center; margin-bottom: 20px; padding: 25px 15px; position: relative; z-index: 10;">
-    <h3 style="color:var(--neon-purple); margin-bottom: 20px;">🏋️‍♂️ Today Gym?</h3>
-    <div style="display:flex; justify-content:center; gap:15px; padding-bottom: 5px;">
-        <button class="btn-universal" style="background:var(--neon-green); color:black; font-weight:bold;" onclick="logGymAttendance(true)">YES, Let's Go!</button>
-        <button class="btn-universal" style="background:#ff4757; color:white; font-weight:bold;" onclick="logGymAttendance(false)">NO, Skip Today</button>
-    </div>
-</div>
 
-<div id="workoutListContainer" style="display:none;">
-
-<div class="form-group" style="margin-bottom:16px;">
-<select id="workoutDaySelect" class="form-control" onchange="showSelectedWorkout(this.value)" style="font-weight:800; background:var(--surface-ultra); border-radius:16px; padding:12px; color:white;">
-<option value="Monday">Monday (Chest & Triceps)</option>
-<option value="Tuesday">Tuesday (Back & Biceps)</option>
-<option value="Wednesday">Wednesday (Yoga & Recovery 🧘‍♂️)</option>
-<option value="Thursday">Thursday (Shoulder & Abs)</option>
-<option value="Friday">Friday (Legs & Glutes)</option>
-<option value="Saturday">Saturday (Yoga & Mobility 🧘‍♂️)</option>
-<option value="Sunday">Sunday (Rest Day 😴)</option>
-</select></div>
-
-<!-- MONDAY: Chest & Triceps -->
-<div id="workout-Monday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-red);">
-<div class="workout-day-title">Monday Routine <span class="gym-target-tag">Chest & Triceps 💥</span></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-1" onchange="saveGymCheck('gym-mon-1')"><span>Barbell Flat Bench Press</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-1')">🔍 Guide</span><span class="gym-sets-info">4 x 6-8</span></div><div id="tips-mon-1" class="exercise-popdown-details"><b>Execution:</b> Flat bench-ல் படுத்து, Barbell-ஐ நெஞ்சு level வரை இறக்கி, மேல் நோக்கி push பண்ணவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-2" onchange="saveGymCheck('gym-mon-2')"><span>Incline Barbell Bench Press</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-2')">🔍 Guide</span><span class="gym-sets-info">3 x 8-10</span></div><div id="tips-mon-2" class="exercise-popdown-details"><b>Execution:</b> Incline bench-ல் அமர்ந்து Barbell-ஐ நெஞ்சின் மேல் பகுதி அளவுக்கு இறக்கி மேல் நோக்கி அழுத்தவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-3" onchange="saveGymCheck('gym-mon-3')"><span>Pec Deck Fly</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-3')">🔍 Guide</span><span class="gym-sets-info">3 x 12-15</span></div><div id="tips-mon-3" class="exercise-popdown-details"><b>Execution:</b> Machine-ல் அமர்ந்து, Chest-ஐ முழுமையாக stretch செய்து பின் squeeze செய்து fly செய்யவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-4" onchange="saveGymCheck('gym-mon-4')"><span>Standing Triceps Extension</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-4')">🔍 Guide</span><span class="gym-sets-info">3 x 10-12</span></div><div id="tips-mon-4" class="exercise-popdown-details"><b>Execution:</b> நின்று தலைக்கு மேல் டம்பலை அல்லது கேபிளை பிடித்து, முழங்கைகளை மட்டும் மடக்கி நீட்டவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-mon-5" onchange="saveGymCheck('gym-mon-5')"><span>Bench Dips</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('mon-5')">🔍 Guide</span><span class="gym-sets-info">3 x Max</span></div><div id="tips-mon-5" class="exercise-popdown-details"><b>Execution:</b> Bench edge-ல் கைகளை வைத்து உடலை கீழ் நோக்கி dip செய்து Triceps-ஆல் மேலே எழவும்.</div></div>
-</div>
-
-<!-- TUESDAY: Back & Biceps -->
-<div id="workout-Tuesday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-cyan);">
-<div class="workout-day-title">Tuesday Routine <span class="gym-target-tag">Back & Biceps 🦍</span></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-1" onchange="saveGymCheck('gym-tue-1')"><span>Deadlift</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-1')">🔍 Guide</span><span class="gym-sets-info">4 x 5-6</span></div><div id="tips-tue-1" class="exercise-popdown-details"><b>Execution:</b> Barbell-ஐ தரையில் இருந்து தூக்கி நிமிரவும். Core டைட்டாக இருக்கட்டும், Back வளைக்கக் கூடாது.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-2" onchange="saveGymCheck('gym-tue-2')"><span>Bent Over Barbell Row</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-2')">🔍 Guide</span><span class="gym-sets-info">3 x 8-10</span></div><div id="tips-tue-2" class="exercise-popdown-details"><b>Execution:</b> முன்னே குனிந்து Barbell-ஐ வயிற்றை நோக்கி இழுக்கவும். Back நேராக இருக்கட்டும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-3" onchange="saveGymCheck('gym-tue-3')"><span>Lat Pulldown</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-3')">🔍 Guide</span><span class="gym-sets-info">3 x 10-12</span></div><div id="tips-tue-3" class="exercise-popdown-details"><b>Execution:</b> Wide grip-ல் bar பிடித்து நெஞ்சை நோக்கி கீழே இழுக்கவும். Lats-ஐ squeeze செய்யவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-4" onchange="saveGymCheck('gym-tue-4')"><span>Barbell Curl</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-4')">🔍 Guide</span><span class="gym-sets-info">3 x 10-12</span></div><div id="tips-tue-4" class="exercise-popdown-details"><b>Execution:</b> நின்று barbell-ஐ curl செய்யவும். Elbows இடுப்பில் fix பண்ணி, ஆடாமல் தூக்கவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-tue-5" onchange="saveGymCheck('gym-tue-5')"><span>Reverse Barbell Curl</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('tue-5')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-tue-5" class="exercise-popdown-details"><b>Execution:</b> Overhand (Reverse) grip-ல் Barbell பிடித்து curl செய்யவும். இது Forearms-க்கு நல்லது.</div></div>
-</div>
-
-<!-- WEDNESDAY: Yoga & Recovery -->
-<div id="workout-Wednesday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-green);">
-<div class="workout-day-title">Wednesday Yoga <span class="gym-target-tag">Recovery Focus 🧘‍♂️</span></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-wed-1" onchange="saveGymCheck('gym-wed-1')"><span>Cobra Pose</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('wed-1')">🔍 Guide</span><span class="gym-sets-info">3 x 30s</span></div><div id="tips-wed-1" class="exercise-popdown-details"><b>Execution:</b> குப்புறப் படுத்து, கைகளை ஊன்றி மார்பை மட்டும் மேலே தூக்கி முன்னோக்கிப் பார்க்கவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-wed-2" onchange="saveGymCheck('gym-wed-2')"><span>Camel Pose</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('wed-2')">🔍 Guide</span><span class="gym-sets-info">3 x 30s</span></div><div id="tips-wed-2" class="exercise-popdown-details"><b>Execution:</b> முட்டி போட்டு அமர்ந்து, பின்னோக்கிச் சாய்ந்து பாதங்களைத் தொடவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-wed-3" onchange="saveGymCheck('gym-wed-3')"><span>Child's Pose</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('wed-3')">🔍 Guide</span><span class="gym-sets-info">3 x 60s</span></div><div id="tips-wed-3" class="exercise-popdown-details"><b>Execution:</b> குதிகால் மீது அமர்ந்து குனிந்து நெற்றியைத் தரையில் வைக்கவும். முதுகு தசை ரிலாக்ஸ் ஆகும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-wed-4" onchange="saveGymCheck('gym-wed-4')"><span>Cat-Cow</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('wed-4')">🔍 Guide</span><span class="gym-sets-info">3 x 15</span></div><div id="tips-wed-4" class="exercise-popdown-details"><b>Execution:</b> நான்கு கால்களில் நின்று, மூச்சை விடும்போது முதுகை வளைத்து, மூச்சை இழுக்கும்போது முதுகைத் தாழ்த்தவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-wed-5" onchange="saveGymCheck('gym-wed-5')"><span>Hip Stretch</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('wed-5')">🔍 Guide</span><span class="gym-sets-info">3 x 30s</span></div><div id="tips-wed-5" class="exercise-popdown-details"><b>Execution:</b> தரையில் அமர்ந்து அல்லது Lunge position-ல் இடுப்பு தசைகளை stretch செய்யவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-wed-6" onchange="saveGymCheck('gym-wed-6')"><span>Walking</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('wed-6')">🔍 Guide</span><span class="gym-sets-info">15-20 mins</span></div><div id="tips-wed-6" class="exercise-popdown-details"><b>Execution:</b> தசைகளை ரிலாக்ஸ் செய்ய மிதமான வேகத்தில் நடக்கவும்.</div></div>
-</div>
-
-<!-- THURSDAY: Shoulder & Abs -->
-<div id="workout-Thursday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-gold);">
-<div class="workout-day-title">Thursday Routine <span class="gym-target-tag">Shoulder & Abs 🎯</span></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-thu-1" onchange="saveGymCheck('gym-thu-1')"><span>Barbell Overhead Press</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('thu-1')">🔍 Guide</span><span class="gym-sets-info">4 x 8-10</span></div><div id="tips-thu-1" class="exercise-popdown-details"><b>Execution:</b> நின்று Barbell-ஐ தோள்பட்டையில் இருந்து தலைக்கு மேல் நேராக push பண்ணவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-thu-2" onchange="saveGymCheck('gym-thu-2')"><span>Lateral Raise</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('thu-2')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-thu-2" class="exercise-popdown-details"><b>Execution:</b> நின்று 5kg டம்பல்களை பக்கவாட்டில் shoulder height வரை தூக்கவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-thu-3" onchange="saveGymCheck('gym-thu-3')"><span>Rear Fly</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('thu-3')">🔍 Guide</span><span class="gym-sets-info">3 x 12-15</span></div><div id="tips-thu-3" class="exercise-popdown-details"><b>Execution:</b> முன்னே குனிந்து, 5kg டம்பல்களை இருபுறமும் பின்புறமாக விரிக்கவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-thu-4" onchange="saveGymCheck('gym-thu-4')"><span>Barbell Shrugs</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('thu-4')">🔍 Guide</span><span class="gym-sets-info">3 x 12</span></div><div id="tips-thu-4" class="exercise-popdown-details"><b>Execution:</b> Barbell-ஐ பிடித்து தோள்பட்டையை (Shoulders) காது வரை உயர்த்தி இறக்கவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-thu-5" onchange="saveGymCheck('gym-thu-5')"><span>Leg Raises + Plank</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('thu-5')">🔍 Guide</span><span class="gym-sets-info">3 sets</span></div><div id="tips-thu-5" class="exercise-popdown-details"><b>Execution:</b> படுத்து கால்களை உயர்த்தவும் (Leg Raises), அதை முடித்ததும் உடனே Plank செய்யவும்.</div></div>
-</div>
-
-<!-- FRIDAY: Legs & Glutes -->
-<div id="workout-Friday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-orange);">
-<div class="workout-day-title">Friday Routine <span class="gym-target-tag">Legs & Glutes 🦵</span></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-fri-1" onchange="saveGymCheck('gym-fri-1')"><span>Barbell Squat</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('fri-1')">🔍 Guide</span><span class="gym-sets-info">4 x 8-10</span></div><div id="tips-fri-1" class="exercise-popdown-details"><b>Execution:</b> Barbell-ஐ தோளில் வைத்து deep squat-க்கு இறங்கி எழவும். Core tight-ஆக இருக்கட்டும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-fri-2" onchange="saveGymCheck('gym-fri-2')"><span>Romanian Deadlift</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('fri-2')">🔍 Guide</span><span class="gym-sets-info">3 x 8-10</span></div><div id="tips-fri-2" class="exercise-popdown-details"><b>Execution:</b> கால்களை சிறிது மட்டும் மடக்கி, இடுப்பை பின்னால் தள்ளி Barbell-ஐ இறக்கவும் (Hamstring stretch).</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-fri-3" onchange="saveGymCheck('gym-fri-3')"><span>Walking Lunges</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('fri-3')">🔍 Guide</span><span class="gym-sets-info">3 x 10 each leg</span></div><div id="tips-fri-3" class="exercise-popdown-details"><b>Execution:</b> முன்னே அடி வைத்து, back knee தரையைத் தொட குனிந்து எழவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-fri-4" onchange="saveGymCheck('gym-fri-4')"><span>Hip Thrust</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('fri-4')">🔍 Guide</span><span class="gym-sets-info">3 x 10-12</span></div><div id="tips-fri-4" class="exercise-popdown-details"><b>Execution:</b> Bench-ல் முதுகு வைத்து, Hips-ஐ மேலே உயர்த்தி glutes-ஐ இறுக்கமாக squeeze செய்யவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-fri-5" onchange="saveGymCheck('gym-fri-5')"><span>Standing Calf Raises</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('fri-5')">🔍 Guide</span><span class="gym-sets-info">4 x 15-20</span></div><div id="tips-fri-5" class="exercise-popdown-details"><b>Execution:</b> Toes-ல் நின்று heels-ஐ உயர்த்தி calf-ஐ contract செய்யவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-fri-6" onchange="saveGymCheck('gym-fri-6')"><span>Inner/Outer Thigh Machine</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('fri-6')">🔍 Guide</span><span class="gym-sets-info">2-3 sets</span></div><div id="tips-fri-6" class="exercise-popdown-details"><b>Execution:</b> Machine-ல் அமர்ந்து thighs-ஐ உள்ளே/வெளியே தள்ளவும் (Optional).</div></div>
-</div>
-
-<!-- SATURDAY: Yoga & Mobility -->
-<div id="workout-Saturday" class="workout-day-card app-card" style="border-left:5px solid var(--neon-green);">
-<div class="workout-day-title">Saturday Routine <span class="gym-target-tag">Mobility 🧘‍♂️</span></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-sat-1" onchange="saveGymCheck('gym-sat-1')"><span>Downward Dog</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('sat-1')">🔍 Guide</span><span class="gym-sets-info">3 x 30s</span></div><div id="tips-sat-1" class="exercise-popdown-details"><b>Execution:</b> V-shape-ல் உடலை வளைத்து Calves மற்றும் Back-ஐ stretch செய்யவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-sat-2" onchange="saveGymCheck('gym-sat-2')"><span>Butterfly Pose</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('sat-2')">🔍 Guide</span><span class="gym-sets-info">3 x 60s</span></div><div id="tips-sat-2" class="exercise-popdown-details"><b>Execution:</b> அமர்ந்து பாதங்களை ஒன்றாக சேர்த்து முட்டியை தரையை நோக்கி அழுத்தவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-sat-3" onchange="saveGymCheck('gym-sat-3')"><span>Pigeon Pose</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('sat-3')">🔍 Guide</span><span class="gym-sets-info">3 x 30s</span></div><div id="tips-sat-3" class="exercise-popdown-details"><b>Execution:</b> ஒரு காலை முன்னே மடக்கி வைத்து hips-ஐ stretch செய்யவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-sat-4" onchange="saveGymCheck('gym-sat-4')"><span>Puppy Pose</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('sat-4')">🔍 Guide</span><span class="gym-sets-info">3 x 30s</span></div><div id="tips-sat-4" class="exercise-popdown-details"><b>Execution:</b> முட்டி போட்டு, கைகளை முன்னே நீட்டி நெஞ்சை தரையை நோக்கி அழுத்தவும்.</div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-sat-5" onchange="saveGymCheck('gym-sat-5')"><span>Deep Breathing</span></label><span class="guide-trigger-lbl" onclick="toggleDropdownTips('sat-5')">🔍 Guide</span><span class="gym-sets-info">10 mins</span></div><div id="tips-sat-5" class="exercise-popdown-details"><b>Execution:</b> அமைதியாக அமர்ந்து ஆழமாக மூச்சுப் பயிற்சி (Wim Hof / Box Breathing) செய்யவும்.</div></div>
-</div>
-
-<!-- SUNDAY: Rest -->
-<div id="workout-Sunday" class="workout-day-card app-card" style="border-left:5px solid #8e44ad;">
-<div class="workout-day-title">Sunday Routine <span class="gym-target-tag">Total Rest 😴</span></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-sun-1" onchange="saveGymCheck('gym-sun-1')"><span>Good food 🍚🥚🥛</span></label><span class="gym-sets-info">✅</span></div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-sun-2" onchange="saveGymCheck('gym-sun-2')"><span>7.5 - 8.5 hours sleep</span></label><span class="gym-sets-info">✅</span></div></div>
-<div class="gym-task-wrapper"><div class="gym-task-item"><label><input type="checkbox" id="gym-sun-3" onchange="saveGymCheck('gym-sun-3')"><span>Light walking</span></label><span class="gym-sets-info">15 Mins</span></div></div>
-</div>
-
-</div>
                                                                                                                                                                             
   
 
 
 
 
-<div class="app-card" style="border-left:5px solid var(--neon-cyan); margin-top:20px;">
-<div class="workout-day-title" style="margin-bottom:15px; color:var(--neon-cyan);">Dynamic Builder <span class="gym-target-tag" style="background:transparent; border-color:var(--neon-cyan); color:var(--neon-cyan);">Custom</span></div>
-<div id="customWorkoutList"></div>
-<div style="border-top:1px dashed var(--glass-border); padding-top:15px; margin-top:15px;">
-<p style="font-size:0.75rem; color:var(--neon-cyan); margin-bottom:8px; font-weight:bold;">+ Add New Exercise to Current Day</p>
-<div class="form-group"><input type="text" id="cwName" class="custom-input" placeholder="Exercise Name "></div>
-<div style="display:flex; gap:10px;"><input type="number" id="cwSets" class="custom-input w-box" placeholder="Sets"><input type="number" id="cwReps" class="custom-input w-box" placeholder="Reps"><input type="number" id="cwWeight" class="custom-input w-box" placeholder="Kg"><button class="btn-universal" style="background:var(--neon-cyan); color:black; padding:6px; flex:1;" onclick="addCustomWorkout()">Add</button></div></div></div>
 </div>
 
 <!-- DIET PAGE -->
@@ -1604,7 +1526,29 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <div id="page-settings" class="page">
 <div class="page-banner" style="background:linear-gradient(135deg,#7c3aed,#4c1d95); padding:15px; border-radius:16px; margin-bottom:15px; font-weight:900; text-align:center;">⚙️ SETTINGS & DATA</div>
 
-<div class="app-card" style="border-top:4px solid var(--neon-gold);">
+<!-- 🔑 AI & Cloud Credentials (gear-icon modal-ல் இருந்து இங்கு மாற்றப்பட்டது — ஒரே Settings இடத்துல எல்லா credentials-உம்) -->
+<div class="app-card" style="border-top:4px solid var(--neon-cyan);">
+<h3 class="card-title" style="color:var(--neon-cyan);">🔑 AI & Cloud Credentials</h3>
+<div><h4 style="font-size:0.9rem; color:var(--neon-gold); margin-bottom:10px;">🔑 Gemini AI API Key</h4><p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">🔐 Your personal Gemini API key (secure in browser only)</p><div class="form-group"><label style="font-size:0.75rem;">Get your free key from: https://aistudio.google.com/app/apikey</label><input type="password" id="geminiApiKeyInput" placeholder="Paste your Gemini API key here..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); color:white; font-size:0.85rem; margin-bottom:8px;"></div><button class="btn-universal" style="background:var(--neon-cyan); color:black; margin-bottom:10px; font-size:0.85rem;" onclick="saveGeminiApiKey()">💾 Save API Key</button><p id="geminiKeyStatus" style="font-size:0.7rem; color:var(--neon-green); text-align:center;"></p></div>
+<div style="border-top:1px dashed var(--glass-border); padding-top:15px; margin-top:5px;">
+    <h4 style="font-size:0.9rem; color:var(--neon-gold); margin-bottom:10px;">☁️ Google Drive Client ID</h4>
+    <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">🔐 Cloud Backup எடுக்க உங்கள் Drive Client ID-ஐ பதிவு செய்யவும் (கீழே Cloud Backup Sync-க்கு தேவை)</p>
+    <div class="form-group">
+        <input type="text" id="driveClientIdInput" placeholder="Paste your Google Drive Client ID here..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); color:white; font-size:0.85rem; margin-bottom:8px;">
+    </div>
+    <button class="btn-universal" style="background:var(--neon-cyan); color:black; margin-bottom:10px; font-size:0.85rem;" onclick="saveDriveClientId()">💾 Save Client ID</button>
+    <p id="driveClientIdStatus" style="font-size:0.7rem; color:var(--neon-green); text-align:center;"></p>
+</div>
+</div>
+
+<!-- 🔔 Notifications + 🔒 Security Log (gear-icon modal-ல் இருந்து மாற்றப்பட்டது) -->
+<div class="app-card" style="border-top:4px solid var(--neon-purple); margin-top:15px;">
+<h3 class="card-title" style="color:var(--neon-purple);">🔔 Notifications & Security</h3>
+<div style="padding-bottom:15px; border-bottom:1px dashed var(--glass-border); margin-bottom:15px;"><button class="notif-permission-btn" id="notifPermissionBtn" onclick="requestNotificationPermission()"><span>🔔</span> Enable Push Alerts</button><p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Get reminded for water, meals, gym time, and sleep.</p></div>
+<h4 style="font-size:0.9rem; color:var(--neon-red); margin-bottom:10px;">🔒 Security Log (Wrong PIN Alerts)</h4><p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">Yaaravadhu Wrong PIN podta, Boss phone-ku Notification alert varum + log-ல save aagum.</p><button class="btn-universal" style="background:var(--neon-red);" onclick="viewIntruderLog()">🚨 View Security Log</button>
+</div>
+
+<div class="app-card" style="border-top:4px solid var(--neon-gold); margin-top:15px;">
 <h3 class="card-title" style="color:var(--neon-gold);">🗄️ Master Data Archives</h3>
     <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:15px;">Download your history and progress logs.</p>
     <div style="display:flex; flex-direction:column; gap:10px;">
@@ -1613,10 +1557,21 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
         <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="downloadYearlyArchive()">📥 Download Yearly Archive</button>
     </div>
 
+    <!-- 💾 Local Full-Database Backup (gear-icon modal-ல் இருந்து மாற்றப்பட்டது) -->
+    <div style="border-top:1px dashed var(--glass-border); margin-top:16px; padding-top:12px;">
+        <div style="font-size:0.8rem; font-weight:800; color:var(--neon-cyan); margin-bottom:8px;">💾 Local Full-Database Backup (Restore File)</div>
+        <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">Browser database-ah safe file-ah backup/restore secure panni vechukkalam.</p>
+        <button class="btn-universal" style="background:var(--neon-green); color:black; margin-bottom:12px;" onclick="exportSystemDatabaseFile()">📥 Export Database Backup File</button>
+        <div style="background:rgba(0,0,0,0.3); border:1px dashed var(--glass-border); padding:16px; border-radius:18px; margin-bottom:12px; text-align:center;"><label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:8px;">Select Backup JSON File</label><input type="file" id="importDatabaseFileInput" accept=".json" style="font-size:0.8rem; color:var(--text-secondary);"></div>
+        <button class="btn-universal" style="background:#2563eb;" onclick="importSystemDatabaseFile()">📤 Import Database File & Restore</button>
+    </div>
+
+
     <!-- 🤖 AI Reports & Reviews (Roast/Monthly Meeting/Weekly Review — ஒரே category-ஆ இங்கு grouping பண்ணப்பட்டது) -->
     <div style="border-top:1px dashed var(--glass-border); margin-top:16px; padding-top:12px;">
         <div style="font-size:0.8rem; font-weight:800; color:var(--neon-purple); margin-bottom:8px;">🤖 AI Reports & Reviews</div>
         <div style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn-universal" style="background:#25D366; color:white;" onclick="runDailyReviewMeeting()">📊 Daily Review Meeting</button>
             <button class="btn-universal" style="background:var(--neon-purple); color:white;" onclick="runMonthlyAudit()">📊 Monthly AI Meeting</button>
             <button class="btn-universal" style="background:var(--neon-gold); color:black;" onclick="runWeeklyAIReview()">🗓️ Weekly AI Review Chat</button>
             <button class="btn-universal" style="background:var(--neon-red); color:white; box-shadow: 0 0 15px rgba(239,68,68,0.4);" onclick="roastMyMonth()">🔥 TOBI: Roast My Month (கலாய்க்க)</button>
@@ -1704,29 +1659,8 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <div style="background:rgba(255,255,255,0.04); height:4px; border-radius:2px;"><div id="dailyProgressFill" style="background:var(--neon-green); height:100%; width:0%; transition:0.3s;"></div></div>
 <div style="font-size:0.65rem; color:var(--text-secondary); display:flex; justify-content:space-between; font-weight:bold; margin-top:2px;"><span>MONTHLY CONSISTENCY</span><span id="monthlyProgressText">0%</span></div>
 <div style="background:rgba(255,255,255,0.04); height:4px; border-radius:2px;"><div id="monthlyProgressFill" style="background:var(--neon-purple); height:100%; width:0%; transition:0.3s;"></div></div></div>
-<button class="console-gear-btn" onclick="openModalWithHistory('systemSettingsModal','flex')">⚙️</button></div>
+<button class="console-gear-btn" onclick="switchPage('settings')">⚙️</button></div>
 
-<div id="systemSettingsModal" class="universal-modal">
-<div class="modal-body">
-<h3 class="modal-header-title">⚙️ Core System Backup Utility</h3>
-<p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:20px;">Browser database-ah safe file-ah backup/restore secure panni vechukkalam.</p>
-<button class="btn-universal" style="background:var(--neon-green); color:black; margin-bottom:12px;" onclick="exportSystemDatabaseFile()">📥 Export Database Backup File</button>
-<div style="background:rgba(0,0,0,0.3); border:1px dashed var(--glass-border); padding:16px; border-radius:18px; margin-bottom:20px; text-align:center;"><label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-secondary); margin-bottom:8px;">Select Backup JSON File</label><input type="file" id="importDatabaseFileInput" accept=".json" style="font-size:0.8rem; color:var(--text-secondary);"></div>
-<button class="btn-universal" style="background:#2563eb; margin-bottom:12px;" onclick="importSystemDatabaseFile()">📤 Import Database File & Restore</button>
-<div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:15px;"><h4 style="font-size:0.9rem; color:var(--neon-gold); margin-bottom:10px;">🔑 Gemini AI API Key</h4><p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">🔐 Your personal Gemini API key (secure in browser only)</p><div class="form-group"><label style="font-size:0.75rem;">Get your free key from: https://aistudio.google.com/app/apikey</label><input type="password" id="geminiApiKeyInput" placeholder="Paste your Gemini API key here..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); color:white; font-size:0.85rem; margin-bottom:8px;"></div><button class="btn-universal" style="background:var(--neon-cyan); color:black; margin-bottom:10px; font-size:0.85rem;" onclick="saveGeminiApiKey()">💾 Save API Key</button><p id="geminiKeyStatus" style="font-size:0.7rem; color:var(--neon-green); text-align:center;"></p></div>
-<!-- Google Drive Client ID இன்புட் -->
-<div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:15px;">
-    <h4 style="font-size:0.9rem; color:var(--neon-gold); margin-bottom:10px;">☁️ Google Drive Client ID</h4>
-    <p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">🔐 Cloud Backup எடுக்க உங்கள் Drive Client ID-ஐ பதிவு செய்யவும்</p>
-    <div class="form-group">
-        <input type="text" id="driveClientIdInput" placeholder="Paste your Google Drive Client ID here..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); color:white; font-size:0.85rem; margin-bottom:8px;">
-    </div>
-    <button class="btn-universal" style="background:var(--neon-cyan); color:black; margin-bottom:10px; font-size:0.85rem;" onclick="saveDriveClientId()">💾 Save Client ID</button>
-    <p id="driveClientIdStatus" style="font-size:0.7rem; color:var(--neon-green); text-align:center;"></p>
-</div>
-<div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:15px;"><h4 style="font-size:0.9rem; color:var(--neon-gold); margin-bottom:10px;">🔔 Smart Notifications</h4><button class="notif-permission-btn" id="notifPermissionBtn" onclick="requestNotificationPermission()"><span>🔔</span> Enable Push Alerts</button><p style="font-size:0.75rem; color:var(--text-secondary); margin-top:8px;">Get reminded for water, meals, gym time, and sleep.</p></div>
-<div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; margin-top:15px;"><h4 style="font-size:0.9rem; color:var(--neon-red); margin-bottom:10px;">🔒 Security Log (Wrong PIN Alerts)</h4><p style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:10px;">Yaaravadhu Wrong PIN podta, Boss phone-ku Notification alert varum + log-ல save aagum.</p><button class="btn-universal" style="background:var(--neon-red); margin-bottom:8px;" onclick="viewIntruderLog()">🚨 View Security Log</button></div>
-<button class="btn-universal" style="background:rgba(255,255,255,0.04); color:white; border:1px solid var(--glass-border); margin-top:15px;" onclick="closeModalAction('systemSettingsModal')">Close Panel</button></div></div>
 
 <div id="dayClickModal" class="universal-modal">
 <div class="modal-body" style="border-top:6px solid var(--neon-cyan);">
@@ -1855,7 +1789,7 @@ async function syncBankSMS() {
 }
 // --- 1. MORNING BRIEFING ---
 async function playMorningBriefing() {
-    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); openModalWithHistory('systemSettingsModal', 'flex'); return; }
+    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); switchPage('settings'); return; }
     // ... மீதி கோடு அப்படியே இருக்கட்டும் ...
     triggerDeviceHapticPulse();
     displayPremiumToastNotification("TOBI analyzing your day...", "🔊");
@@ -1887,7 +1821,7 @@ async function playMorningBriefing() {
 
 // --- 2. ZERO-WASTE AI ---
 async function generateLeftoverRecipe() {
-    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); openModalWithHistory('systemSettingsModal', 'flex'); return; }
+    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); switchPage('settings'); return; }
     // ... மீதி கோடு அப்படியே இருக்கட்டும் ...
     let items = document.getElementById('leftoverInput').value.trim();
     if(!items) return displayPremiumToastNotification("பொருட்களை டைப் செய்யவும்!", "❌");
@@ -1913,7 +1847,7 @@ async function generateLeftoverRecipe() {
 
 // --- 3. BRAIN DUMP ---
 async function processBrainDump() {
-    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); openModalWithHistory('systemSettingsModal', 'flex'); return; }
+    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); switchPage('settings'); return; }
     // ... மீதி கோடு அப்படியே இருக்கட்டும் ...
     let thoughts = document.getElementById('brainDumpInput').value.trim();
     if(!thoughts) return displayPremiumToastNotification("ஏதாவது டைப் செய்யவும்!", "❌");
@@ -1973,7 +1907,7 @@ async function calculateREMCycles() {
 
 // --- 5. ROAST MY MONTH ---
 async function roastMyMonth() {
-    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); openModalWithHistory('systemSettingsModal', 'flex'); return; }
+    if (!GEMINI_API_KEY) { displayPremiumToastNotification("Settings-ல் API Key செட் பண்ணுங்க!", "❌"); switchPage('settings'); return; }
     // ... மீதி கோடு அப்படியே இருக்கட்டும் ...
     triggerDeviceHapticPulse();
     openModalWithHistory('aiEngineModal');
@@ -2284,13 +2218,19 @@ function logGymAttendance(didGo) {
     localStorage.setItem(`gym_done_${todayStr}`, didGo ? 'true' : 'false');
     
     if (didGo) {
-        // YES கொடுத்தால்: பாக்ஸ் மெசேஜ் மாறி, ஒர்க்அவுட் லிஸ்ட் ஓபன் ஆகும்
+        // YES கொடுத்தால்: பாக்ஸ் மெசேஜ் மாறி, Today's Focus Hero ஓபன் ஆகும்
         document.getElementById('gymAttendanceBox').innerHTML = `<h3 style="color:var(--neon-green); margin-bottom: 10px;">✅ Great! Workout session activated. Let's crush it!</h3>`;
-        document.getElementById('workoutListContainer').style.display = 'block';
+        document.getElementById('todayWorkoutHero').style.display = 'block';
+
+        // YES கொடுத்த உடனேயே Streak-ல் இன்றைய நாளை சேர்த்துவிடும்
+        let loggedStreakDays = safeGetItem('gym_streak_days_list', {});
+        loggedStreakDays[todayStr] = true;
+        localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays));
+        updateStreakDisplay();
     } else {
         // NO கொடுத்தால்: பாக்ஸ் மெசேஜ் மாறி, AI உங்களை திட்டும்
         document.getElementById('gymAttendanceBox').innerHTML = `<h3 style="color:#ff4757; margin-bottom: 10px;">⚠️ Gym Session Skipped Today.</h3>`;
-        document.getElementById('workoutListContainer').style.display = 'none';
+        document.getElementById('todayWorkoutHero').style.display = 'none';
         
         // Remove from streak days
         let loggedStreakDays = safeGetItem('gym_streak_days_list', {});
@@ -2316,19 +2256,19 @@ function checkGymAttendanceStatus() {
     let gymStatus = localStorage.getItem(`gym_done_${todayStr}`);
     
     let attendanceBox = document.getElementById('gymAttendanceBox');
-    let workoutContainer = document.getElementById('workoutListContainer');
+    let heroBox = document.getElementById('todayWorkoutHero');
     
     if (gymStatus === 'true') {
         // ஏற்கனவே YES கொடுத்திருந்தால்
         attendanceBox.innerHTML = `<h3 style="color:var(--neon-green); margin-bottom: 10px;">✅ Great! Workout session activated. Let's crush it!</h3>`;
-        workoutContainer.style.display = 'block';
+        heroBox.style.display = 'block';
     } else if (gymStatus === 'false') {
         // ஏற்கனவே NO கொடுத்திருந்தால்
         attendanceBox.innerHTML = `<h3 style="color:#ff4757; margin-bottom: 10px;">⚠️ Gym Session Skipped Today.</h3>`;
-        workoutContainer.style.display = 'none';
+        heroBox.style.display = 'none';
     } else {
         // இன்று இன்னும் எந்த பட்டனும் அழுத்தவில்லை என்றால்
-        workoutContainer.style.display = 'none';
+        heroBox.style.display = 'none';
     }
 }
 // ===== FACE ID / BIOMETRIC AUTHENTICATION =====
@@ -3837,7 +3777,23 @@ function toggleDropdownTips(id) {
 function rateDay(stars) { triggerDeviceHapticPulse(); dayRatings[currentlyViewingDayDateStr] = stars; localStorage.setItem('person_day_ratings', JSON.stringify(dayRatings)); drawStars(stars); displayPremiumToastNotification(`Day Rated ${stars} Stars!`, "⭐"); }
 function drawStars(rating) { const box = document.getElementById('dayStarRatingBox'); if(box) { box.innerHTML = ''; for(let i=1;i<=5;i++) { box.innerHTML += `<span class="${i <= rating ? 'active' : ''}" onclick="rateDay(${i})">★</span>`; } } }
 
-function initGymDay() { let appToday = getAppToday(); const todayName = daysOfWeek[appToday.getDay()]; const select = document.getElementById('workoutDaySelect'); if([...select.options].some(o => o.value === todayName)) { select.value = todayName; showSelectedWorkout(todayName); } else { select.value = "Monday"; showSelectedWorkout("Monday"); } renderCustomWorkouts(); updateStreakDisplay(); renderPRTracker(); }
+function populateTodayWorkoutHero(todayName) {
+    const heroMap = {
+        'Monday': { title: 'Monday Routine', tag: 'Chest & Triceps 💥' },
+        'Tuesday': { title: 'Tuesday Routine', tag: 'Back & Biceps 🦍' },
+        'Wednesday': { title: 'Wednesday Yoga', tag: 'Recovery Focus 🧘‍♂️' },
+        'Thursday': { title: 'Thursday Routine', tag: 'Shoulder & Abs 🎯' },
+        'Friday': { title: 'Friday Routine', tag: 'Legs & Glutes 🦵' },
+        'Saturday': { title: 'Saturday Routine', tag: 'Mobility 🧘‍♂️' },
+        'Sunday': { title: 'Sunday Routine', tag: 'Total Rest 😴' }
+    };
+    const info = heroMap[todayName] || heroMap['Monday'];
+    const titleEl = document.getElementById('todayWorkoutHeroTitle');
+    const tagEl = document.getElementById('todayWorkoutHeroTag');
+    if (titleEl) titleEl.innerText = info.title;
+    if (tagEl) tagEl.innerText = info.tag;
+}
+function initGymDay() { let appToday = getAppToday(); const todayName = daysOfWeek[appToday.getDay()]; populateTodayWorkoutHero(todayName); checkGymAttendanceStatus(); updateStreakDisplay(); renderPRTracker(); }
 function showSelectedWorkout(dayId) { document.querySelectorAll('.workout-day-card').forEach(card => card.classList.remove('visible-workout')); const activeCard = document.getElementById(`workout-${dayId}`); if(activeCard) { activeCard.classList.add('visible-workout'); activeCard.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = localStorage.getItem(cb.id) === 'true'; }); } renderCustomWorkouts(); }
 function addCustomWorkout() { const day = document.getElementById('workoutDaySelect').value; const name = document.getElementById('cwName').value; const sets = document.getElementById('cwSets').value; const reps = document.getElementById('cwReps').value; const weight = document.getElementById('cwWeight').value; if(!name || !sets || !reps) return displayPremiumToastNotification("Fill Name, Sets & Reps!", "❌"); if(!customWorkouts[day]) customWorkouts[day] = []; customWorkouts[day].push({ id: Date.now(), name, sets, reps, weight }); localStorage.setItem('custom_workouts', JSON.stringify(customWorkouts)); document.getElementById('cwName').value = ''; checkAndUpdatePR(name, weight); renderCustomWorkouts(); renderPRTracker(); displayPremiumToastNotification("Exercise Added!", "💪"); }
 
@@ -3894,8 +3850,9 @@ function updateRestTimerDisplay() {
 }
 // --- UPDATED: Render Custom Workouts with YouTube Guide Button ---
 function renderCustomWorkouts() { 
-    const day = document.getElementById('workoutDaySelect').value; 
     const container = document.getElementById('customWorkoutList'); 
+    if (!container) return;
+    const day = document.getElementById('workoutDaySelect').value; 
     container.innerHTML = ''; 
     let list = customWorkouts[day] || []; 
     if(list.length === 0) { 
@@ -3922,7 +3879,7 @@ function renderCustomWorkouts() {
 function handleCustomGymCheck(day, id) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(`cw_${day}_${id}`).checked; localStorage.setItem(`cw_${day}_${id}`, isChecked); renderCustomWorkouts(); calculateGymStreak(); updateCEODashboard(); }
 function deleteCustomWorkout(day, id) { customWorkouts[day] = customWorkouts[day].filter(x => x.id !== id); localStorage.setItem('custom_workouts', JSON.stringify(customWorkouts)); renderCustomWorkouts(); calculateGymStreak(); updateCEODashboard(); }
 function saveGymCheck(id) { triggerDeviceHapticPulse(); const isChecked = document.getElementById(id).checked; localStorage.setItem(id, isChecked); calculateGymStreak(); updateCEODashboard(); }
-function calculateGymStreak() { let appToday = getAppToday(); let loggedStreakDays = safeGetItem('gym_streak_days_list', {}); const todayStr = appToday.toDateString(); const todayName = daysOfWeek[appToday.getDay()]; const activeCard = document.getElementById(`workout-${todayName}`); let allDone = true; let dayHasWorkout = false; if(activeCard) { const checkboxes = activeCard.querySelectorAll('input[type="checkbox"]'); if(checkboxes.length > 0) { dayHasWorkout = true; checkboxes.forEach(cb => { if(!cb.checked) allDone = false; }); if(allDone) loggedStreakDays[todayStr] = true; else delete loggedStreakDays[todayStr]; } else { dayHasWorkout = false; allDone = false; } } else { dayHasWorkout = false; allDone = false; } if(!dayHasWorkout && (todayName === 'Sunday' || todayName === 'Wednesday' || todayName === 'Saturday')) { loggedStreakDays[todayStr] = true; allDone = true; } localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays)); updateStreakDisplay(); }
+function calculateGymStreak() { let appToday = getAppToday(); const todayStr = appToday.toDateString(); const gymStatus = localStorage.getItem(`gym_done_${todayStr}`); if (gymStatus === 'true') { let loggedStreakDays = safeGetItem('gym_streak_days_list', {}); loggedStreakDays[todayStr] = true; localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays)); } updateStreakDisplay(); }
 function updateStreakDisplay() { let appToday = getAppToday(); let loggedStreakDays = safeGetItem('gym_streak_days_list', {}); let streakCount = 0; let checkDate = new Date(appToday); while(true) { const dateStr = checkDate.toDateString(); if(loggedStreakDays[dateStr]) { streakCount++; checkDate.setDate(checkDate.getDate()-1); } else { if(checkDate.toDateString() === appToday.toDateString()) { checkDate.setDate(checkDate.getDate()-1); if(loggedStreakDays[checkDate.toDateString()]) { checkDate.setDate(checkDate.getDate()-1); streakCount = 1; continue; } } break; } } if(document.getElementById('gymStreakDisplay')) document.getElementById('gymStreakDisplay').innerText = `🔥 ${streakCount} Days`; localStorage.setItem('gym_streak', streakCount.toString()); }
 
 function setWeeklyTarget() { const val = prompt("Set Weekly Budget Target (₹):", weeklyBudgetTarget); if(val !== null) { weeklyBudgetTarget = parseFloat(val) || 0; localStorage.setItem('weekly_budget_target', weeklyBudgetTarget); renderExpenses(); updateCEODashboard(); } }
@@ -6689,41 +6646,31 @@ function renderGroceryUI(plan) {
     let removedSet = new Set(plan.removed || []);
 
     function itemRow(item) {
-        let swapHtml = item.swap ? `<div style="font-size:0.65rem; color:#aaa; margin-top:2px;">💡 மாற்று: ${item.swap}</div>` : '';
+        let swapHtml = item.swap ? `<span style="font-size:0.62rem; color:#999;">💡 ${item.swap}</span>` : '';
         return `
-            <div class="grocery-item" style="padding: 8px 0; border-bottom: 1px dashed #222;">
-                <div style="flex:1;">
-                    <span style="font-size:0.85rem; color:var(--text-main);">${item.name}</span>
+            <div class="grocery-item">
+                <div class="grocery-item-name">
+                    <span>${item.name}</span>
                     ${swapHtml}
                 </div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <div style="text-align:right;">
-                        <input type="text" value="${item.qty}" onchange="updateGroceryItemQty('${item.id}', this.value)" style="width:52px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--neon-cyan); font-size:0.75rem; padding:2px 4px; text-align:right; margin-bottom:3px;">
-                        <div style="display:flex; align-items:center; gap:2px; justify-content:flex-end;">
-                            <span style="font-size:0.75rem; color:var(--text-secondary);">₹</span>
-                            <input type="number" value="${item.price||0}" onchange="updateGroceryItemPrice('${item.id}', this.value)" style="width:52px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-secondary); font-size:0.75rem; padding:2px 4px;">
-                        </div>
-                    </div>
-                    <button onclick="toggleRemoveGroceryItem('${item.id}')" title="Cancel this item" style="background:none; border:1px solid var(--neon-red); color:var(--neon-red); border-radius:6px; width:22px; height:22px; line-height:1; cursor:pointer; font-size:0.75rem;">✕</button>
+                <div class="grocery-item-right">
+                    <input type="text" class="grocery-pill-input qty" value="${item.qty}" onchange="updateGroceryItemQty('${item.id}', this.value)">
+                    <input type="number" class="grocery-pill-input price" value="${item.price||0}" onchange="updateGroceryItemPrice('${item.id}', this.value)">
+                    <button class="grocery-del-btn" onclick="toggleRemoveGroceryItem('${item.id}')" title="Cancel this item">✕</button>
                 </div>
             </div>`;
     }
     function manualItemRow(item, type) {
         return `
-            <div class="grocery-item" style="padding: 8px 0; border-bottom: 1px dashed #222;">
-                <div style="flex:1;">
-                    <span style="font-size:0.85rem; color:var(--text-main);">${item.name}</span>
-                    <div style="font-size:0.65rem; color:var(--neon-cyan); margin-top:2px;">✏️ மேனுவலாக சேர்க்கப்பட்டது</div>
+            <div class="grocery-item">
+                <div class="grocery-item-name">
+                    <span>${item.name}</span>
+                    <span style="font-size:0.62rem; color:var(--neon-cyan);">✏️ manual</span>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <div style="text-align:right;">
-                        <input type="text" value="${item.qty}" onchange="updateManualGroceryItemQty('${type}','${item.id}', this.value)" style="width:52px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--neon-cyan); font-size:0.75rem; padding:2px 4px; text-align:right; margin-bottom:3px;">
-                        <div style="display:flex; align-items:center; gap:2px; justify-content:flex-end;">
-                            <span style="font-size:0.75rem; color:var(--text-secondary);">₹</span>
-                            <input type="number" value="${item.price||0}" onchange="updateManualGroceryItemPrice('${type}','${item.id}', this.value)" style="width:52px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-secondary); font-size:0.75rem; padding:2px 4px;">
-                        </div>
-                    </div>
-                    <button onclick="removeManualGroceryItem('${type}','${item.id}')" title="Remove" style="background:none; border:1px solid var(--neon-red); color:var(--neon-red); border-radius:6px; width:22px; height:22px; line-height:1; cursor:pointer; font-size:0.75rem;">✕</button>
+                <div class="grocery-item-right">
+                    <input type="text" class="grocery-pill-input qty" value="${item.qty}" onchange="updateManualGroceryItemQty('${type}','${item.id}', this.value)">
+                    <input type="number" class="grocery-pill-input price" value="${item.price||0}" onchange="updateManualGroceryItemPrice('${type}','${item.id}', this.value)">
+                    <button class="grocery-del-btn" onclick="removeManualGroceryItem('${type}','${item.id}')" title="Remove">✕</button>
                 </div>
             </div>`;
     }
@@ -6735,11 +6682,11 @@ function renderGroceryUI(plan) {
             let visibleItems = category.items.filter(item => !removedSet.has(item.id));
             if (visibleItems.length === 0) return;
             visibleCount += visibleItems.length;
-            html += `<h4 style="color:var(--neon-gold); margin: 15px 0 5px 0; font-size:0.85rem; border-bottom:1px solid #333; padding-bottom:5px;">${category.title}</h4>`;
+            html += `<h4 style="color:var(--neon-gold); margin: 12px 0 2px 0; font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:4px;">${category.title}</h4>`;
             visibleItems.forEach(item => { html += itemRow(item); });
         });
         if (manualItems && manualItems.length) {
-            html += `<h4 style="color:var(--neon-cyan); margin: 15px 0 5px 0; font-size:0.85rem; border-bottom:1px solid #333; padding-bottom:5px;">✏️ நீங்கள் சேர்த்தவை</h4>`;
+            html += `<h4 style="color:var(--neon-cyan); margin: 12px 0 2px 0; font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:4px;">✏️ நீங்கள் சேர்த்தவை</h4>`;
             manualItems.forEach(item => { html += manualItemRow(item, type); visibleCount++; });
         }
         if (visibleCount === 0) {
@@ -6860,6 +6807,61 @@ function removeManualGroceryItem(type, id) {
     renderGroceryUI(plan);
 }
 
+// 📊 DAILY REVIEW MEETING — food names, expenses, wake-up time, gym YES/NO மட்டும் (workout name வேணாம்) — WhatsApp share உடன்
+let dailyReviewWhatsAppText = '';
+function runDailyReviewMeeting() {
+    triggerDeviceHapticPulse();
+    let appToday = getAppToday();
+    let todayStr = appToday.toDateString();
+    let dateLabel = appToday.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+
+    // 🌅 Morning wake up time
+    let todayWakeups = wakeupLogs.filter(w => w.date === todayStr);
+    let wakeTime = todayWakeups.length ? todayWakeups[0].time : '--';
+
+    // 🏋️ Gym status — YES / NO மட்டும், workout name எதுவும் இல்ல
+    let gymStatusRaw = localStorage.getItem(`gym_done_${todayStr}`);
+    let gymStatus = gymStatusRaw === 'true' ? '✅ YES' : (gymStatusRaw === 'false' ? '❌ NO' : '➖ Not logged yet');
+
+    // 🍽️ Today's food names மட்டும் (macros/details வேணாம்)
+    let todayMeals = mealLogs.filter(m => m.date === todayStr);
+    let foodLines = todayMeals.length ? todayMeals.map(m => `• ${m.foodText}`).join('\n') : '• இன்னும் எதுவும் log பண்ணல';
+
+    // 💰 இன்றைய expenses
+    let todayExpenses = expenses.filter(e => new Date(e.date).toDateString() === todayStr);
+    let expenseLines = todayExpenses.length ? todayExpenses.map(e => `• ${e.desc} - ₹${e.amount}`).join('\n') : '• இன்று expense எதுவும் இல்ல';
+    let expenseTotal = todayExpenses.reduce((s,e) => s + e.amount, 0);
+
+    let reportText =
+`📊 TOBI Daily Review — ${dateLabel}
+
+🌅 Wake up: ${wakeTime}
+🏋️ Gym: ${gymStatus}
+
+🍽️ Food Today:
+${foodLines}
+
+💰 Expenses Today:
+${expenseLines}
+Total: ₹${expenseTotal}`;
+
+    dailyReviewWhatsAppText = reportText;
+
+    openModalWithHistory('aiEngineModal');
+    document.getElementById('aiHeaderTitle').innerText = "📊 TOBI DAILY REVIEW";
+    document.getElementById('aiTypingText').innerHTML = '';
+    playAiTyping(reportText, document.getElementById('aiTypingText'));
+    document.getElementById('aiActionButtons').innerHTML = `
+        <button class="ai-btn-close" style="background:#25D366; color:white;" onclick="shareDailyReviewToWhatsApp()">📲 Share to WhatsApp</button>
+        <button class="ai-btn-close" onclick="closeModalAction('aiEngineModal')">Close</button>
+    `;
+}
+function shareDailyReviewToWhatsApp() {
+    if (!dailyReviewWhatsAppText) { displayPremiumToastNotification("Report இல்லை!", "⚠️"); return; }
+    const encodedText = encodeURIComponent(dailyReviewWhatsAppText);
+    window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+}
+
 function shareGroceryToWhatsApp() {
     if (!whatsappGroceryText) {
         displayPremiumToastNotification("List is empty!", "⚠️");
@@ -6977,7 +6979,7 @@ function syncToCloud() {
     DRIVE_CLIENT_ID = localStorage.getItem('drive_client_id');
     if (!DRIVE_CLIENT_ID) {
         displayPremiumToastNotification("⚠️ முதலில் Settings-ல் Client ID-ஐ சேமிக்கவும்!", "❌");
-        openModalWithHistory('systemSettingsModal', 'flex');
+        switchPage('settings');
         return;
     }
 
@@ -7059,7 +7061,7 @@ function restoreFromCloud() {
     DRIVE_CLIENT_ID = localStorage.getItem('drive_client_id');
     if (!DRIVE_CLIENT_ID) {
         displayPremiumToastNotification("⚠️ முதலில் Settings-ல் Client ID-ஐ சேமிக்கவும்!", "❌");
-        openModalWithHistory('systemSettingsModal', 'flex');
+        switchPage('settings');
         return;
     }
 
