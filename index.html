@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
@@ -7685,7 +7685,7 @@ checkGymAttendanceStatus();
 // ==========================================
 // 🕉️ JYOTISH INSIGHTS MODULE
 // ==========================================
-const JYOTISH_PROFILE = { rasi:"ரிஷபம் (Rishabam)", nakshatra:"ரோகிணி (Rohini)", lagna:"கடகம் (Kadagam)", dob:"12-03-2000", tob:"4:10 PM", pob:"Madurai, Tamil Nadu" };
+const JYOTISH_PROFILE = { rasi:"ரிஷபம் (Rishabam)", nakshatra:"ரோகிணி (Rohini)", lagna:"கடகம் (Kadagam)",               dob:"12-03-2000", tob:"4:10 PM", pob:"Madurai, Tamil Nadu" };
 // Device-local API Key மிஸ்ஸிங்-ஆ இருந்தா, box-லேயே direct-ஆ காரணத்தை காட்ட (modal மிஸ் ஆனாலும் phone-ல தெளிவா தெரியும்)
 function apiKeyMissingHTML() {
     return `⚠️ <b>இந்த Phone/Browser-ல Gemini API Key இல்லை!</b><br><br>PC-ல போட்ட Key இந்த Device-க்கு தானா வராது — localStorage Device-க்கு Device தனித்தனி. ஒவ்வொரு Phone/Browser-லயும் தனியா Settings (⚙️) → API Key section-ல Key-ஐ Paste பண்ணி Save பண்ணணும்.<br><br>அல்லது ஏற்கனவே "☁️ Sync to Cloud" பண்ணிருந்தா, இந்த Device-ல "📥 Restore from Cloud" பண்ணி பாருங்க.`;
@@ -7822,13 +7822,14 @@ async function loadDailyAstroBriefing(force) {
     if (cached && !force) { box.innerHTML = cached; return; }
     if (!GEMINI_API_KEY) { box.innerHTML = apiKeyMissingHTML(); return; }
     box.innerHTML = "⏳ ஏற்றுகிறேன்...";
-    const prompt = `நீ ஒரு அனுபவமிக்க தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ${JYOTISH_PROFILE.tob}, ஊர் ${JYOTISH_PROFILE.pob}.
+    const prompt = const prompt = `நீ ஒரு அனுபவமிக்க தமிழ் ஜோதிடர். ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob}.
 இன்றைய தேதி: ${todayStr}, ஊர்: Madurai, Tamil Nadu.
-கீழ்க்கண்ட STRICT FORMAT-ல மட்டும் பதில் தா (வேறு எதுவும் சேர்க்காதே):
-PANCHANGAM: [இன்றைய திதி, ராகு காலம் (தோராயமான நேரம்), எமகண்டம் (தோராயமான நேரம்) - ஒரு வரியில்]
-RASI_PALAN: [இன்றைய ரிஷப ராசி பலன் - 2-3 வரிகளில், தமிழில்]
-ACTIVITY_TIP: [இன்று ரோகிணி நட்சத்திரத்திற்கு ஏற்ற ஒரு activity suggestion - ஒரு வரியில்]
-CHANDRASHTAMA: [YES அல்லது NO மட்டும்]`;
+
+கீழ்க்கண்ட STRICT FORMAT-ல மட்டும் பதில் தா:
+PANCHANGAM: [இன்றைய திதி, ராகு காலம், எமகண்டம் - ஒரு வரியில்]
+RASI_PALAN:ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ஊர்: Madurai, Tamil Nadu ராசி பலன் - 5-6 வரிகளில், தமிழில்]
+ACTIVITY_TIP: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ஊர்: Madurai, Tamil Nadu நட்சத்திரத்திற்கு ஏற்ற ஒரு activity suggestion - ஒரு வரியில்]
+CHANDRASHTAMA: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}, பிறந்த தேதி ${JYOTISH_PROFILE.dob} ஊர்: Madurai, Tamil Nadu [YES அல்லது NO மட்டும்]`;
     try {
         let res = await askGemini(prompt);
         const panch = extractField(res, 'PANCHANGAM');
