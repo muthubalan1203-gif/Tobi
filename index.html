@@ -906,6 +906,14 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
         </div>
         <span id="adaptiveRecoveryPct" style="font-size:0.8rem; font-weight:900; color:var(--neon-red);">0%</span>
     </div>
+    <!-- Factor Breakdown: Sleep / Hydration / Nutrition / Training Load -->
+    <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:0.65rem; color:var(--text-secondary); font-weight:700; width:70px;">😴 Sleep</span><div class="adaptive-recovery-bar" style="flex:1;"><div id="adaptiveFactorSleepFill" class="adaptive-recovery-fill" style="width:0%; background:var(--neon-indigo);"></div></div><span id="adaptiveFactorSleepPct" style="font-size:0.68rem; font-weight:800; width:32px; text-align:right;">0%</span></div>
+        <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:0.65rem; color:var(--text-secondary); font-weight:700; width:70px;">💧 Water</span><div class="adaptive-recovery-bar" style="flex:1;"><div id="adaptiveFactorHydrationFill" class="adaptive-recovery-fill" style="width:0%; background:var(--neon-cyan);"></div></div><span id="adaptiveFactorHydrationPct" style="font-size:0.68rem; font-weight:800; width:32px; text-align:right;">0%</span></div>
+        <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:0.65rem; color:var(--text-secondary); font-weight:700; width:70px;">🍗 Food</span><div class="adaptive-recovery-bar" style="flex:1;"><div id="adaptiveFactorNutritionFill" class="adaptive-recovery-fill" style="width:0%; background:var(--neon-orange);"></div></div><span id="adaptiveFactorNutritionPct" style="font-size:0.68rem; font-weight:800; width:32px; text-align:right;">0%</span></div>
+        <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:0.65rem; color:var(--text-secondary); font-weight:700; width:70px;">🏋️ Load</span><div class="adaptive-recovery-bar" style="flex:1;"><div id="adaptiveFactorLoadFill" class="adaptive-recovery-fill" style="width:0%; background:var(--neon-purple);"></div></div><span id="adaptiveFactorLoadPct" style="font-size:0.68rem; font-weight:800; width:32px; text-align:right;">0%</span></div>
+    </div>
+
     <div class="adaptive-suggestion" id="adaptiveSuggestionText"><b>💡 TOBI:</b> Analyzing your biometric data... Please log sleep and mood for accurate suggestions.</div>
     
     <div style="margin-top:12px; display:flex; gap:8px;">
@@ -2030,6 +2038,16 @@ function logGymAttendance(didGo) {
         let loggedStreakDays = safeGetItem('gym_streak_days_list', {});
         loggedStreakDays[todayStr] = true;
         localStorage.setItem('gym_streak_days_list', JSON.stringify(loggedStreakDays));
+
+        // 🧠 Adaptive Workout AI-க்காக: இந்த session எந்த exact நேரத்துல (timestamp) log ஆச்சுன்னு சேமிக்கிறோம்.
+        // Daily gym போறவங்களுக்கு "rest day" concept இல்லாததால், இதை வெச்சு "கடந்த session-ல் இருந்து
+        // எத்தனை மணிநேரம் ஆச்சு" (24hr cycle baseline) அடிப்படையில் Training Load கணக்கிடுவோம்.
+        let sessionTimestamps = safeGetItem('gym_session_timestamps', {});
+        sessionTimestamps[todayStr] = Date.now();
+        // 90 நாட்களுக்கு மேல் பழைய entries clean பண்ணுறோம்
+        let tsKeys = Object.keys(sessionTimestamps);
+        if(tsKeys.length > 90) { tsKeys.sort((a,b) => new Date(a) - new Date(b)); delete sessionTimestamps[tsKeys[0]]; }
+        safeSetItem('gym_session_timestamps', sessionTimestamps);
         updateStreakDisplay();
     } else {
         // NO கொடுத்தால்: பாக்ஸ் மெசேஜ் மாறி, AI உங்களை திட்டும்
@@ -2658,6 +2676,21 @@ function checkAndResetDailyTasks() {
             list.forEach(ex => { localStorage.removeItem(`cw_${d}_${ex.id}`); });
         });
         for(let i=1;i<=8;i++) { localStorage.removeItem(`diet_${todayDateStr}_${i}`); }
+
+        // 🧠 Adaptive Workout AI-க்காக: நேற்றைய முழு நாள் Water தொகையை history-ல் சேமிக்கிறோம்
+        // (இது இல்லாட்டி, காலை ஜிம் நேரத்துல நேற்றைய hydration தகவலே கிடைக்காது)
+        if(lastOpenedDate) {
+            let waterHist = safeGetItem('water_daily_history', {});
+            waterHist[lastOpenedDate] = { ml: currentWater, target: waterTargetML };
+            // 60 நாட்களுக்கு மேல் பழைய entries-ஐ clean பண்ணுறோம் (storage bloat தவிர்க்க)
+            let histKeys = Object.keys(waterHist);
+            if(histKeys.length > 60) {
+                histKeys.sort((a,b) => new Date(a) - new Date(b));
+                delete waterHist[histKeys[0]];
+            }
+            safeSetItem('water_daily_history', waterHist);
+        }
+
         localStorage.setItem('TOBI_water_intake_v6', 0);
         currentWater = 0;
         renderWater();
@@ -6109,31 +6142,138 @@ function stopWimHof() {
 
 
 
-// 7. Adaptive Workout AI
-function generateAdaptiveWorkout() {
+// 7. Adaptive Workout AI — Extreme Level Recovery Model
+// 4 factors weigh in: Sleep (40%), Hydration (20%), Nutrition (20%), Training Load (20%)
+// Early-morning gym நேரத்துல இன்றைய water/food ஏறக்குறைய 0-ஆ இருக்கும் என்பதால்,
+// dayProgress-ஐ வெச்சு நேற்றைய முழு நாள் தரவையும் இன்றைய early pace-ஐயும் blend பண்றோம்.
+
+function getPreviousDateStr(dateObj, daysBack) {
+    let d = new Date(dateObj); d.setDate(d.getDate() - daysBack); return d.toDateString();
+}
+
+// நேற்றைய Hydration % — water_daily_history-ல் இருந்து (இல்லைனா null)
+function getHydrationScoreForDate(dateStr) {
+    let hist = safeGetItem('water_daily_history', {});
+    let entry = hist[dateStr];
+    if(!entry || !entry.target) return null;
+    return Math.min(100, Math.round((entry.ml / entry.target) * 100));
+}
+
+// குறிப்பிட்ட தேதிக்கான Protein+Carb attainment % (Diet schedule checkboxes + meal logs இரண்டையும் சேர்த்து)
+function getNutritionScoreForDate(dateStr) {
+    if(targetP === 0 && targetC === 0) return null;
+    let tP = 0, tC = 0;
+    for(let i=1;i<=8;i++) { if(localStorage.getItem(`diet_${dateStr}_${i}`) === 'true') { tP += dietScheduleMacros[i-1].p; tC += dietScheduleMacros[i-1].c; } }
+    mealLogs.forEach(m => { if(m.date === dateStr) { tP += m.p; tC += m.c; } });
+    let pPct = targetP > 0 ? Math.min(100, (tP / targetP) * 100) : 100;
+    let cPct = targetC > 0 ? Math.min(100, (tC / targetC) * 100) : 100;
+    return { score: Math.round((pPct * 0.65) + (cPct * 0.35)), p: tP, c: tC }; // முதலில் Protein-க்கு முக்கியத்துவம் (தசை repair)
+}
+
+// Training Load — Daily gym போறவங்களுக்கு "rest day" concept பொருந்தாது, அதனால கடந்த session
+// exact timestamp-ல் இருந்து இப்போ வரைக்கும் எத்தனை மணிநேரம் ஆச்சுன்னு கணக்கிட்டு,
+// 24hr-ஐ ஒரு recovery cycle baseline-ஆ வெச்சு score தருகிறோம். Device clock தவறா இருந்தா
+// coverage பாதிக்காம, network time-ஐ முதலில் முயற்சிக்கிறோம் (fail ஆனா local device time fallback).
+async function getAccurateNow() {
+    try {
+        let controller = new AbortController();
+        let timeoutId = setTimeout(() => controller.abort(), 2500);
+        let res = await fetch('https://worldtimeapi.org/api/timezone/Asia/Kolkata', { signal: controller.signal });
+        clearTimeout(timeoutId);
+        let data = await res.json();
+        if(data && data.unixtime) return data.unixtime * 1000;
+    } catch(e) { /* network unavailable - fallback கீழே */ }
+    return Date.now();
+}
+
+async function getTrainingLoadInfo(appToday) {
+    let todayStr = appToday.toDateString();
+    let sessionTimestamps = safeGetItem('gym_session_timestamps', {});
+
+    // இன்னைக்கு already YES log ஆகியிருந்தா அதை விட்டுட்டு, அதுக்கு முந்தின மிக சமீபத்திய session-ஐ தேடுறோம்
+    let pastTimestamps = Object.keys(sessionTimestamps).filter(d => d !== todayStr).map(d => sessionTimestamps[d]);
+
+    if(pastTimestamps.length === 0) {
+        return { hoursSinceLastSession: null, score: 85 }; // முதல் session - history இல்ல, neutral-high default
+    }
+
+    let lastTimestamp = Math.max(...pastTimestamps);
+    let nowMs = await getAccurateNow();
+    let hoursSinceLastSession = Math.max(0, (nowMs - lastTimestamp) / (1000 * 60 * 60));
+
+    // 24hrs = முழு recovery cycle. அதுக்கு கீழ இருந்தா (எ.கா. 14hrs-ல மறுபடி gym) recovery incomplete-ஆ கருதுறோம்.
+    // 24hrs அல்லது அதுக்கு மேல ஆகிட்டா, daily routine-க்கு standard recovery கிடைச்சிருக்குனு 100%.
+    let score = Math.max(0, Math.min(100, Math.round((hoursSinceLastSession / 24) * 100)));
+    return { hoursSinceLastSession, score };
+}
+
+async function generateAdaptiveWorkout() {
     let appToday = getAppToday(); let todayStr = appToday.toDateString(); let todayName = daysOfWeek[appToday.getDay()];
+    let yesterdayStr = getPreviousDateStr(appToday, 1);
     let sleepScore = getEffectiveSleepScore(todayStr) ?? 50;
 
-    // Hydration score — early morning gym-க்கு போறப்போ இன்னைக்கு water intake இன்னும் 0-அருகில் இருக்கும் (நாள் தொடங்கிதே தான்),
-    // அதனால இன்றைய full target-உடன் ஒப்பிடாம, இந்த நேரத்திற்குள் எவ்வளவு குடிச்சிருக்கணும்-ன்னு (pro-rated expected)
-    // அதுக்கு ஒப்பிட்டு score கணக்கிடுறோம். இதனால 6AM gym நேரத்திலயும் sleep quality தான் recovery-ஐ decide பண்ணும்,
-    // water 0%-ஆ இருக்குறதால unfair-ஆ recovery% கீழே இழுக்காது.
+    // dayProgress: நாள் எவ்வளவு தூரம் ஓடிடுச்சு-ன்னு காட்டும் (6AM-ல் ~0.08, 11PM-ல் 1.0)
     let currentHour = appToday.getHours() + (appToday.getMinutes() / 60);
-    let wakeHour = 6, sleepHour = 23; // typical waking window (6AM - 11PM)
+    let wakeHour = 6, sleepHour = 23;
     let dayProgress = Math.min(1, Math.max(0.08, (currentHour - wakeHour) / (sleepHour - wakeHour)));
-    let expectedWaterByNow = waterTargetML * dayProgress;
-    let waterScore = expectedWaterByNow > 0 ? Math.min(100, (currentWater / expectedWaterByNow) * 100) : 100;
 
-    let recoveryPct = Math.round((sleepScore * 0.7) + (waterScore * 0.3));
+    // --- Hydration: நேற்றைய முழு நாள் data + இன்றைய early pace-ஐ blend பண்றோம் ---
+    let expectedWaterByNow = waterTargetML * dayProgress;
+    let todayWaterPace = expectedWaterByNow > 0 ? Math.min(100, (currentWater / expectedWaterByNow) * 100) : 100;
+    let yesterdayHydration = getHydrationScoreForDate(yesterdayStr);
+    let hydrationScore = yesterdayHydration !== null
+        ? Math.round((yesterdayHydration * (1 - dayProgress)) + (todayWaterPace * dayProgress))
+        : todayWaterPace;
+
+    // --- Nutrition: நேற்றைய Protein/Carb fueling + இன்றைய early intake-ஐ blend பண்றோம் ---
+    let todayNutrition = getNutritionScoreForDate(todayStr);
+    let todayNutritionPace = todayNutrition ? Math.min(100, (todayNutrition.score / dayProgress)) : 100;
+    let yesterdayNutrition = getNutritionScoreForDate(yesterdayStr);
+    let nutritionScore = yesterdayNutrition !== null
+        ? Math.round((yesterdayNutrition.score * (1 - dayProgress)) + (todayNutritionPace * dayProgress))
+        : (todayNutrition ? todayNutrition.score : 75);
+
+    // --- Training Load: கடந்த session-ல் இருந்து எத்தனை மணிநேரம் ஆச்சு (async, real elapsed time) ---
+    let loadInfo = await getTrainingLoadInfo(appToday);
+
+    let recoveryPct = Math.round((sleepScore * 0.40) + (hydrationScore * 0.20) + (nutritionScore * 0.20) + (loadInfo.score * 0.20));
+    recoveryPct = Math.max(0, Math.min(100, recoveryPct));
+
     let moods = safeGetItem('gym_moods', {}); let todayMood = moods[todayStr] || 'Normal';
+
     document.getElementById('adaptiveRecoveryFill').style.width = recoveryPct + '%';
     document.getElementById('adaptiveRecoveryFill').style.background = recoveryPct >= 70 ? 'var(--neon-green)' : (recoveryPct >= 40 ? 'var(--neon-gold)' : 'var(--neon-red)');
     document.getElementById('adaptiveRecoveryPct').innerText = recoveryPct + '%';
     document.getElementById('adaptiveRecoveryPct').style.color = recoveryPct >= 70 ? 'var(--neon-green)' : (recoveryPct >= 40 ? 'var(--neon-gold)' : 'var(--neon-red)');
+
+    // Factor breakdown mini-bars (UI-ல் card இருந்தா update பண்ணும்)
+    let factors = [
+        ['adaptiveFactorSleep', sleepScore], ['adaptiveFactorHydration', hydrationScore],
+        ['adaptiveFactorNutrition', nutritionScore], ['adaptiveFactorLoad', loadInfo.score]
+    ];
+    factors.forEach(([id, val]) => {
+        let fill = document.getElementById(id + 'Fill'); let pct = document.getElementById(id + 'Pct');
+        if(fill) { fill.style.width = val + '%'; fill.style.background = val >= 70 ? 'var(--neon-green)' : (val >= 40 ? 'var(--neon-gold)' : 'var(--neon-red)'); }
+        if(pct) pct.innerText = Math.round(val) + '%';
+    });
+
+    // --- Suggestion Text: எந்த factor weak-ஆ இருக்குதுன்னு குறிப்பா சொல்லும் ---
+    let weakest = [['Sleep', sleepScore], ['Hydration', hydrationScore], ['Nutrition', nutritionScore], ['Training Load', loadInfo.score]].sort((a,b) => a[1]-b[1])[0];
+    let loadNote = loadInfo.hoursSinceLastSession === null
+        ? "இது உங்க முதல் logged session."
+        : `கடந்த session-ல் இருந்து ${loadInfo.hoursSinceLastSession.toFixed(1)} hrs ஆகுது (24hr cycle-ல் ${loadInfo.score}%).`;
+
     let suggestion = ""; let color = "var(--neon-gold)";
-    if(recoveryPct < 40 || todayMood.includes('Sore')) { suggestion = `⚠️ RECOVERY ALERT: Recovery ${recoveryPct}%. Mood: ${todayMood}. TOBI recommends: SKIP HEAVY LIFTING. Do light cardio 20 mins + full body stretching + foam rolling. Focus on sleep tonight.`; color = "var(--neon-red)"; }
-    else if(recoveryPct < 65 || todayMood.includes('Tired')) { suggestion = `⚡ MODERATE DAY: Recovery ${recoveryPct}%. TOBI suggests: Reduce volume by 20%. Drop 1 set per exercise. Focus on form over weight. Add 10 mins extra warm-up.`; color = "var(--neon-gold)"; }
-    else { suggestion = `🔥 BEAST MODE READY: Recovery ${recoveryPct}%. Mood: ${todayMood}. TOBI approves: HEAVY DAY! Add 2.5kg to your main lifts. Push for PRs. You are primed for anabolic growth.`; color = "var(--neon-green)"; }
+    if(recoveryPct < 40 || todayMood.includes('Sore')) {
+        suggestion = `⚠️ RECOVERY ALERT: Recovery ${recoveryPct}%. Mood: ${todayMood}. Weak spot: ${weakest[0]} (${Math.round(weakest[1])}%). ${loadNote} TOBI recommends: SKIP HEAVY LIFTING. Light cardio 20 mins + full body stretching + foam rolling. Sleep, Water, Protein-ஐ சரி பண்ணுங்க.`;
+        color = "var(--neon-red)";
+    } else if(recoveryPct < 65 || todayMood.includes('Tired')) {
+        suggestion = `⚡ MODERATE DAY: Recovery ${recoveryPct}%. Weak spot: ${weakest[0]} (${Math.round(weakest[1])}%). ${loadNote} TOBI suggests: Reduce volume by 20%. Drop 1 set per exercise. Focus on form over weight. Add 10 mins extra warm-up.`;
+        color = "var(--neon-gold)";
+    } else {
+        suggestion = `🔥 BEAST MODE READY: Recovery ${recoveryPct}%. Mood: ${todayMood}. ${loadNote} Sleep ${Math.round(sleepScore)}% | Hydration ${Math.round(hydrationScore)}% | Nutrition ${Math.round(nutritionScore)}% — எல்லாமே strong ஆ இருக்கு. TOBI approves: HEAVY DAY! Add 2.5kg to your main lifts. Push for PRs.`;
+        color = "var(--neon-green)";
+    }
     document.getElementById('adaptiveSuggestionText').innerHTML = `<b style="color:${color};">💡 TOBI:</b> ${suggestion}`;
     localStorage.setItem('adaptive_workout_' + todayStr, suggestion);
 }
