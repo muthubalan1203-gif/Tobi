@@ -2481,6 +2481,35 @@ async function askGemini(prompt, imageBase64 = null, imageMimeType = 'image/jpeg
     }
 }
 
+// FEATURE: Google Search grounding-ஓட Gemini கேக்கிற helper — Panchangam/date மாதிரி real-time facts தேவைப்படுற இடங்கள்ல plain askGemini() க்கு பதிலா இதை உபயோகி (training data hallucination தவிர்க்க)
+async function askGeminiGrounded(prompt) {
+    if (!GEMINI_API_KEY) return null;
+    const model = 'gemini-3.1-flash-lite';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
+        let response;
+        try {
+            response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], tools: [{ google_search: {} }] }),
+                signal: controller.signal
+            });
+        } finally { clearTimeout(timeoutId); }
+        if (!response.ok) throw new Error('Grounded Gemini HTTP ' + response.status);
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message);
+        const text = (data?.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
+        if (!text) throw new Error('Empty grounded response');
+        return text;
+    } catch (e) {
+        console.log('askGeminiGrounded failed, will fallback:', e.message);
+        return null; // caller-கிட்ட fallback logic இருக்கும் (e.g. plain askGemini)
+    }
+}
+
 // FEATURE: AI-Powered Personalized Water Target — Weight/Height/Temperature வச்சி, Google Search grounding-ஓட Gemini analysis பண்ணும்
 async function getAIWaterTargetML(tempC, weightKg, heightCm) {
     if (!GEMINI_API_KEY) return null;
@@ -7912,61 +7941,116 @@ async function findMuhurtham(presetPurpose) {
     } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
 }
 
-// ---- 5. Pooja/Vrat monthly list (AI, cached per month) ----
-async function loadPoojaVratList(force) {
+// ---- 5. Pooja/Vrat monthly list — STATIC DATA (Chennai, Tamil Nadu), source: drikpanchang.com, verified July 2026 ----
+// AI-generation அகற்றப்பட்டது — panchangam தேதிகள் real astronomical calculation தேவைப்படும் விஷயம், AI (grounding வச்சாலும்) அதை reliably பண்ண முடியாது.
+// இந்த static table-ஐ ஒவ்வொரு வருஷமும் (டிசம்பர் இறுதியில்) drikpanchang.com/vrats/ (Chennai) பாத்து புதுப்பிக்கவும்.
+const POOJA_VRAT_STATIC_DATES = {
+    2026: [
+        // Ekadashi
+        {date:'2026-01-14', name:'Shattila Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-01-29', name:'Jaya Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-02-13', name:'Vijaya Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-02-27', name:'Amalaki Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-03-15', name:'Papamochani Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-03-29', name:'Kamada Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-04-13', name:'Varuthini Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-04-27', name:'Mohini Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-05-13', name:'Apara Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-05-27', name:'Padmini Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-06-11', name:'Parama Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-06-25', name:'Nirjala Ekadashi', note:'மிக முக்கியமான ஏகாதசி — 24 ஏகாதசி பலனும் கிடைக்கும்'},
+        {date:'2026-07-10', name:'Yogini Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-07-25', name:'Devshayani Ekadashi', note:'சாதுர்மாஸ்யம் தொடக்கம்'},
+        {date:'2026-08-09', name:'Kamika Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-08-23', name:'Shravana Putrada Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-09-07', name:'Aja Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-09-22', name:'Parsva Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-10-06', name:'Indira Ekadashi', note:'பித்ருக்களுக்கு நல்லது'},
+        {date:'2026-10-22', name:'Papankusha Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-11-05', name:'Rama Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-11-20', name:'Vaikuntha/Devutthana Ekadashi', note:'விஷ்ணு யோக நித்திரையிலிருந்து எழும் நாள்'},
+        {date:'2026-12-04', name:'Utpanna Ekadashi', note:'விஷ்ணு விரத நாள்'},
+        {date:'2026-12-20', name:'Mokshada Ekadashi (Vaikuntha Ekadashi)', note:'மிக முக்கியமான ஏகாதசி — வைகுண்ட வாசல் திறக்கும் நாள்'},
+        // Pradosham
+        {date:'2026-01-01', name:'Guru Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-01-16', name:'Shukra Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-01-30', name:'Shukra Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-02-14', name:'Shani Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-03-01', name:'Ravi Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-03-16', name:'Soma Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-03-30', name:'Soma Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-04-15', name:'Budha Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-04-28', name:'Bhauma Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-05-14', name:'Guru Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-05-28', name:'Guru Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-06-12', name:'Shukra Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-06-27', name:'Shani Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-07-12', name:'Ravi Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-07-26', name:'Ravi Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-08-10', name:'Soma Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-08-25', name:'Bhauma Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-09-08', name:'Bhauma Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-09-24', name:'Guru Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-10-08', name:'Guru Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-10-23', name:'Shukra Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-11-06', name:'Shukra Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-11-22', name:'Ravi Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-12-06', name:'Ravi Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        {date:'2026-12-21', name:'Soma Pradosham', note:'சிவ பூஜைக்கு நல்ல நேரம் (மாலை)'},
+        // Amavasai
+        {date:'2026-01-18', name:'Thai Amavasai', note:'பித்ரு தர்ப்பணத்திற்கு நல்ல நாள்'},
+        {date:'2026-02-17', name:'Masi Amavasai', note:'பித்ரு தர்ப்பணத்திற்கு நல்ல நாள்'},
+        {date:'2026-03-18', name:'Panguni Amavasai', note:'பித்ரு தர்ப்பணத்திற்கு நல்ல நாள்'},
+        {date:'2026-04-17', name:'Vaikasi Amavasai', note:'பித்ரு தர்ப்பணத்திற்கு நல்ல நாள்'},
+        {date:'2026-05-16', name:'Ani Amavasai (Sani Amavasai)', note:'சனி தோஷ நிவர்த்திக்கு நல்ல நாள்'},
+        {date:'2026-06-14', name:'Adi Amavasai', note:'பித்ரு தர்ப்பணத்திற்கு நல்ல நாள்'},
+        {date:'2026-07-14', name:'Aadi Amavasai', note:'பித்ரு தர்ப்பணத்திற்கு நல்ல நாள்'},
+        {date:'2026-08-12', name:'Aavani Amavasai', note:'பார்வதி தேவி வழிபாட்டுக்கு நல்ல நாள்'},
+        {date:'2026-09-11', name:'Mahalaya (Purattasi) Amavasai', note:'பித்ரு தர்ப்பணத்திற்கு மிக முக்கிய நாள்'},
+        {date:'2026-10-10', name:'Aippasi Amavasai (Deepavali Amavasai)', note:'தீபாவளி அமாவாசை'},
+        {date:'2026-11-09', name:'Karthigai Amavasai (Somavathi)', note:'குடும்ப சமாதானத்திற்கு நல்ல நாள்'},
+        {date:'2026-12-08', name:'Margazhi Amavasai', note:'பித்ரு தர்ப்பணத்திற்கு நல்ல நாள்'},
+        // Pournami
+        {date:'2026-01-03', name:'Thai Pournami', note:'பௌர்ணமி விரதம்'},
+        {date:'2026-02-01', name:'Masi Pournami', note:'பௌர்ணமி விரதம்'},
+        {date:'2026-03-03', name:'Panguni Pournami', note:'பௌர்ணமி விரதம்'},
+        {date:'2026-04-02', name:'Chithirai Pournami', note:'பௌர்ணமி விரதம்'},
+        {date:'2026-05-01', name:'Vaikasi Pournami', note:'பௌர்ணமி விரதம்'},
+        {date:'2026-05-31', name:'Ani Adhika Pournami', note:'அதிக மாத பௌர்ணமி'},
+        {date:'2026-06-29', name:'Ani Pournami', note:'பௌர்ணமி விரதம்'},
+        {date:'2026-07-29', name:'Aadi Pournami', note:'பௌர்ணமி விரதம்'},
+        {date:'2026-08-28', name:'Aavani Pournami (Gayatri Japam)', note:'உபகர்ம நாள்'},
+        {date:'2026-09-26', name:'Purattasi Pournami', note:'பௌர்ணமி விரதம்'},
+        {date:'2026-10-26', name:'Aippasi Pournami', note:'பௌர்ணமி விரதம்'},
+        {date:'2026-11-24', name:'Karthigai Pournami (Karthigai Deepam)', note:'கார்த்திகை தீபம்'},
+        {date:'2026-12-24', name:'Margazhi Pournami', note:'பௌர்ணமி விரதம்'},
+    ]
+};
+function loadPoojaVratList(force) {
     const appToday = getAppToday();
-    const monthKey = 'pooja_vrat_' + appToday.getFullYear() + '_' + (appToday.getMonth() + 1);
     const box = document.getElementById('poojaVratBox');
     if (!box) return;
-    let cached = localStorage.getItem(monthKey);
-    if (cached && !force) { box.innerHTML = cached; return; }
-    if (!GEMINI_API_KEY) { box.innerHTML = apiKeyMissingHTML(); return; }
-    box.innerHTML = "⏳ ஏற்றுகிறேன்...";
+    const year = appToday.getFullYear(), month = appToday.getMonth();
     const monthName = safeMonthName(appToday);
-    const prompt = `நீ ஒரு தமிழ் பஞ்சாங்க நிபுணர். ரோகிணி நட்சத்திரம், ரிஷப ராசிக்காரருக்கு இந்த மாதம் (${monthName} ${appToday.getFullYear()}) வரும் முக்கியமான Ekadashi, Pradosham, Amavasai, Pournami, மற்றும் முக்கிய பண்டிகை தேதிகளை பட்டியலிடு. ஒவ்வொன்றுக்கும் தோராய தேதி மற்றும் ஒரு வரி முக்கியத்துவம் தமிழில் தா. Bullet points-ஆ மட்டும் தா, markdown formatting வேண்டாம்.`;
-    try {
-        let res = await askGemini(prompt);
-        const html = `<div style="white-space:pre-wrap;">${res}</div>`;
-        localStorage.setItem(monthKey, html);
-        box.innerHTML = html;
-    } catch(e) { box.innerHTML = "⚠️ AI Error — மீண்டும் முயற்சிக்கவும்."; }
+    const yearData = POOJA_VRAT_STATIC_DATES[year];
+    if (!yearData) { box.innerHTML = `⚠️ ${year}-க்கான தேதிகள் இன்னும் update ஆகல. drikpanchang.com/vrats/ (Chennai) பாத்து app-ல update பண்ணணும்.`; return; }
+    const monthEvents = yearData.filter(e => { const d = new Date(e.date + 'T00:00:00'); return d.getFullYear() === year && d.getMonth() === month; })
+        .sort((a,b) => a.date.localeCompare(b.date));
+    if (!monthEvents.length) { box.innerHTML = `இந்த மாதம் (${monthName}) குறிப்பிட்ட நாட்கள் எதுவும் இல்லை.`; return; }
+    const lines = monthEvents.map(e => { const d = new Date(e.date + 'T00:00:00'); return `📿 ${d.getDate()} ${monthName} — ${e.name}: ${e.note}`; }).join('\n');
+    box.innerHTML = `<div style="white-space:pre-wrap;">${lines}</div>
+    <div style="margin-top:8px; font-size:0.68rem; color:var(--text-secondary);">✅ Source: drikpanchang.com (Chennai) — fixed data, AI இல்லை.</div>`;
 }
-
-// ---- 5b. Pooja/Vrat Push Notification — Ekadashi/Pradosham/special days-க்கு structured தேதி list (AI, cached per month) + daily auto-check ----
-async function loadPoojaVratDatesStructured(force) {
-    const appToday = getAppToday();
-    const monthKey = 'pooja_vrat_dates_' + appToday.getFullYear() + '_' + (appToday.getMonth() + 1);
-    if (!force) {
-        const cached = localStorage.getItem(monthKey);
-        if (cached) { checkPoojaVratTodayNotification(); return; }
-    }
-    if (!GEMINI_API_KEY) return; // API key இல்லனா silent-ஆ skip, banner button மூலம் பின்னாடி try பண்ணலாம்
-    const monthName = safeMonthName(appToday);
-    const prompt = `நீ ஒரு தமிழ் பஞ்சாங்க நிபுணர். இந்த மாதம் (${monthName} ${appToday.getFullYear()}) வரும் Ekadashi, Pradosham, Amavasai, Pournami, மற்றும் முக்கிய பண்டிகை நாட்களை பட்டியலிடு.
-STRICT FORMAT-ல மட்டும் பதில் தா — தலைப்பு/intro/வேறு எந்த வரியும் சேர்க்காதே. ஒவ்வொரு நாளும் ஒரு தனி வரியில், இந்த format-ல மட்டும்:
-YYYY-MM-DD | நாள் பெயர் | ஒரு வரி முக்கியத்துவம்`;
-    try {
-        let res = await askGemini(prompt);
-        const lines = res.split('\n').map(l => l.trim()).filter(Boolean);
-        const dates = [];
-        lines.forEach(line => {
-            const m = line.match(/^(\d{4}-\d{2}-\d{2})\s*\|\s*([^|]+)\|\s*(.+)$/);
-            if (m) dates.push({ date: m[1].trim(), name: m[2].trim(), note: m[3].trim() });
-        });
-        if (dates.length) localStorage.setItem(monthKey, JSON.stringify(dates));
-        checkPoojaVratTodayNotification();
-    } catch(e) { console.log('Pooja/Vrat date fetch failed:', e.message); }
+// ---- 5b. Pooja/Vrat Push Notification — static data-லேர்ந்தே directly check பண்றோம், AI தேவையே இல்ல ----
+function loadPoojaVratDatesStructured(force) {
+    checkPoojaVratTodayNotification();
 }
 function checkPoojaVratTodayNotification() {
     const enabled = localStorage.getItem('pooja_vrat_reminder_enabled') === 'true';
     const appToday = getAppToday();
     const todayISO = getIsoDateStr(appToday);
-    const monthKey = 'pooja_vrat_dates_' + appToday.getFullYear() + '_' + (appToday.getMonth() + 1);
-    const raw = localStorage.getItem(monthKey);
-    if (!raw) { if (enabled) loadPoojaVratDatesStructured(false); return; }
-    let dates = [];
-    try { dates = JSON.parse(raw); } catch(e) { dates = []; }
-    const todayEntries = dates.filter(d => d.date === todayISO);
+    const yearData = POOJA_VRAT_STATIC_DATES[appToday.getFullYear()] || [];
+    const todayEntries = yearData.filter(d => d.date === todayISO);
     const bannerEl = document.getElementById('poojaVratTodayBanner');
     if (bannerEl) {
         if (todayEntries.length) {
@@ -8305,8 +8389,7 @@ function initJyotishModule() {
     let appToday = getAppToday();
     const briefingCache = localStorage.getItem('astro_briefing_' + appToday.toDateString());
     if (briefingCache) document.getElementById('astroBriefingBox').innerHTML = briefingCache;
-    const poojaCache = localStorage.getItem('pooja_vrat_' + appToday.getFullYear() + '_' + (appToday.getMonth() + 1));
-    if (poojaCache) document.getElementById('poojaVratBox').innerHTML = poojaCache;
+    loadPoojaVratList(false); // static data-லேர்ந்து உடனே காட்டும், AI wait பண்ண வேண்டாம்
     // Pooja/Vrat Push Reminder toggle state + Voice Milestone toggle state
     const poojaReminderEnabled = localStorage.getItem('pooja_vrat_reminder_enabled') === 'true';
     const poojaToggleEl = document.getElementById('poojaVratReminderToggle');
