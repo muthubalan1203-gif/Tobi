@@ -217,6 +217,8 @@ body.theme-sharingan .toast-notification-hub {
 .calendar-day-box { background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:10px; padding:10px 0; text-align:center; font-size:0.85rem; font-weight:800; cursor:pointer; transition:0.3s; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:45px; }
 .calendar-day-box.completed-day { background:rgba(16,185,129,0.15); border-color:var(--neon-green); color:var(--neon-green); }
 .calendar-day-box.today-box { border-color:var(--neon-gold); box-shadow:0 0 12px rgba(245,158,11,0.5); color:var(--neon-gold); background:rgba(245,158,11,0.12); font-weight:900; }
+.calendar-day-box.festival-day { border-color:#f472b6; background:rgba(244,114,182,0.12); }
+.calendar-day-box.festival-day.today-box { border-color:var(--neon-gold); }
 .dashboard-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
 .dash-box { background:var(--surface-ultra); padding:16px 12px; border-radius:20px; text-align:center; border:1px solid var(--glass-border); }
 .dash-box-val { font-size:1.25rem; font-weight:900; margin-top:3px; }
@@ -1307,10 +1309,13 @@ body.theme-marvel .marvel-gauntlet-box { display: block; animation: holoBorder 3
 <!-- CALENDAR PAGE -->
 <div id="page-calendar" class="page">
 <div class="page-banner" style="background:linear-gradient(135deg,#10b981,#047857); padding:15px; border-radius:16px; margin-bottom:15px; font-weight:900; text-align:center;">📅  PROGRESS MATRIX</div>
+<div id="upcomingFestivalBanner" style="display:none; font-size:0.8rem; line-height:1.5; background:rgba(244,114,182,0.15); border:1px solid #f472b6; border-radius:12px; padding:10px 14px; margin-bottom:12px; color:var(--text-primary); font-weight:700;"></div>
 <div class="app-card">
 <div class="calendar-header"><button class="cal-nav-btn" onclick="prevMonth()">◄</button><div class="cal-month-lbl" id="calendarMonthYearLbl">Month 2026</div><button class="cal-nav-btn" onclick="nextMonth()">►</button></div>
 <div class="calendar-weekdays"><div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div></div>
-<div class="calendar-grid" id="calendarGridContainer"></div></div>
+<div class="calendar-grid" id="calendarGridContainer"></div>
+<p style="font-size:0.65rem; color:var(--text-secondary); margin-top:10px; text-align:center;">🪔 = Tamil Nadu Festival/Holiday — box-ஐ தட்டி பெயர் பாருங்க</p>
+</div>
 </div>
 
 <!-- JYOTISH PAGE -->
@@ -3210,6 +3215,52 @@ async function updateWaterTargetFromWeather() {
     }
 }
 
+// FEATURE: Accurate Sunrise/Sunset Calculator — Astronomical Almanac (NOAA) formula, network தேவையில்லை, ~1-2 நிமிட accuracy
+// (Old code Open-Meteo API-ஐ மட்டும் நம்பியிருந்தது — fetch fail ஆனா தவறான static "5:30-6:00 AM" fallback காட்டிச்சு.
+//  இப்போ lat/lon + தேதி வெச்சே கணக்கு போட்டு, timezone-safe-ஆ Asia/Kolkata-ல் காட்டுறோம்)
+function calculateSunTimes(date, lat, lon) {
+    const rad = Math.PI / 180, deg = 180 / Math.PI;
+    const zenith = 90.833; // official sunrise/sunset zenith (atmospheric refraction + sun's angular radius சேர்த்து)
+
+    function calc(isSunrise) {
+        const startOfYear = Date.UTC(date.getFullYear(), 0, 1);
+        const dayOfYear = Math.floor((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - startOfYear) / 86400000) + 1;
+        const lngHour = lon / 15;
+        const t = dayOfYear + ((isSunrise ? 6 : 18) - lngHour) / 24;
+
+        const M = (0.9856 * t) - 3.289;
+        let L = M + (1.916 * Math.sin(M * rad)) + (0.020 * Math.sin(2 * M * rad)) + 282.634;
+        L = (L + 360) % 360;
+
+        let RA = deg * Math.atan(0.91764 * Math.tan(L * rad));
+        RA = (RA + 360) % 360;
+        const Lquadrant = Math.floor(L / 90) * 90;
+        const RAquadrant = Math.floor(RA / 90) * 90;
+        RA = (RA + (Lquadrant - RAquadrant)) / 15;
+
+        const sinDec = 0.39782 * Math.sin(L * rad);
+        const cosDec = Math.cos(Math.asin(sinDec));
+        const cosH = (Math.cos(zenith * rad) - (sinDec * Math.sin(lat * rad))) / (cosDec * Math.cos(lat * rad));
+        if (cosH > 1 || cosH < -1) return null; // polar day/night — Madurai latitude-க்கு நடக்காது, safety check மட்டும்
+
+        let H = isSunrise ? 360 - deg * Math.acos(cosH) : deg * Math.acos(cosH);
+        H = H / 15;
+
+        const T = H + RA - (0.06571 * t) - 6.622;
+        return (T - lngHour + 24) % 24; // UT hours (0-24)
+    }
+
+    const riseUT = calc(true), setUT = calc(false);
+    if (riseUT === null || setUT === null) return null;
+
+    const toDate = (utHours) => {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0));
+        d.setUTCMinutes(Math.round(utHours * 60));
+        return d;
+    };
+    return { sunrise: toDate(riseUT), sunset: toDate(setUT) };
+}
+
 // FEATURE: Sunrise/Sunset Based Wake-up Suggestion
 async function updateSunriseWakeupSuggestion() {
     const el = document.getElementById('sunriseWakeupSuggestion');
@@ -3221,51 +3272,29 @@ async function updateSunriseWakeupSuggestion() {
 
     let lat = 9.9252, lon = 78.1198; // Madurai default
 
-    const applySunrise = async (latitude, longitude) => {
-        try {
-            if (navigator.onLine === false) throw new Error('offline');
-            // FIX: AbortController.signal-ஐ fetch()-க்கு நேரடியா pass பண்ணினா, sandboxed preview
-            // iframe-கள் (postMessage-மூலம் fetch proxy பண்றது) அதை clone பண்ண முடியாம "AbortSignal
-            // object could not be cloned" எர்ரர் தரும். அதனால Promise.race()-வச்சு timeout பண்றோம்,
-            // signal எதுவும் fetch()-க்கு அனுப்பமாட்டோம்.
-            const fetchPromise = fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=sunrise,sunset&timezone=auto`);
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Sunrise fetch timeout')), 6000));
-            const res = await Promise.race([fetchPromise, timeoutPromise]);
-            if (!res.ok) throw new Error('Sunrise fetch failed');
-            const data = await res.json();
-            const sunriseISO = data?.daily?.sunrise?.[0];
-            const sunsetISO = data?.daily?.sunset?.[0];
-            if (!sunriseISO) throw new Error('No sunrise data');
-
-            const sunrise = new Date(sunriseISO);
-            const idealStart = new Date(sunrise.getTime() - 15 * 60000);
-            const idealEnd = new Date(sunrise.getTime() + 30 * 60000);
-            const fmt = (d) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-            const msg = `🌄 இன்று Sunrise: ${fmt(sunrise)} → Ideal Wake-up: ${fmt(idealStart)} - ${fmt(idealEnd)} (Natural light-ல எழுந்தா circadian rhythm சிறப்பா set ஆகும்)`;
-            localStorage.setItem('sunrise_suggestion_cache_' + todayKey, msg);
-            el.innerText = msg;
-
-            if (sunsetISO) localStorage.setItem('todays_sunset_time', sunsetISO);
-        } catch (err) {
-            // Network offline / sandboxed preview / API unreachable — this is an expected fallback path,
-            // not a crash. Reuse yesterday's sunrise estimate if we have one (sunrise shifts by only a
-            // minute or two day-to-day), else show a sensible static default. Works normally once hosted
-            // with real network access, since open-meteo.com allows CORS from any origin.
-            console.log("Sunrise: live data unavailable, using fallback estimate.");
-            let fallbackMsg = null;
-            for (let i = 1; i <= 3 && !fallbackMsg; i++) {
-                const d = new Date(getAppToday()); d.setDate(d.getDate() - i);
-                fallbackMsg = localStorage.getItem('sunrise_suggestion_cache_' + getIsoDateStr(d));
-            }
-            el.innerText = fallbackMsg || "🌄 Ideal Wake-up: 5:30 - 6:00 AM (default — internet/location கிடைச்சா exact சூரிய உதயம் காட்டும்)";
+    const applySunrise = (latitude, longitude) => {
+        const times = calculateSunTimes(getAppToday(), latitude, longitude);
+        if (!times) {
+            el.innerText = "🌄 Ideal Wake-up: 5:30 - 6:00 AM (default — location கிடைக்கல)";
+            return;
         }
+
+        const { sunrise, sunset } = times;
+        const idealStart = new Date(sunrise.getTime() - 15 * 60000);
+        const idealEnd = new Date(sunrise.getTime() + 30 * 60000);
+        // FIX: எப்பவும் Asia/Kolkata timezone-ல் explicit-ஆ format பண்றோம் — device timezone எதுவா இருந்தாலும் சரியான IST நேரமே காட்டும்
+        const fmt = (d) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
+
+        const msg = `🌄 இன்று Sunrise: ${fmt(sunrise)} → Ideal Wake-up: ${fmt(idealStart)} - ${fmt(idealEnd)} (Natural light-ல எழுந்தா circadian rhythm சிறப்பா set ஆகும்)`;
+        localStorage.setItem('sunrise_suggestion_cache_' + todayKey, msg);
+        el.innerText = msg;
+        localStorage.setItem('todays_sunset_time', sunset.toISOString());
     };
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (pos) => applySunrise(pos.coords.latitude, pos.coords.longitude),
-            () => applySunrise(lat, lon),
+            () => applySunrise(lat, lon), // location denied/unavailable ஆனா Madurai default coords வெச்சே accurate-ஆ கணக்கு போடும்
             { timeout: 5000 }
         );
     } else {
@@ -4966,7 +4995,64 @@ function loadGeminiApiKey() {
 
 function updateProgressBars() { const checkBoxes = document.querySelectorAll('#dayCard input[type="checkbox"]'); let dPct = 0; if(checkBoxes.length > 0) { let dCount = 0; checkBoxes.forEach(cb => { if(cb.checked) dCount++; }); dPct = Math.round((dCount / checkBoxes.length) * 100); } document.getElementById('dailyProgressText').innerText = `${dPct}%`; document.getElementById('dailyProgressFill').style.width = `${dPct}%`; let appToday = getAppToday(); let currentMonth = appToday.getMonth(); let currentYear = appToday.getFullYear(); let daysPassed = appToday.getDate(); let possibleDays = daysPassed; if(currentYear === startDate.getFullYear() && currentMonth === startDate.getMonth()) { possibleDays = daysPassed - startDate.getDate() + 1; } if(possibleDays <= 0) possibleDays = 1; let completedDays = 0; for(let i=1;i<=daysPassed;i++) { let dd = String(i).padStart(2, '0'); let mm = String(currentMonth + 1).padStart(2, '0'); let dateKey = `${currentYear}-${mm}-${dd}`; if(localStorage.getItem(`day_completed_${dateKey}`) === 'true') completedDays++; } let mPct = Math.round((completedDays / possibleDays) * 100); if(mPct > 100) mPct = 100; if(isNaN(mPct)) mPct = 0; document.getElementById('monthlyProgressText').innerText = `${mPct}%`; document.getElementById('monthlyProgressFill').style.width = `${mPct}%`; }
 
-function renderMonthlyCalendar() { const gridContainer = document.getElementById('calendarGridContainer'); const monthYearLbl = document.getElementById('calendarMonthYearLbl'); gridContainer.innerHTML = ''; let appToday = getAppToday(); let year = calendarCurrentDate.getFullYear(); let month = calendarCurrentDate.getMonth(); monthYearLbl.innerText = `${monthNames[month]} ${year}`; let firstDay = new Date(year, month, 1).getDay(); let daysInMonth = new Date(year, month + 1, 0).getDate(); for(let i=0;i<firstDay;i++) { let empty = document.createElement('div'); gridContainer.appendChild(empty); } for(let i=1;i<=daysInMonth;i++) { let dd = String(i).padStart(2, '0'); let mm = String(month + 1).padStart(2, '0'); let dateKey = `${year}-${mm}-${dd}`; const isCompleted = localStorage.getItem(`day_completed_${dateKey}`) === 'true'; const isToday = getIsoDateStr(appToday) === dateKey; const box = document.createElement('div'); box.className = `calendar-day-box ${isCompleted ? 'completed-day' : ''} ${isToday ? 'today-box' : ''}`; box.innerHTML = `${i}<br>${isCompleted ? '✅' : (isToday ? '🔥' : '')}`; box.onclick = function() { openDayModal(dateKey, i); }; gridContainer.appendChild(box); } updateProgressBars(); }
+// FEATURE: Tamil Nadu Festival/Holiday markers — official govt holiday list (cleartax.in) + Drikpanchang panchangam-verified dates
+// NOTE: இந்த தேதிகள் 2026-க்கு மட்டும். ஒவ்வொரு வருஷமும் Tamil festivals (Pongal தவிர மத்தவை) chandra calendar-படி மாறும்,
+// அதனால 2027 வந்ததும் இந்த list-ஐ புதுப்பிக்கணும் (Claude-கிட்ட "2027 festival dates update பண்ணு" சொன்னா போதும்).
+const FESTIVALS_TN = {
+    2026: {
+        '2026-01-01': 'New Year\'s Day',
+        '2026-01-14': 'Bhogi',
+        '2026-01-15': 'பொங்கல் (Pongal)',
+        '2026-01-16': 'திருவள்ளுவர் தினம்',
+        '2026-01-17': 'உழவர் திருநாள் (Mattu Pongal)',
+        '2026-01-26': 'குடியரசு தினம்',
+        '2026-02-01': 'தைப்பூசம்',
+        '2026-02-15': 'மகா சிவராத்திரி',
+        '2026-03-19': 'தெலுங்கு புத்தாண்டு',
+        '2026-03-21': 'ரம்ஜான்',
+        '2026-03-31': 'மகாவீர் ஜெயந்தி',
+        '2026-04-03': 'Good Friday',
+        '2026-04-14': 'தமிழ் புத்தாண்டு (Puthandu)',
+        '2026-05-01': 'உழைப்பாளர் தினம்',
+        '2026-05-28': 'பக்ரீத்',
+        '2026-06-26': 'முஹர்ரம்',
+        '2026-08-02': 'ஆடி பெருக்கு',
+        '2026-08-15': 'சுதந்திர தினம்',
+        '2026-08-26': 'மிலாத் உந்நபி',
+        '2026-09-04': 'கிருஷ்ண ஜெயந்தி',
+        '2026-09-14': 'விநாயகர் சதுர்த்தி',
+        '2026-10-02': 'காந்தி ஜெயந்தி',
+        '2026-10-19': 'ஆயுத பூஜை',
+        '2026-10-20': 'விஜயதசமி',
+        '2026-11-08': 'தீபாவளி',
+        '2026-11-23': 'கார்த்திகை தீபம்',
+        '2026-12-25': 'கிறிஸ்துமஸ்'
+    }
+};
+function getFestivalForDate(dateKey) {
+    const year = parseInt(dateKey.split('-')[0]);
+    return (FESTIVALS_TN[year] && FESTIVALS_TN[year][dateKey]) || null;
+}
+function updateUpcomingFestivalBanner() {
+    const banner = document.getElementById('upcomingFestivalBanner');
+    if (!banner) return;
+    const today = getAppToday();
+    const todayKey = getIsoDateStr(today);
+    // இன்று முதல் அடுத்த 60 நாட்களுக்குள் வரும் அடுத்த festival-ஐ தேடுறோம்
+    for (let i = 0; i <= 60; i++) {
+        const d = new Date(today); d.setDate(d.getDate() + i);
+        const dKey = getIsoDateStr(d);
+        const fest = getFestivalForDate(dKey);
+        if (fest) {
+            const daysLeft = i === 0 ? 'இன்று!' : (i === 1 ? 'நாளை!' : `இன்னும் ${i} நாட்களில்`);
+            banner.style.display = 'block';
+            banner.innerText = `🪔 அடுத்த விழா: ${fest} — ${daysLeft} (${d.getDate()} ${monthNames[d.getMonth()]})`;
+            return;
+        }
+    }
+    banner.style.display = 'none';
+}
+function renderMonthlyCalendar() { const gridContainer = document.getElementById('calendarGridContainer'); const monthYearLbl = document.getElementById('calendarMonthYearLbl'); gridContainer.innerHTML = ''; let appToday = getAppToday(); let year = calendarCurrentDate.getFullYear(); let month = calendarCurrentDate.getMonth(); monthYearLbl.innerText = `${monthNames[month]} ${year}`; let firstDay = new Date(year, month, 1).getDay(); let daysInMonth = new Date(year, month + 1, 0).getDate(); for(let i=0;i<firstDay;i++) { let empty = document.createElement('div'); gridContainer.appendChild(empty); } for(let i=1;i<=daysInMonth;i++) { let dd = String(i).padStart(2, '0'); let mm = String(month + 1).padStart(2, '0'); let dateKey = `${year}-${mm}-${dd}`; const isCompleted = localStorage.getItem(`day_completed_${dateKey}`) === 'true'; const isToday = getIsoDateStr(appToday) === dateKey; const festivalName = getFestivalForDate(dateKey); const box = document.createElement('div'); box.className = `calendar-day-box ${isCompleted ? 'completed-day' : ''} ${isToday ? 'today-box' : ''} ${festivalName ? 'festival-day' : ''}`; if (festivalName) box.title = festivalName; box.innerHTML = `${i}<br>${isCompleted ? '✅' : (isToday ? '🔥' : (festivalName ? '🪔' : ''))}`; box.onclick = function() { if (festivalName) { displayPremiumToastNotification(`🪔 ${festivalName}`, '📅'); } openDayModal(dateKey, i); }; gridContainer.appendChild(box); } updateProgressBars(); updateUpcomingFestivalBanner(); }
 function prevMonth() { calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1); renderMonthlyCalendar(); }
 function nextMonth() { calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1); renderMonthlyCalendar(); }
 
@@ -6800,8 +6886,10 @@ function syncToCloud() {
         }
         const fileContent = JSON.stringify(backupData, null, 2);
         const file = new Blob([fileContent], {type: 'application/json'});
+        // FIX: fixed filename (no date suffix) so daily backup REPLACES the same Drive file instead of creating a new one every time
+        const FIXED_BACKUP_FILENAME = 'TOBI_Cloud_Backup.json';
         const metadata = {
-            'name': 'TOBI_Backup_' + getIsoDateStr(new Date()) + '.json',
+            'name': FIXED_BACKUP_FILENAME,
             'mimeType': 'application/json'
         };
 
@@ -6810,9 +6898,25 @@ function syncToCloud() {
         form.append('file', file);
 
         try {
+            // FIX: முதலில் அதே பேரில் Drive-ல் ஏற்கனவே file இருக்கானு தேடுகிறோம்
+            const searchRes = await fetch(
+                "https://www.googleapis.com/drive/v3/files?q=" +
+                encodeURIComponent(`name = '${FIXED_BACKUP_FILENAME}' and trashed = false`) +
+                "&fields=files(id,name)&pageSize=1",
+                { headers: new Headers({ 'Authorization': 'Bearer ' + resp.access_token }) }
+            );
+            const searchData = await searchRes.json();
+            const existingFile = (searchData.files && searchData.files.length > 0) ? searchData.files[0] : null;
+
+            // File இருந்தா அதையே PATCH பண்ணி update (replace) பண்றோம், இல்லைனா மட்டும் புதுசா create பண்றோம்
+            const uploadUrl = existingFile
+                ? `https://www.googleapis.com/upload/drive/v3/files/${existingFile.id}?uploadType=multipart`
+                : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+            const uploadMethod = existingFile ? 'PATCH' : 'POST';
+
             // resp.access_token நேரடியாகப் பயன்படுத்தப்படுகிறது
-            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                method: 'POST',
+            const uploadRes = await fetch(uploadUrl, {
+                method: uploadMethod,
                 headers: new Headers({ 'Authorization': 'Bearer ' + resp.access_token }),
                 body: form
             });
@@ -6879,8 +6983,8 @@ function restoreFromCloud() {
 
             const listRes = await fetch(
                 "https://www.googleapis.com/drive/v3/files?q=" +
-                encodeURIComponent("name contains 'TOBI_Backup_' and trashed = false") +
-                "&orderBy=createdTime desc&pageSize=1&fields=files(id,name,createdTime)",
+                encodeURIComponent("(name = 'TOBI_Cloud_Backup.json' or name contains 'TOBI_Backup_') and trashed = false") +
+                "&orderBy=modifiedTime desc&pageSize=1&fields=files(id,name,modifiedTime)",
                 { headers: new Headers({ 'Authorization': 'Bearer ' + token }) }
             );
             const listData = await listRes.json();
@@ -7591,51 +7695,46 @@ function extractField(raw, key) {
 const RAHU_KALAM_SEGMENT   = { 0:8, 1:2, 2:7, 3:5, 4:6, 5:4, 6:3 };
 const YAMAGANDAM_SEGMENT   = { 0:5, 1:4, 2:3, 3:2, 4:1, 5:7, 6:6 };
 const GULIKA_KALAM_SEGMENT = { 0:7, 1:6, 2:5, 3:4, 4:3, 5:2, 6:1 };
-function formatHHMM12(d) { return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }); }
+function formatHHMM12(d) { return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' }); }
 function segmentToTimeRange(sunrise, sunset, segmentNum) {
     const totalMs = sunset.getTime() - sunrise.getTime();
     const partMs = totalMs / 8;
     return { start: new Date(sunrise.getTime() + (segmentNum - 1) * partMs), end: new Date(sunrise.getTime() + segmentNum * partMs) };
 }
-// இன்றைய Sunrise/Sunset — GPS கிடைச்சா அந்த ஊருக்கு, இல்லனா Madurai default; network இல்லனா 6AM-6PM fallback
-async function getTodaySunriseSunset() {
+// இன்றைய Sunrise/Sunset — GPS கிடைச்சா அந்த ஊருக்கு, இல்லனா Madurai default; calculateSunTimes()-மூலம் accurate-ஆ கணக்கு (network தேவையில்லை)
+async function getTodaySunriseSunset(force) {
     const todayKey = getIsoDateStr(getAppToday());
     const cacheKey = 'rahu_sun_times_' + todayKey;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) { try { const p = JSON.parse(cached); return { sunrise: new Date(p.sunrise), sunset: new Date(p.sunset) }; } catch(e) {} }
+    if (!force) {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) { try { const p = JSON.parse(cached); return { sunrise: new Date(p.sunrise), sunset: new Date(p.sunset) }; } catch(e) {} }
+    }
     let lat = 9.9252, lon = 78.1198; // Madurai default
-    const fetchFor = async (latitude, longitude) => {
-        try {
-            if (navigator.onLine === false) throw new Error('offline');
-            const fetchPromise = fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=sunrise,sunset&timezone=auto`);
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 6000));
-            const res = await Promise.race([fetchPromise, timeoutPromise]);
-            if (!res.ok) throw new Error('fetch failed');
-            const data = await res.json();
-            const sunriseISO = data?.daily?.sunrise?.[0];
-            const sunsetISO = data?.daily?.sunset?.[0];
-            if (!sunriseISO || !sunsetISO) throw new Error('no data');
-            const result = { sunrise: new Date(sunriseISO), sunset: new Date(sunsetISO) };
-            localStorage.setItem(cacheKey, JSON.stringify({ sunrise: result.sunrise.toISOString(), sunset: result.sunset.toISOString() }));
-            return result;
-        } catch (err) {
-            console.log('Rahu Kalam: sunrise/sunset fetch failed, using 6AM-6PM default estimate.', err.message);
+    const computeFor = (latitude, longitude) => {
+        const times = calculateSunTimes(getAppToday(), latitude, longitude);
+        let result;
+        if (times) {
+            result = times;
+        } else {
+            // safety fallback மட்டும் (Madurai latitude-ல இது நடக்காது)
             const base = getAppToday();
             const sunrise = new Date(base); sunrise.setHours(6,0,0,0);
             const sunset = new Date(base); sunset.setHours(18,0,0,0);
-            return { sunrise, sunset };
+            result = { sunrise, sunset };
         }
+        localStorage.setItem(cacheKey, JSON.stringify({ sunrise: result.sunrise.toISOString(), sunset: result.sunset.toISOString() }));
+        return result;
     };
     if (navigator.geolocation) {
         return new Promise((resolve) => {
             navigator.geolocation.getCurrentPosition(
-                (pos) => resolve(fetchFor(pos.coords.latitude, pos.coords.longitude)),
-                () => resolve(fetchFor(lat, lon)),
+                (pos) => resolve(computeFor(pos.coords.latitude, pos.coords.longitude)),
+                () => resolve(computeFor(lat, lon)),
                 { timeout: 5000 }
             );
         });
     }
-    return fetchFor(lat, lon);
+    return computeFor(lat, lon);
 }
 async function updateRahuKalamYamagandam(force) {
     const box = document.getElementById('rahuKalamBox');
@@ -7647,7 +7746,7 @@ async function updateRahuKalamYamagandam(force) {
     if (!force) { const cached = localStorage.getItem(cacheKey); if (cached) { try { timesData = JSON.parse(cached); } catch(e) {} } }
     if (!timesData) {
         box.innerHTML = "⏳ இன்றைய ராகு காலம் கணக்கிடுகிறேன்...";
-        const { sunrise, sunset } = await getTodaySunriseSunset();
+        const { sunrise, sunset } = await getTodaySunriseSunset(force);
         const day = getAppToday().getDay();
         const rahu = segmentToTimeRange(sunrise, sunset, RAHU_KALAM_SEGMENT[day]);
         const yama = segmentToTimeRange(sunrise, sunset, YAMAGANDAM_SEGMENT[day]);
@@ -7750,26 +7849,38 @@ async function loadDailyAstroBriefing(force) {
     // API-ஐ அழைத்து இன்றைய கிரக நிலைகளை வாங்குதல்
     const apiData = await getTodayAstroData();
 
+    // FIX: ராகு காலம்/எமகண்டம்-ஐ AI-கிட்ட guess பண்ண வைக்காம, நாமே accurate-ஆ கணக்கு போட்ட
+    // sunrise/sunset-based calculation-ஐயே (Rahu Kalam card-ல உள்ளதே) இங்கயும் use பண்றோம் —
+    // இரண்டு இடத்திலும் ஒரே சரியான நேரம் மட்டும் காட்டும்படி.
+    const { sunrise: briefSunrise, sunset: briefSunset } = await getTodaySunriseSunset(force);
+    const briefDay = appToday.getDay();
+    const briefRahu = segmentToTimeRange(briefSunrise, briefSunset, RAHU_KALAM_SEGMENT[briefDay]);
+    const briefYama = segmentToTimeRange(briefSunrise, briefSunset, YAMAGANDAM_SEGMENT[briefDay]);
+    const rahuKalamStr = `${formatHHMM12(briefRahu.start)} — ${formatHHMM12(briefRahu.end)}`;
+    const yamagandamStr = `${formatHHMM12(briefYama.start)} — ${formatHHMM12(briefYama.end)}`;
+
     // AI-க்கு அனுப்பப்படும் Prompt
     const prompt = `நீ ஒரு அனுபவமிக்க தமிழ் ஜோதிடர். 
     இன்றைய துல்லியமான கிரக நிலைகள் (JSON): ${JSON.stringify(apiData)}
     பயனரின் ஜாதக விவரம்: ராசி ${JYOTISH_PROFILE.rasi}, நட்சத்திரம் ${JYOTISH_PROFILE.nakshatra}, லக்னம் ${JYOTISH_PROFILE.lagna}.
 
     மேற்கண்ட துல்லியமான தகவல்களை வைத்து, பயனரின் சொந்த ராசி மற்றும் நட்சத்திரத்திற்கு ஏற்ப கீழ்க்கண்ட STRICT FORMAT-ல மட்டும் தமிழில் பதில் தா:
-    PANCHANGAM: [இன்றைய திதி, ராகு காலம், எமகண்டம்]
+    THITHI: [இன்றைய திதி மட்டும் — ராகு காலம்/எமகண்டம் இங்கு தேவையில்லை, அது வேறு கணக்கிடப்படும்]
     RASI_PALAN: [இன்றைய ${JYOTISH_PROFILE.rasi} ராசி பலன் - 5-6 வரிகளில்]
     ACTIVITY_TIP: [இன்று ${JYOTISH_PROFILE.nakshatra} நட்சத்திரத்திற்கு ஏற்ற ஒரு குறிப்பு]
     CHANDRASHTAMA: [பயனரின் ராசிக்கு இன்று சந்திராஷ்டமம் உள்ளதா? YES அல்லது NO மட்டும்]`;
 
     try {
         let res = await askGemini(prompt);
-        const panch = extractField(res, 'PANCHANGAM');
+        const thithi = extractField(res, 'THITHI');
         const rasi = extractField(res, 'RASI_PALAN');
         const tip = extractField(res, 'ACTIVITY_TIP');
         const isChandrashtama = /YES/i.test(extractField(res, 'CHANDRASHTAMA'));
-        
+        // FIX: பஞ்சாங்க வரியை நாமே கட்டுறோம் — Thithi (AI) + Rahu Kalam/Yamagandam (நம்ம accurate calculation)
+        const panch = `${thithi || 'தகவல் இல்லை'} | ராகு காலம்: ${rahuKalamStr} | எமகண்டம்: ${yamagandamStr}`;
+
         const html = `<div style="font-size:0.8rem; line-height:1.7;">
-            <p><b>🪔 பஞ்சாங்கம்:</b> ${panch || 'தகவல் இல்லை'}</p>
+            <p><b>🪔 பஞ்சாங்கம்:</b> ${panch}</p>
             <p><b>🌙 ராசி பலன்:</b> ${rasi || 'தகவல் இல்லை'}</p>
             <p><b>✅ இன்றைய Tip:</b> ${tip || 'தகவல் இல்லை'}</p>
             ${isChandrashtama ? '<p style="color:var(--neon-red); font-weight:700;">⚠️ இன்று சந்திராஷ்டமம் — முக்கிய காரியங்களை தவிர்க்கவும்.</p>' : ''}
